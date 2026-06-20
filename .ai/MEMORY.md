@@ -7,6 +7,10 @@
 ## 已完成（前端靜態展示版）
 
 - 首頁 Hero 改為**左圖右文兩邊布局**：文案與 CTA 置於右側，背景圖片 focal point 左移，避免遮擋度假酒店主體。
+- 首頁 Hero 標語改為更優雅呈現：
+  - **桌面端**：「留住 · 感受 / 放鬆身心」（中文間隔號 + 兩行排版）
+  - **行動端**：垂直三行「留住 / 感受 / 放鬆身心」
+- 首頁 Hero 行動端改為**上下布局**：上半部 55vh 圖片（酒店在中央偏上），下半部深色背景文字與按鈕。
 - 首頁「為你的島嶼命名」互動，強調「感覺優先」。
 - 物業列表頁移除本地 demo，改由 `client.ts` mock fallback 提供 3 筆 demo 島嶼。
 - 物業詳情頁雙視角：旅客視角（體驗查詢表單）/ 島主視角（生活場景預演）。
@@ -19,9 +23,9 @@
 ## 部署狀態
 
 - **Cloudflare project**: `stay-islands-hk`
-- **最新 deployment**: https://e1abbefa.stay-islands-hk.pages.dev
+- **最新 deployment**: https://ef85a2a0.stay-islands-hk.pages.dev
 - **Production / 穩定 URL**: https://stay-islands-hk.pages.dev（同樣 200）
-- 舊 deployment IDs（`3e0598b8`、`05e740de`）仍可訪問，但內容落後。
+- 舊 deployment IDs（`e1abbefa` 之前的版本）仍可訪問，但內容落後。
 
 ## CI/CD
 
@@ -29,13 +33,20 @@
 - **Workflow**: `.github/workflows/deploy.yml`
 - **Trigger**: push to `main`
 - **Secret**: `CLOUDFLARE_API_TOKEN` 已設置
-- 未來 push 到 `main` 會自動 build 並部署到 Cloudflare Pages。
+- 最新 push 已成功觸發 GitHub Actions 並自動部署（run 27866020996，38s）。
+
+## 後端遷移規劃
+
+- 規劃文件：`.ai/TASKS/backend-migration.md`
+- 目標：EdgeSpark → Cloudflare Workers + D1 + R2（Hono）
+- P0 endpoints：`GET /api/public/properties`、property detail、三種 lead capture
+- P2：認證、管理後台
 
 ## 技術債
 
 - `client.ts` 仍指向 EdgeSpark staging URL；所有表單僅為留資（lead capture），未連接真實後端。
 - 尚未建立 Cloudflare Workers + D1 + R2 後端（Hono）。
-- `.github/workflows/deploy.yml` 已配置，但需等待首次自動部署驗證。
+- CI/CD 已配置並驗證成功。
 
 ## 合規債
 
