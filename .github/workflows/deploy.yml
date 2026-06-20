@@ -29,6 +29,8 @@ jobs:
 
       - name: Build project
         run: pnpm run build
+        env:
+          VITE_WORKER_URL: https://stay-islands-hk-worker.jimsbond007.workers.dev
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
