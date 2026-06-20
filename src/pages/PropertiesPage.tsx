@@ -44,9 +44,9 @@ export default function PropertiesPage() {
         <img src="https://images.unsplash.com/photo-1540202404-a2f29016b523?w=1920&q=80" alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-[#0a4c6b]/70" />
         <div className="relative z-10 text-center text-white px-4">
-          <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的島嶼</p>
+          <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的海島之家</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-2">先住進來，感受這裡</h1>
-          <p className="text-white/80 max-w-2xl mx-auto">每一座島嶼都在等待它的島主。先來體驗，讓感覺帶領你。</p>
+          <p className="text-white/80 max-w-2xl mx-auto">每一座海島之家都在等待它的海島業主。先來體驗，讓感覺帶領你。</p>
         </div>
       </div>
 
@@ -73,7 +73,7 @@ export default function PropertiesPage() {
                         HK${property.pricePerNight.toLocaleString()}/晚
                       </div>
                       <div className="absolute top-4 left-4 bg-[#B8902F] text-white px-3 py-1 rounded-full text-xs font-medium">
-                        開放島主體驗
+                        開放業主體驗
                       </div>
                     </div>
                     <div className="p-6">

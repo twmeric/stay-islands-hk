@@ -12,13 +12,13 @@ export default function MemberPage() {
             會員中心即將開放
           </h1>
           <p className="text-gray-600 mb-8 leading-relaxed">
-            成為島主的第一步，是先預約一次輕鬆的島主對話。
+            成為海島業主的第一步，是先預約一次輕鬆的業主對話。
           </p>
           <Link
             to="/invest"
             className="inline-block bg-[#0a4c6b] text-white px-8 py-3 rounded-lg text-base font-medium hover:bg-[#083d56] transition"
           >
-            預約島主對話
+            預約業主對話
           </Link>
         </div>
       </div>

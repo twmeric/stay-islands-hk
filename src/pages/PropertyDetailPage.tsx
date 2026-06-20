@@ -165,7 +165,7 @@ export default function PropertyDetailPage() {
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              ✨ 島主視角
+              ✨ 海島業主視角
             </button>
           </div>
         </div>
@@ -185,14 +185,14 @@ export default function PropertyDetailPage() {
               <div className="bg-gradient-to-br from-[#f8f5ed] to-[#fffdf8] border border-[#B8902F]/20 rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-[#B8902F] text-xl">✨</span>
-                  <h2 className="text-2xl font-bold text-[#0d1b2a]">如果這裡成為你的島嶼</h2>
+                  <h2 className="text-2xl font-bold text-[#0d1b2a]">如果這裡成為你的海島之家</h2>
                 </div>
 
                 {/* Butler / Personal Touch */}
                 <div className="flex items-start gap-3 bg-white rounded-xl p-4 border border-[#B8902F]/10 mb-6">
                   <div className="w-10 h-10 rounded-full bg-[#0a4c6b] flex items-center justify-center text-white text-sm font-bold">A</div>
                   <div>
-                    <p className="text-sm text-gray-500">你的島嶼管家</p>
+                    <p className="text-sm text-gray-500">你的物業管家</p>
                     <p className="font-semibold text-[#0d1b2a]">Aisha</p>
                     <p className="text-gray-600 text-sm mt-1">「我已經為你記下了你喜歡的枕頭、咖啡，還有你希望早晨浮潛的時間。」</p>
                   </div>
@@ -228,7 +228,7 @@ export default function PropertyDetailPage() {
                 <div className="bg-[#0a4c6b] text-white rounded-xl p-4 mb-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white/80 text-sm">本季開放島主體驗的名額</p>
+                      <p className="text-white/80 text-sm">本季開放業主體驗的名額</p>
                       <p className="text-2xl font-bold">僅餘 2 組</p>
                     </div>
                     <div className="text-right">
@@ -243,7 +243,7 @@ export default function PropertyDetailPage() {
                   <div className="w-10 h-10 rounded-full bg-[#0a4c6b] flex items-center justify-center text-white text-sm font-bold">陳</div>
                   <div>
                     <p className="text-gray-700 text-sm italic">「我本來只打算度假。第三天，我坐在露台上看海龜，突然想：為什麼不能每年回來？」</p>
-                    <p className="text-xs text-gray-500 mt-1">陳先生，御海閣島主，2025 年入住</p>
+                    <p className="text-xs text-gray-500 mt-1">陳先生，御海閣海島業主，2025 年入住</p>
                   </div>
                 </div>
 
@@ -256,7 +256,7 @@ export default function PropertyDetailPage() {
                       : 'bg-white border-2 border-[#B8902F] text-[#B8902F] hover:bg-[#B8902F]/5'
                   }`}
                 >
-                  {saved ? '✓ 已儲存到我的島嶼清單' : '💾 儲存到我的島嶼清單'}
+                  {saved ? '✓ 已儲存到我的海島之家清單' : '💾 儲存到我的海島之家清單'}
                 </button>
 
                 {/* Soft CTA */}
@@ -264,7 +264,7 @@ export default function PropertyDetailPage() {
                   onClick={() => navigate('/invest')}
                   className="w-full bg-[#B8902F] text-white py-3 rounded-xl font-medium hover:bg-[#9a7a28] transition"
                 >
-                  我想多了解成為島主的方式
+                  我想多了解成為海島業主的方式
                 </button>
                 <p className="text-xs text-gray-500 text-center mt-2">沒有壓力，只是一次輕鬆的對話</p>
               </div>
@@ -328,7 +328,7 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-1">
             {viewMode === 'investor' ? (
               <div className="sticky top-20 bg-gradient-to-br from-[#f8f5ed] to-[#fffdf8] border border-[#B8902F]/20 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-xl font-bold text-[#0d1b2a] mb-4">你的島嶼體驗</h3>
+                <h3 className="text-xl font-bold text-[#0d1b2a] mb-4">你的業主體驗</h3>
                 <div className="space-y-4">
                   <div className="bg-white rounded-xl p-4 border border-[#B8902F]/10">
                     <p className="text-sm text-gray-500 mb-1">體驗長度</p>
@@ -352,24 +352,24 @@ export default function PropertyDetailPage() {
                         : 'bg-white border-2 border-[#B8902F] text-[#B8902F] hover:bg-[#B8902F]/5'
                     }`}
                   >
-                    {saved ? '✓ 已儲存到我的島嶼清單' : '💾 儲存到我的島嶼清單'}
+                    {saved ? '✓ 已儲存到我的海島之家清單' : '💾 儲存到我的海島之家清單'}
                   </button>
                   <button
                     onClick={() => navigate('/invest')}
                     className="w-full bg-[#B8902F] text-white py-3 rounded-xl font-medium hover:bg-[#9a7a28] transition"
                   >
-                    我想多了解成為島主
+                    我想多了解成為海島業主
                   </button>
                   <p className="text-xs text-gray-500 text-center">沒有壓力，只是一次輕鬆的對話</p>
                 </div>
               </div>
             ) : (
               <div className="sticky top-20 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-xl font-bold text-[#0d1b2a] mb-4">預約你的島嶼體驗</h3>
+                <h3 className="text-xl font-bold text-[#0d1b2a] mb-4">預約你的海島之家體驗</h3>
                 {inquirySubmitted ? (
                   <div className="bg-[#f0f9f7] border border-[#2ec4b6]/20 rounded-xl p-5 text-center">
                     <p className="text-[#0a4c6b] font-medium leading-relaxed">
-                      我們已收到你的查詢，島主關係經理會在 1 個工作天內與你聯絡。
+                      我們已收到你的查詢，物業關係經理會在 1 個工作天內與你聯絡。
                     </p>
                   </div>
                 ) : (
@@ -443,7 +443,7 @@ export default function PropertyDetailPage() {
                         HK${referencePrice.toLocaleString()}
                         <span className="text-sm font-normal text-gray-500">/晚</span>
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">實際價格將由島主關係經理確認</p>
+                      <p className="text-xs text-gray-400 mt-1">實際價格將由物業關係經理確認</p>
                     </div>
 
                     <button

@@ -1,0 +1,31 @@
+name = "stay-islands-hk-worker"
+main = "src/index.ts"
+compatibility_date = "2024-06-20"
+account_id = "dfbee5c2a5706a81bc04675499c933d4"
+
+# D1 Database
+# database_id 為佔位符，實際建立資料庫後請更新。
+[[d1_databases]]
+binding = "DB"
+database_name = "stay-islands-hk-db"
+database_id = "853b2c3e-31f9-45c8-b6f2-aab8b57140ac"
+
+# R2 Bucket
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "stay-islands-hk-assets"
+
+# KV Namespace
+[[kv_namespaces]]
+binding = "CACHE"
+id = "f66f62ad0a694bf6ac33b0e961e0b8e5"
+
+# 環境變數（非敏感）
+[vars]
+FRONTEND_URL = "https://stay-islands-hk.pages.dev"
+
+# Secrets（請使用 `wrangler secret put <NAME>` 設置，勿在此寫入值）：
+# - CLOUDWAPI_API_KEY
+# - CLOUDWAPI_SENDER
+# - JWT_SECRET
+# - STRIPE_SECRET_KEY（可選）
