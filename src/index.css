@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-ocean: #0a4c6b;
+  --color-sand: #f5e6d3;
+  --color-coral: #e8856c;
+  --color-lagoon: #2ec4b6;
+  --color-deep: #0d1b2a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a2e;
+  background: #ffffff;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: 'Playfair Display', 'Noto Sans TC', serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(10, 76, 107, 0.3);
+  border-radius: 3px;
+}
+
+/* Auth UI styling override */
+[data-edgespark-auth] {
+  --edgespark-auth-color-primary: #0a4c6b;
+  --edgespark-auth-color-bg: #ffffff;
+  --edgespark-auth-radius-card: 16px;
+  --edgespark-auth-radius-button: 12px;
+  --edgespark-auth-font-family: 'Noto Sans TC', sans-serif;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, rgba(10, 76, 107, 0.7), rgba(46, 196, 182, 0.3));
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
