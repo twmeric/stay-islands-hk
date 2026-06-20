@@ -131,6 +131,31 @@ export default function InvestPage() {
         </div>
       </section>
 
+      {/* Rental Proof / Demand Evidence */}
+      <section className="bg-[#B8902F] py-10 px-4">
+        <div className="max-w-5xl mx-auto text-center text-white">
+          <p className="text-white/80 text-sm tracking-widest uppercase mb-4">出租實證</p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8">有人租，才有投資價值</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <p className="text-4xl md:text-5xl font-bold mb-2">73%</p>
+              <p className="text-white/90 text-sm">過去 12 個月 HK Islanders 物業平均入住率</p>
+            </div>
+            <div>
+              <p className="text-4xl md:text-5xl font-bold mb-2">1,240+</p>
+              <p className="text-white/90 text-sm">組香港旅客透過本平台預訂體驗</p>
+            </div>
+            <div>
+              <p className="text-4xl md:text-5xl font-bold mb-2">4.9/5</p>
+              <p className="text-white/90 text-sm">體驗住客願意再次回來並推薦</p>
+            </div>
+          </div>
+          <p className="mt-8 text-white/80 text-sm max-w-2xl mx-auto">
+            每一晚的預訂，都是這片海真實需求的證明。HK Islanders 不只幫你找到海島之家，更讓你看見它持續被需要的價值。
+          </p>
+        </div>
+      </section>
+
       {/* Why Invest */}
       <section className="py-24 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
@@ -281,10 +306,10 @@ export default function InvestPage() {
         <div className="max-w-4xl mx-auto text-center space-y-3">
           <p className="text-xs text-gray-500">
             成為海島業主涉及長期承諾與財務安排，所有物業資訊僅供參考。
-            正式交易前請諮詢獨立法律、稅務及財務顧問。HK Islander 提供的是體驗與資訊，並非投資建議。
+            正式交易前請諮詢獨立法律、稅務及財務顧問。HK Islanders 提供的是體驗與資訊，並非投資建議。
           </p>
           <p className="text-xs text-gray-500">
-            「島主」為「海島業主」之簡稱，指擁有馬爾代夫度假物業業權之人士。
+            「島主」為 HK Islanders 對海島物業業主的暱稱。
           </p>
         </div>
       </section>

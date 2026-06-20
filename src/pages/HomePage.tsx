@@ -65,10 +65,10 @@ export default function HomePage() {
           <img
             src="https://images.unsplash.com/photo-1540202404-a2f29016b523?w=1920&q=80"
             alt="Maldives ocean"
-            className="w-full h-full object-cover object-[60%_center]"
+            className="w-full h-full object-cover object-[35%_center]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a4c6b]/60 via-[#0a4c6b]/30 to-[#0d1b2a]/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0a4c6b]/20 to-[#0d1b2a]/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a4c6b]/50 via-[#0a4c6b]/20 to-[#0d1b2a]/70" />
+          <div className="absolute inset-0 bg-gradient-to-l from-[#0d1b2a]/90 via-[#0a4c6b]/30 to-transparent" />
         </div>
 
         {/* Mobile top image */}
@@ -82,7 +82,7 @@ export default function HomePage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center w-full px-6 sm:px-8 md:mx-0 md:ml-auto md:max-w-2xl lg:max-w-3xl md:pl-12 lg:pl-20 md:pr-12 lg:pr-20 py-12 md:py-0 text-center md:text-left text-white bg-[#0d1b2a] md:bg-transparent">
+        <div className="relative z-10 flex-1 flex flex-col justify-center w-full px-6 sm:px-8 md:mx-0 md:ml-auto md:mr-0 md:max-w-xl lg:max-w-2xl md:pl-8 md:pr-12 lg:pr-20 py-12 md:py-0 text-center md:text-right text-white bg-[#0d1b2a] md:bg-transparent">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -113,7 +113,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
+            className="flex flex-col sm:flex-row gap-4 justify-center md:justify-end"
           >
             <Link
               to="/properties"
@@ -128,6 +128,14 @@ export default function HomePage() {
               ✨ 探索島主計劃
             </Link>
           </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="mt-4 text-sm text-white/70"
+          >
+            你預訂的每一晚，都在證明這片海的價值。
+          </motion.p>
         </div>
 
         {/* Scroll indicator */}
@@ -211,10 +219,10 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <p className="text-[#2ec4b6] font-medium mb-2">歡迎來到海島生活</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-6">HK Islander - 香港島主俱樂部</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-6">HK Islanders - 香港島主俱樂部</h2>
             <p className="text-gray-600 max-w-3xl mx-auto text-lg">
               我們相信，真正的高級不在於擁有多少，而在於是否能擁有一片讓你完全放鬆的海。
-              HK Islander 為你預留的不只是一趟旅程，而是一個可以一再回來的地方。
+              HK Islanders 為你預留的不只是一趟旅程，而是一個可以一再回來的地方。
             </p>
           </motion.div>
 
