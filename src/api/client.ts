@@ -191,7 +191,7 @@ async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
 }
 
 // ---------------------------------------------------------------------------
-// Auth helpers (minimal replacements for the removed EdgeSpark auth UI)
+// Auth helpers for the custom JWT login flow
 // ---------------------------------------------------------------------------
 
 async function getSession() {
