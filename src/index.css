@@ -46,15 +46,6 @@ h1, h2, h3 {
   border-radius: 3px;
 }
 
-/* Auth UI styling override */
-[data-edgespark-auth] {
-  --edgespark-auth-color-primary: #0a4c6b;
-  --edgespark-auth-color-bg: #ffffff;
-  --edgespark-auth-radius-card: 16px;
-  --edgespark-auth-radius-button: 12px;
-  --edgespark-auth-font-family: 'Noto Sans TC', sans-serif;
-}
-
 .glass-card {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);

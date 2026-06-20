@@ -9,7 +9,7 @@ interface Booking {
   checkIn: number;
   checkOut: number;
   guests: number;
-  totalPrice: number;
+  totalAmount: number;
   status: string;
   paymentStatus: string;
   paymentMethod: string | null;
@@ -27,7 +27,12 @@ export default function DashboardPage() {
 
   async function fetchBookings() {
     try {
-      const res = await client.api.fetch('/api/bookings');
+      const email = user?.email;
+      if (!email) {
+        setBookings([]);
+        return;
+      }
+      const res = await client.api.fetch(`/api/public/bookings?email=${encodeURIComponent(email)}`);
       const data = await res.json();
       setBookings(data.data || []);
     } catch (err) { console.error(err); }
@@ -37,7 +42,7 @@ export default function DashboardPage() {
   async function cancelBooking(id: number) {
     if (!confirm('確定要取消此預訂嗎？')) return;
     try {
-      await client.api.fetch(`/api/bookings/${id}/cancel`, { method: 'PATCH' });
+      await client.api.fetch(`/api/public/bookings/${id}/cancel`, { method: 'PATCH' });
       fetchBookings();
     } catch (err) { console.error(err); }
   }
@@ -109,7 +114,7 @@ export default function DashboardPage() {
                         {b.voucherCode && <p className="text-sm text-[#2ec4b6] font-mono mt-1">憑證: {b.voucherCode}</p>}
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-bold text-[#0a4c6b]">HK${b.totalPrice.toLocaleString()}</p>
+                        <p className="text-xl font-bold text-[#0a4c6b]">HK${b.totalAmount.toLocaleString()}</p>
                         <p className="text-xs text-gray-400 mt-1">建立於 {new Date(b.createdAt * 1000).toLocaleDateString('zh-HK')}</p>
                         {b.status === 'pending' && (
                           <button onClick={() => cancelBooking(b.id)} className="mt-2 text-xs text-red-500 hover:text-red-600">取消預訂</button>
@@ -139,7 +144,7 @@ export default function DashboardPage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-bold">HK${b.totalPrice.toLocaleString()}</p>
+                      <p className="text-3xl font-bold">HK${b.totalAmount.toLocaleString()}</p>
                       <p className="text-white/70 text-sm mt-1">預訂 #{b.id}</p>
                     </div>
                   </div>

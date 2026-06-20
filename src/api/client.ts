@@ -1,112 +1,6 @@
-import { createEdgeSpark } from "@edgespark/client";
-import "@edgespark/client/styles.css";
-
-export const client = createEdgeSpark({
-  baseUrl: "https://staging--4ea90hamxnhi5jzf7tqf.youbase.cloud",
-});
-
-// --- Demo data for unified mock mode ---
-
-interface RoomType {
-  id: number;
-  name: string;
-  nameZh: string;
-  description: string | null;
-  descriptionZh: string | null;
-  pricePerNight: number;
-  maxGuests: number | null;
-  inventory: number;
-  imageUrl: string | null;
-  amenities: string | null;
-}
-
-interface Property {
-  id: number;
-  name: string;
-  nameZh: string;
-  description: string | null;
-  descriptionZh: string | null;
-  location: string | null;
-  pricePerNight: number;
-  maxGuests: number | null;
-  imageUrl: string | null;
-  amenities: string | null;
-  roomTypes: RoomType[];
-}
-
-const demoPropertiesList = [
-  { id: 1, name: 'Stay Mikado', nameZh: '御海閣', description: 'Boutique overwater villas.', descriptionZh: '坐落於清澈潟湖之上的奢華水上別墅，配備私人泳池與管家服務。', location: 'North Malé Atoll', pricePerNight: 4800, maxGuests: 4, imageUrl: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800&q=80', amenities: JSON.stringify(['私人泳池', '管家服務', '水上飛機']) },
-  { id: 2, name: 'Private Island', nameZh: '私享島嶼', description: 'Exclusive private island retreat.', descriptionZh: '整島出租的頂級私人島嶼，適合家族或高端團體的私密度假。', location: 'Baa Atoll', pricePerNight: 12800, maxGuests: 12, imageUrl: 'https://images.unsplash.com/photo-1688949078626-a358f500e063?w=800&q=80', amenities: JSON.stringify(['私人島嶼', '廚師團隊', '遊艇']) },
-  { id: 3, name: 'Stay Madivaru', nameZh: '碧海灣', description: 'Beachfront villas with reef access.', descriptionZh: '沙灘別墅直通珊瑚礁，浮潛與潛水愛好者的天堂。', location: 'South Ari Atoll', pricePerNight: 3200, maxGuests: 3, imageUrl: 'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=800&q=80', amenities: JSON.stringify(['珊瑚礁', '浮潛', '海灘晚餐']) },
-];
-
-const lagoonVilla = (basePrice: number): RoomType => ({
-  id: basePrice + 100,
-  name: 'Lagoon Villa',
-  nameZh: '潟湖別墅',
-  description: 'Overwater villa with lagoon views.',
-  descriptionZh: '坐擁潟湖美景的水上別墅，配備私人露台與下沉式沙發。',
-  pricePerNight: basePrice,
-  maxGuests: 2,
-  inventory: 3,
-  imageUrl: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600',
-  amenities: JSON.stringify(['海景露台', '浴缸', '空調', 'Wi-Fi']),
-});
-
-const oceanSuite = (basePrice: number): RoomType => ({
-  id: basePrice + 101,
-  name: 'Ocean Suite',
-  nameZh: '海洋套房',
-  description: 'Spacious suite with private pool.',
-  descriptionZh: '寬敞海洋套房，設有私人無邊際泳池與獨立客廳。',
-  pricePerNight: Math.round(basePrice * 1.625),
-  maxGuests: 4,
-  inventory: 2,
-  imageUrl: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600',
-  amenities: JSON.stringify(['私人泳池', '客廳', '管家服務', '迎賓香檳']),
-});
-
-const demoPropertiesDetail: Property[] = [
-  {
-    id: 1,
-    name: 'Stay Mikado',
-    nameZh: '御海閣',
-    description: 'A boutique overwater villa collection in the Maldives.',
-    descriptionZh: '御海閣坐落於馬爾代夫清澈潟湖之上，提供私密而奢華的度假體驗。每棟水上別墅均配備私人泳池、玻璃地板與無邊際海景，並由專屬管家團隊提供全天候服務。',
-    location: 'North Malé Atoll, Maldives',
-    pricePerNight: 4800,
-    maxGuests: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=1200&q=80',
-    amenities: JSON.stringify(['私人泳池', '水上飛機接送', '24 小時管家', '浮潛裝備', '海鮮晚餐', 'SPA']),
-    roomTypes: [lagoonVilla(4800), oceanSuite(4800)],
-  },
-  {
-    id: 2,
-    name: 'Private Island',
-    nameZh: '私享島嶼',
-    description: 'An exclusive private island retreat for the ultimate privacy.',
-    descriptionZh: '整島出租的頂級私人島嶼，擁有私人沙灘、廚師團隊與遊艇，適合家族或高端團體的私密度假體驗。',
-    location: 'Baa Atoll, Maldives',
-    pricePerNight: 12800,
-    maxGuests: 12,
-    imageUrl: 'https://images.unsplash.com/photo-1688949078626-a358f500e063?w=1200&q=80',
-    amenities: JSON.stringify(['私人島嶼', '廚師團隊', '遊艇', '管家服務', 'SPA', '私人影院']),
-    roomTypes: [lagoonVilla(12800), oceanSuite(12800)],
-  },
-  {
-    id: 3,
-    name: 'Stay Madivaru',
-    nameZh: '碧海灣',
-    description: 'Beachfront villas with direct reef access.',
-    descriptionZh: '沙灘別墅直通珊瑚礁，浮潛與潛水愛好者的天堂，每晚皆可安排海灘晚餐與日落巡航。',
-    location: 'South Ari Atoll, Maldives',
-    pricePerNight: 3200,
-    maxGuests: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=1200&q=80',
-    amenities: JSON.stringify(['珊瑚礁', '浮潛', '海灘晚餐', '潛水中心', '日落巡航']),
-    roomTypes: [lagoonVilla(3200), oceanSuite(3200)],
-  },
-];
+const BASE_URL =
+  import.meta.env.VITE_WORKER_URL ||
+  'https://stay-islands-hk-worker.jimsbond007.workers.dev';
 
 function createJsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -115,46 +9,222 @@ function createJsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-function createEmptyResponse(status = 200): Response {
-  return createJsonResponse({ data: null }, status);
+function getAdminToken(): string | null {
+  return localStorage.getItem('admin_access_token');
 }
 
-// --- Intercept all client.api.fetch() calls for mock mode ---
+async function fetchWithAuth(input: string, init?: RequestInit): Promise<Response> {
+  const token = getAdminToken();
+  const headers = new Headers(init?.headers);
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  if (!headers.has('Content-Type') && init?.body && typeof init.body === 'string') {
+    headers.set('Content-Type', 'application/json');
+  }
+  const url = input.startsWith('http') ? input : `${BASE_URL}${input}`;
+  return fetch(url, { ...init, headers });
+}
 
-const originalFetch = (client.api as unknown as { fetch: (input: string, init?: RequestInit) => Promise<Response> }).fetch.bind(
-  client.api
-);
+// ---------------------------------------------------------------------------
+// Trip-plans local mock (kept on the browser so the planner keeps working)
+// ---------------------------------------------------------------------------
 
-(client.api as unknown as { fetch: (input: string, init?: RequestInit) => Promise<Response> }).fetch = async (
+const TRIP_PLANS_KEY = 'stayislands-trip-plans';
+
+interface TripPlan {
+  id: number;
+  name: string;
+  destination: string | null;
+  startDate: number | null;
+  endDate: number | null;
+  items: unknown;
+  notes: string | null;
+  status: string;
+  createdAt: number;
+}
+
+function getTripPlans(): TripPlan[] {
+  const raw = localStorage.getItem(TRIP_PLANS_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+function saveTripPlans(plans: TripPlan[]): void {
+  localStorage.setItem(TRIP_PLANS_KEY, JSON.stringify(plans));
+}
+
+async function handleTripPlans(
   input: string,
-  init?: RequestInit
-): Promise<Response> => {
-  // Public properties list: always return demo data
-  if (input === '/api/public/properties') {
-    return createJsonResponse({ data: demoPropertiesList });
+  method: string,
+  body?: BodyInit | null
+): Promise<Response> {
+  if (input === '/api/trip-plans' && method === 'GET') {
+    return createJsonResponse({ data: getTripPlans() });
   }
 
-  // Public property detail: return matching demo property
-  const detailMatch = input.match(/^\/api\/public\/properties\/(\d+)$/);
+  if (input === '/api/trip-plans' && method === 'POST') {
+    const parsed = body ? JSON.parse(body as string) : {};
+    const plan: TripPlan = {
+      id: Date.now(),
+      name: parsed.name || '新行程',
+      destination: parsed.destination || null,
+      startDate: parsed.startDate || null,
+      endDate: parsed.endDate || null,
+      items: parsed.items || null,
+      notes: parsed.notes || null,
+      status: parsed.status || 'active',
+      createdAt: Math.floor(Date.now() / 1000),
+    };
+    const plans = [...getTripPlans(), plan];
+    saveTripPlans(plans);
+    return createJsonResponse({ data: plan }, 201);
+  }
+
+  const detailMatch = input.match(/^\/api\/trip-plans\/(\d+)$/);
   if (detailMatch) {
     const id = Number(detailMatch[1]);
-    const property = demoPropertiesDetail.find((p) => p.id === id) ?? {
-      ...demoPropertiesDetail[0],
-      id,
-    };
-    return createJsonResponse({ data: property });
+    if (method === 'DELETE') {
+      const plans = getTripPlans().filter((p) => p.id !== id);
+      saveTripPlans(plans);
+      return createJsonResponse({ data: { ok: true } });
+    }
+    if (method === 'PUT' || method === 'PATCH') {
+      const parsed = body ? JSON.parse(body as string) : {};
+      let updated: TripPlan | undefined;
+      const plans = getTripPlans().map((p) => {
+        if (p.id !== id) return p;
+        updated = { ...p, ...parsed };
+        return updated;
+      });
+      saveTripPlans(plans);
+      return createJsonResponse({ data: updated ?? null });
+    }
   }
 
-  // For all other endpoints, try the real fetch first
-  try {
-    const response = await originalFetch(input, init);
-    if (!response.ok) {
-      console.warn(`API call to ${input} returned ${response.status}, returning empty response.`);
-      return createEmptyResponse(response.status);
+  return createJsonResponse({ error: 'Trip plan action not supported' }, 405);
+}
+
+// ---------------------------------------------------------------------------
+// Main API client
+// ---------------------------------------------------------------------------
+
+async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
+  const method = (init?.method || 'GET').toUpperCase();
+  let targetUrl = input;
+  let body = init?.body;
+
+  // Legacy endpoint remapping for the new Cloudflare Worker backend
+  if (input === '/api/admin/check') {
+    const res = await fetchWithAuth('/api/admin/auth/me', { ...init, method: 'GET', body: undefined });
+    if (!res.ok) {
+      return createJsonResponse({ isAdmin: false });
     }
-    return response;
-  } catch (err) {
-    console.warn(`API call to ${input} failed, returning empty response:`, err);
-    return createEmptyResponse();
+    const json = await res.json().catch(() => ({}));
+    const admin = json?.data;
+    return createJsonResponse({
+      isAdmin: true,
+      role: admin?.role || null,
+    });
   }
+
+  if (input === '/api/admin/accounts') {
+    targetUrl = '/api/admin/admins';
+    if (method === 'POST' && typeof body === 'string') {
+      const parsed = JSON.parse(body);
+      parsed.password = parsed.password || 'stay1234';
+      parsed.name = parsed.name || parsed.email?.split('@')[0] || 'Admin';
+      body = JSON.stringify(parsed);
+    }
+    return fetchWithAuth(targetUrl, { ...init, method, body });
+  }
+
+  const accountsMatch = input.match(/^\/api\/admin\/accounts\/(\d+)$/);
+  if (accountsMatch) {
+    const id = accountsMatch[1];
+    if (method === 'PATCH' || method === 'PUT') {
+      targetUrl = `/api/admin/admins/${id}`;
+      return fetchWithAuth(targetUrl, { ...init, method: 'PUT', body });
+    }
+    if (method === 'DELETE') {
+      targetUrl = `/api/admin/admins/${id}`;
+      return fetchWithAuth(targetUrl, { ...init, method: 'DELETE', body });
+    }
+  }
+
+  const adminBookingMatch = input.match(/^\/api\/admin\/bookings\/(\d+)$/);
+  if (adminBookingMatch && method === 'PATCH') {
+    targetUrl = `/api/admin/bookings/${adminBookingMatch[1]}`;
+    return fetchWithAuth(targetUrl, { ...init, method: 'PUT', body });
+  }
+
+  const adminInquiryMatch = input.match(/^\/api\/admin\/inquiries\/(\d+)$/);
+  if (adminInquiryMatch && method === 'PATCH') {
+    targetUrl = `/api/admin/inquiries/${adminInquiryMatch[1]}/status`;
+    const parsed = typeof body === 'string' ? JSON.parse(body) : {};
+    const newBody = JSON.stringify({
+      status: parsed.status === 'replied' ? 'contacted' : parsed.status || 'contacted',
+    });
+    return fetchWithAuth(targetUrl, { ...init, method: 'PATCH', body: newBody });
+  }
+
+  if (input === '/api/bookings' && method === 'GET') {
+    targetUrl = '/api/public/bookings';
+    return fetchWithAuth(targetUrl, { ...init, method, body });
+  }
+
+  const bookingCancelMatch = input.match(/^\/api\/bookings\/(\d+)\/cancel$/);
+  if (bookingCancelMatch && method === 'PATCH') {
+    targetUrl = `/api/public/bookings/${bookingCancelMatch[1]}/cancel`;
+    return fetchWithAuth(targetUrl, { ...init, method, body });
+  }
+
+  if (input.startsWith('/api/trip-plans')) {
+    return handleTripPlans(input, method, body);
+  }
+
+  return fetchWithAuth(input, init);
+}
+
+// ---------------------------------------------------------------------------
+// Auth helpers (minimal replacements for the removed EdgeSpark auth UI)
+// ---------------------------------------------------------------------------
+
+async function getSession() {
+  const raw = localStorage.getItem('stayislands_user');
+  if (!raw) return { data: null };
+  try {
+    const user = JSON.parse(raw);
+    return { data: { user } };
+  } catch {
+    return { data: null };
+  }
+}
+
+async function signOut() {
+  const token = getAdminToken();
+  if (token) {
+    try {
+      await fetchWithAuth('/api/admin/auth/logout', { method: 'POST' });
+    } catch {
+      // ignore
+    }
+  }
+  localStorage.removeItem('admin_access_token');
+  localStorage.removeItem('admin_refresh_token');
+  localStorage.removeItem('stayislands_user');
+}
+
+export const client = {
+  api: {
+    fetch: apiFetch,
+  },
+  auth: {
+    getSession,
+    signOut,
+  },
 };

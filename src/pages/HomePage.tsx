@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { client } from '../api/client';
 
 export default function HomePage() {
   const [islandName, setIslandName] = useState('');
   const [named, setNamed] = useState(false);
   const [savedIsland, setSavedIsland] = useState('');
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+  const [leadError, setLeadError] = useState('');
 
   useEffect(() => {
     const saved = localStorage.getItem('my-island-name');
@@ -23,6 +27,35 @@ export default function HomePage() {
     setSavedIsland(islandName.trim());
     setNamed(true);
   }
+  async function handleLeadSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLeadError('');
+    if (!leadEmail.trim().includes('@')) {
+      setLeadError('請輸入有效的電郵地址');
+      return;
+    }
+    try {
+      const res = await client.api.fetch('/api/public/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: leadEmail.trim(),
+          lead_type: 'island_owner_talk',
+          source: 'homepage',
+        }),
+      });
+      if (res.ok) {
+        setLeadSubmitted(true);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setLeadError(data.error || '提交失敗，請稍後再試');
+      }
+    } catch (err) {
+      console.error(err);
+      setLeadError('提交時發生錯誤');
+    }
+  }
+
   return (
     <div>
       {/* Hero Section - Immersive */}
@@ -317,16 +350,24 @@ export default function HomePage() {
                 不是投資手冊，而是一本關於「如果這裡成為你每年回來的地方」的靈感集。
                 無需任何費用，寄送到你的電郵。
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <input
-                  type="email"
-                  placeholder="輸入您的電郵"
-                  className="px-6 py-3 rounded-full text-gray-900 w-full sm:w-72 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8902F]"
-                />
-                <button className="bg-[#B8902F] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9a7a28] transition">
-                  寄給我
-                </button>
-              </div>
+              {leadSubmitted ? (
+                <p className="text-white font-medium">我們已收到你的資料，將在 1 個工作天內與你聯絡。</p>
+              ) : (
+                <form onSubmit={handleLeadSubmit} className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <input
+                    type="email"
+                    required
+                    value={leadEmail}
+                    onChange={(e) => setLeadEmail(e.target.value)}
+                    placeholder="輸入您的電郵"
+                    className="px-6 py-3 rounded-full text-gray-900 w-full sm:w-72 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8902F]"
+                  />
+                  <button type="submit" className="bg-[#B8902F] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9a7a28] transition">
+                    預約業主對話
+                  </button>
+                </form>
+              )}
+              {leadError && <p className="text-red-200 text-xs mt-3">{leadError}</p>}
               <p className="text-white/50 text-xs mt-4">已有超過 800 位香港旅客收到這本靈感集</p>
             </div>
           </motion.div>

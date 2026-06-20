@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
-import type { CmsArticle, LeadType, Property, RoomType } from '../db/schema'
+import type { Booking, CmsArticle, Customer, LeadType, Property, RoomType } from '../db/schema'
 import { all, first, run } from '../lib/db'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
@@ -166,6 +166,113 @@ app.post('/leads', async (c) => {
   )
 
   return c.json({ data: { id: result.meta.last_row_id, status: 'new' } }, 201)
+})
+
+function toUnixEpoch(value: unknown): number | null {
+  if (value == null) return null
+  if (typeof value === 'number') return Math.floor(value)
+  if (typeof value === 'string') {
+    const n = parseInt(value, 10)
+    if (String(n) === value && Number.isFinite(n)) return n
+    const d = new Date(value)
+    if (!Number.isNaN(d.getTime())) return Math.floor(d.getTime() / 1000)
+  }
+  return null
+}
+
+// GET /api/public/bookings
+app.get('/bookings', async (c) => {
+  const email = c.req.query('email')
+  if (!email) return c.json({ data: [], total: 0 })
+
+  const customer = await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE email = ?', [email])
+  if (!customer) return c.json({ data: [], total: 0 })
+
+  const bookings = await all<Booking>(
+    c.env.DB,
+    'SELECT * FROM bookings WHERE customer_id = ? ORDER BY created_at DESC',
+    [customer.id]
+  )
+  return c.json({ data: bookings, total: bookings.length })
+})
+
+// GET /api/public/bookings/:id
+app.get('/bookings/:id', async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
+
+  const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  if (!booking) return c.json({ error: 'Booking not found' }, 404)
+
+  const [property, roomType] = await Promise.all([
+    first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [booking.propertyId]),
+    first<RoomType>(c.env.DB, 'SELECT * FROM room_types WHERE id = ?', [booking.roomTypeId]),
+  ])
+
+  return c.json({ data: { ...booking, property, roomType } })
+})
+
+// POST /api/public/bookings
+app.post('/bookings', async (c) => {
+  const body = await c.req.json<Record<string, unknown>>()
+
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+  const name = typeof body.name === 'string' ? body.name.trim() || null : null
+  const phone = typeof body.phone === 'string' ? body.phone.trim() || null : null
+  const propertyId = Number(body.property_id)
+  const roomTypeId = Number(body.room_type_id)
+  const guests = Number(body.guests) || 1
+  const totalAmount = Number(body.total_amount) || 0
+  const currency = typeof body.currency === 'string' ? body.currency.toUpperCase() : 'HKD'
+  const voucherCode = typeof body.voucher_code === 'string' ? body.voucher_code.trim() || null : null
+  const checkIn = toUnixEpoch(body.check_in)
+  const checkOut = toUnixEpoch(body.check_out)
+
+  if (!email) return c.json({ error: 'Missing required field: email' }, 400)
+  if (!Number.isFinite(propertyId)) return c.json({ error: 'Missing or invalid property_id' }, 400)
+  if (!Number.isFinite(roomTypeId)) return c.json({ error: 'Missing or invalid room_type_id' }, 400)
+  if (checkIn == null) return c.json({ error: 'Missing or invalid check_in' }, 400)
+  if (checkOut == null) return c.json({ error: 'Missing or invalid check_out' }, 400)
+
+  let customer = await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE email = ?', [email])
+  if (!customer) {
+    const result = await run(
+      c.env.DB,
+      'INSERT INTO customers (name, email, phone, created_at, updated_at) VALUES (?, ?, ?, unixepoch(), unixepoch())',
+      [name, email, phone]
+    )
+    customer = await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE id = ?', [
+      result.meta.last_row_id,
+    ])
+  }
+
+  const result = await run(
+    c.env.DB,
+    `INSERT INTO bookings
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, unixepoch(), unixepoch())`,
+    [customer?.id ?? null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode]
+  )
+
+  const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [
+    result.meta.last_row_id,
+  ])
+
+  return c.json({ data: booking }, 201)
+})
+
+// PATCH /api/public/bookings/:id/cancel
+app.patch('/bookings/:id/cancel', async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
+
+  const existing = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Booking not found' }, 404)
+
+  await run(c.env.DB, "UPDATE bookings SET status = 'cancelled', updated_at = unixepoch() WHERE id = ?", [id])
+
+  const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  return c.json({ data: updated })
 })
 
 export default app

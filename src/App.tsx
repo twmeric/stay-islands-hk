@@ -9,6 +9,9 @@ import MemberPage from './pages/MemberPage';
 import TripPlannerPage from './pages/TripPlannerPage';
 import GuidePage from './pages/GuidePage';
 import InvestPage from './pages/InvestPage';
+import AuthPage from './pages/AuthPage';
+import DashboardPage from './pages/DashboardPage';
+import AdminPage from './pages/AdminPage';
 import Layout from './layouts/Layout';
 
 export default function App() {
@@ -65,9 +68,9 @@ export default function App() {
           <Route path="/member" element={<MemberPage />} />
           <Route path="/trip-planner" element={<TripPlannerPage />} />
           {/* Legacy routes redirect to /member */}
-          <Route path="/auth" element={<Navigate to="/member" replace />} />
-          <Route path="/dashboard" element={<Navigate to="/member" replace />} />
-          <Route path="/admin" element={<Navigate to="/member" replace />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

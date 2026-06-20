@@ -108,20 +108,46 @@ export default function PropertyDetailPage() {
     }
   }
 
-  function handleInquirySubmit(e: React.FormEvent) {
+  async function handleInquirySubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: wire to lead-capture API once EdgeSpark migration is complete
-    console.log('Experience inquiry:', {
-      propertyId: property!.id,
-      roomTypeId: selectedRoom?.id,
-      name: inquiryName,
-      email: inquiryEmail,
-      phone: inquiryPhone,
-      checkIn: inquiryCheckIn || null,
-      days: inquiryDays,
-      message: inquiryMessage || null,
-    });
-    setInquirySubmitted(true);
+    if (!property) return;
+
+    const room = selectedRoom || property.roomTypes[0];
+    if (!room) return;
+
+    const checkInDate = inquiryCheckIn
+      ? new Date(inquiryCheckIn)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const checkOutDate = new Date(checkInDate);
+    checkOutDate.setDate(checkOutDate.getDate() + inquiryDays);
+
+    const totalAmount = (room.pricePerNight || property.pricePerNight) * inquiryDays;
+
+    try {
+      const res = await client.api.fetch('/api/public/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: inquiryName,
+          email: inquiryEmail,
+          phone: inquiryPhone,
+          property_id: property.id,
+          room_type_id: room.id,
+          check_in: Math.floor(checkInDate.getTime() / 1000),
+          check_out: Math.floor(checkOutDate.getTime() / 1000),
+          guests: 1,
+          total_amount: totalAmount,
+          currency: 'HKD',
+        }),
+      });
+      if (!res.ok) {
+        console.error('Booking submit failed:', await res.text());
+        return;
+      }
+      setInquirySubmitted(true);
+    } catch (err) {
+      console.error('Booking submit error:', err);
+    }
   }
 
   if (loading) return <div className="pt-24 flex justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#0a4c6b] border-t-transparent rounded-full" /></div>;

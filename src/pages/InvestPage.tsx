@@ -1,15 +1,39 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { client } from '../api/client';
 
 export default function InvestPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', vibe: '', property: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: wire to backend consultation endpoint after Cloudflare migration
-    setSubmitted(true);
+    try {
+      const res = await client.api.fetch('/api/public/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          lead_type: 'island_owner_talk',
+          source: 'invest_page',
+          metadata: {
+            vibe: form.vibe,
+            property: form.property,
+            message: form.message,
+          },
+        }),
+      });
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        console.error('Lead submit failed:', await res.text());
+      }
+    } catch (err) {
+      console.error('Lead submit error:', err);
+    }
   }
 
   return (
