@@ -1,5 +1,5 @@
 -- =============================================================================
--- Stay Islands HK — D1 SQLite Schema
+-- HK Islanders — D1 SQLite Schema
 -- =============================================================================
 -- Target: Cloudflare D1 (SQLite)
 -- Usage: wrangler d1 execute stay-islands-hk-db --local --file=./schema.sql

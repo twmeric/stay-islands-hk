@@ -1,5 +1,5 @@
 /**
- * Stay Islands HK — D1 Schema TypeScript Types
+ * HK Islanders — D1 Schema TypeScript Types
  *
  * Mirrors `worker/schema.sql`. All interfaces use camelCase property names.
  * Use `mapRow<T>()` or `mapRows<T>()` to convert D1 result rows from

@@ -53,8 +53,8 @@ export default function InvestPage() {
             <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">海島業主計劃</p>
             <h1 className="text-5xl lg:text-6xl font-bold mb-6">先體驗，再決定。</h1>
             <p className="text-lg lg:text-xl text-white/90 max-w-xl mb-8">
-              成為海島業主，不是從簽約開始，而是從你第一次以海島業主的身份住進來開始。
-              Stay Islands 為你預留一片海，讓感覺帶領你。
+              成為海島業主，從住進來開始。
+              HK Islanders 為你預留一片海，讓感覺帶領你。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-start">
               <Link
@@ -88,8 +88,8 @@ export default function InvestPage() {
             <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">海島業主計劃</p>
             <h1 className="text-4xl font-bold mb-6">先體驗，再決定。</h1>
             <p className="text-lg text-white/90 mb-8">
-              成為海島業主，不是從簽約開始，而是從你第一次以海島業主的身份住進來開始。
-              Stay Islands 為你預留一片海，讓感覺帶領你。
+              成為海島業主，從住進來開始。
+              HK Islanders 為你預留一片海，讓感覺帶領你。
             </p>
             <div className="flex flex-col gap-4">
               <Link
