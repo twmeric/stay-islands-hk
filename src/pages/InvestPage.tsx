@@ -14,36 +14,73 @@ export default function InvestPage() {
 
   return (
     <div className="pt-16">
-      {/* Hero */}
-      <section className="relative py-24 px-4 overflow-hidden">
+      {/* Hero — Desktop */}
+      <section className="relative hidden md:block h-screen overflow-hidden">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1688949078626-a358f500e063?w=1920&q=80"
             alt="Maldives private island"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-[70%_center]"
           />
-          <div className="absolute inset-0 bg-[#0a4c6b]/80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a4c6b]/90 via-[#0a4c6b]/50 to-transparent" />
         </div>
-        <div className="relative z-10 max-w-4xl mx-auto text-center text-white">
-          <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">島主計劃</p>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">先體驗，後決定是否留下來。</h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8">
-            成為島主，不是從簽約開始，而是從你第一次以島主的身份住進來開始。
-            Stay Islands 為你預留一片海，讓感覺帶領你。
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/properties"
-              className="bg-white text-[#0a4c6b] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition"
-            >
-              選擇我的島嶼
-            </Link>
-            <a
-              href="#consultation"
-              className="bg-[#B8902F] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9a7a28] transition"
-            >
-              我想先聊聊
-            </a>
+        <div className="relative z-10 h-full flex items-center px-6 lg:px-16">
+          <div className="max-w-2xl text-left text-white">
+            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">島主計劃</p>
+            <h1 className="text-5xl lg:text-6xl font-bold mb-6">先體驗，再決定。</h1>
+            <p className="text-lg lg:text-xl text-white/90 max-w-xl mb-8">
+              成為島主，不是從簽約開始，而是從你第一次以島主的身份住進來開始。
+              Stay Islands 為你預留一片海，讓感覺帶領你。
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-start">
+              <Link
+                to="/properties"
+                className="bg-white text-[#0a4c6b] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition"
+              >
+                選擇我的島嶼
+              </Link>
+              <a
+                href="#consultation"
+                className="bg-[#B8902F] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9a7a28] transition"
+              >
+                我想先聊聊
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Hero — Mobile */}
+      <section className="md:hidden min-h-screen flex flex-col bg-[#0d1b2a]">
+        <div className="h-[58vh] w-full relative">
+          <img
+            src="https://images.unsplash.com/photo-1688949078626-a358f500e063?w=1920&q=80"
+            alt="Maldives private island"
+            className="w-full h-full object-cover object-[50%_35%]"
+          />
+        </div>
+        <div className="flex-1 flex items-center justify-center px-6 py-10 text-center text-white">
+          <div className="max-w-xl">
+            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">島主計劃</p>
+            <h1 className="text-4xl font-bold mb-6">先體驗，再決定。</h1>
+            <p className="text-lg text-white/90 mb-8">
+              成為島主，不是從簽約開始，而是從你第一次以島主的身份住進來開始。
+              Stay Islands 為你預留一片海，讓感覺帶領你。
+            </p>
+            <div className="flex flex-col gap-4">
+              <Link
+                to="/properties"
+                className="bg-white text-[#0a4c6b] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition"
+              >
+                選擇我的島嶼
+              </Link>
+              <a
+                href="#consultation"
+                className="bg-[#B8902F] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9a7a28] transition"
+              >
+                我想先聊聊
+              </a>
+            </div>
           </div>
         </div>
       </section>
