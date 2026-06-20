@@ -97,8 +97,8 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-snug md:leading-tight"
           >
-            <span className="md:hidden">留住<br />感受<br />放鬆身心</span>
-            <span className="hidden md:inline">留住 · 感受<br />放鬆身心</span>
+            <span className="md:hidden">一片海，一個家<br />一次住進夢想裡</span>
+            <span className="hidden md:inline">一片海，一個家<br />一次住進夢想裡</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
