@@ -39,16 +39,39 @@ export default function PropertiesPage() {
 
   return (
     <div className="pt-20 pb-16">
-      {/* Header */}
-      <div className="relative h-72 flex items-end justify-center overflow-hidden pb-10">
-        <img src="https://images.unsplash.com/photo-1540202404-a2f29016b523?w=1920&q=80" alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a4c6b]/90 via-[#0a4c6b]/40 to-[#0a4c6b]/20" />
+      {/* Header — Desktop / Tablet */}
+      <div className="relative hidden md:flex md:min-h-[600px] md:h-[75vh] items-end justify-center overflow-hidden pb-16">
+        <img
+          src="https://images.unsplash.com/photo-1540202404-a2f29016b523?w=1920&q=80"
+          alt="Maldives resort"
+          className="absolute inset-0 w-full h-full object-cover object-[35%_center]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a4c6b]/95 via-[#0a4c6b]/40 to-[#0a4c6b]/10" />
         <div className="relative z-10 text-center text-white px-4">
           <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的海島之家</p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-2">先住進來，感受這裡</h1>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">先住進來，感受這裡</h1>
           <p className="text-white/80 max-w-2xl mx-auto">每一座海島之家都在等待它的海島業主。先來體驗，讓感覺帶領你。</p>
         </div>
       </div>
+
+      {/* Header — Mobile */}
+      <section className="md:hidden min-h-screen flex flex-col bg-[#0d1b2a]">
+        <div className="relative h-[55vh] w-full">
+          <img
+            src="https://images.unsplash.com/photo-1540202404-a2f29016b523?w=1920&q=80"
+            alt="Maldives resort"
+            className="w-full h-full object-cover object-[50%_35%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a4c6b]/40 via-transparent to-[#0d1b2a]" />
+        </div>
+        <div className="flex-1 flex items-center justify-center px-6 py-10 text-center text-white">
+          <div className="max-w-xl">
+            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的海島之家</p>
+            <h1 className="text-4xl font-bold mb-4">先住進來，感受這裡</h1>
+            <p className="text-lg text-white/90">每一座海島之家都在等待它的海島業主。先來體驗，讓感覺帶領你。</p>
+          </div>
+        </div>
+      </section>
 
       {/* Properties Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

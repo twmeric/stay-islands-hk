@@ -488,7 +488,7 @@ export default function HomePage() {
               選擇我的海島之家
             </Link>
             <Link to="/trip-planner" className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition">
-              規劃我的海島業主假期
+              規劃我的島主假期
             </Link>
           </div>
         </div>
