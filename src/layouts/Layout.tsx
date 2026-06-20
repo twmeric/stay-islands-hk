@@ -20,9 +20,11 @@ export default function Layout() {
       <header className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/20">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0a4c6b] to-[#2ec4b6] flex items-center justify-center">
-              <span className="text-white text-[10px] font-bold">HKI</span>
-            </div>
+            <img
+              src="/logo.png"
+              alt="HK Islanders"
+              className="w-9 h-9 rounded-full object-cover"
+            />
             <span className="font-semibold text-[#0a4c6b] text-lg">HK Islanders</span>
           </Link>
 
