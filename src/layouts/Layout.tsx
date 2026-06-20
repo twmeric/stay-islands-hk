@@ -21,9 +21,9 @@ export default function Layout() {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0a4c6b] to-[#2ec4b6] flex items-center justify-center">
-              <span className="text-white text-xs font-bold">SI</span>
+              <span className="text-white text-[10px] font-bold">HKI</span>
             </div>
-            <span className="font-semibold text-[#0a4c6b] text-lg">Stay Islands</span>
+            <span className="font-semibold text-[#0a4c6b] text-lg">HK Islander</span>
           </Link>
 
           {/* Desktop nav */}
@@ -83,7 +83,7 @@ export default function Layout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Stay Islands</h3>
+              <h3 className="text-lg font-semibold mb-4">HK Islander</h3>
               <p className="text-gray-400 text-sm">專為香港旅客打造的馬爾代夫頂級度假體驗平台。</p>
             </div>
             <div>
@@ -114,7 +114,7 @@ export default function Layout() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
-            <p>© 2026 Stay Islands HK. All rights reserved. 所有價格以港幣 (HKD) 結算。</p>
+            <p>© 2026 HK Islander. All rights reserved. 所有價格以港幣 (HKD) 結算。</p>
           </div>
         </div>
       </footer>

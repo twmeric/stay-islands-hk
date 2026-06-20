@@ -40,9 +40,9 @@ export default function PropertiesPage() {
   return (
     <div className="pt-20 pb-16">
       {/* Header */}
-      <div className="relative h-72 flex items-center justify-center overflow-hidden">
+      <div className="relative h-72 flex items-end justify-center overflow-hidden pb-10">
         <img src="https://images.unsplash.com/photo-1540202404-a2f29016b523?w=1920&q=80" alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-[#0a4c6b]/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a4c6b]/90 via-[#0a4c6b]/40 to-[#0a4c6b]/20" />
         <div className="relative z-10 text-center text-white px-4">
           <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的海島之家</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-2">先住進來，感受這裡</h1>

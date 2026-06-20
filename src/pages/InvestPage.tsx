@@ -46,9 +46,9 @@ export default function InvestPage() {
             alt="Maldives private island"
             className="w-full h-full object-cover object-[70%_center]"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a4c6b]/90 via-[#0a4c6b]/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a4c6b]/95 via-[#0a4c6b]/40 to-transparent" />
         </div>
-        <div className="relative z-10 h-full flex items-center px-6 lg:px-16">
+        <div className="relative z-10 h-full flex items-end px-6 lg:px-16 pb-16 lg:pb-24">
           <div className="max-w-2xl text-left text-white">
             <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">海島業主計劃</p>
             <h1 className="text-5xl lg:text-6xl font-bold mb-6">先體驗，再決定。</h1>
@@ -281,7 +281,7 @@ export default function InvestPage() {
         <div className="max-w-4xl mx-auto text-center space-y-3">
           <p className="text-xs text-gray-500">
             成為海島業主涉及長期承諾與財務安排，所有物業資訊僅供參考。
-            正式交易前請諮詢獨立法律、稅務及財務顧問。Stay Islands 提供的是體驗與資訊，並非投資建議。
+            正式交易前請諮詢獨立法律、稅務及財務顧問。HK Islander 提供的是體驗與資訊，並非投資建議。
           </p>
           <p className="text-xs text-gray-500">
             「島主」為「海島業主」之簡稱，指擁有馬爾代夫度假物業業權之人士。

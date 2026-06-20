@@ -89,7 +89,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             className="text-lg md:text-xl text-white/80 mb-4 tracking-widest uppercase"
           >
-            專為香港海島業主打
+            夢寐以求的海島體驗
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
@@ -107,7 +107,7 @@ export default function HomePage() {
             className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto md:mx-0"
           >
             在馬爾代夫，為自己預留一片海。<br />
-            先以海島業主的身份住進來，讓感覺帶領你，決定是否成為業主。
+            滿足你“曾經擁有”的海島業主夢想。
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -125,17 +125,9 @@ export default function HomePage() {
               to="/invest"
               className="bg-[#B8902F] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9a7a28] transition shadow-lg"
             >
-              ✨ 探索海島業主計劃
+              ✨ 探索島主計劃
             </Link>
           </motion.div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            className="mt-4 text-sm text-white/70"
-          >
-            每個物業每年只接待少數幾組業主體驗
-          </motion.p>
         </div>
 
         {/* Scroll indicator */}
@@ -219,10 +211,10 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <p className="text-[#2ec4b6] font-medium mb-2">歡迎來到海島生活</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-6">Stay Islands 香港</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-6">HK Islander - 香港島主俱樂部</h2>
             <p className="text-gray-600 max-w-3xl mx-auto text-lg">
               我們相信，真正的高級不在於擁有多少，而在於是否能擁有一片讓你完全放鬆的海。
-              Stay Islands 為你預留的不只是一趟旅程，而是一個可以一再回來的地方。
+              HK Islander 為你預留的不只是一趟旅程，而是一個可以一再回來的地方。
             </p>
           </motion.div>
 
