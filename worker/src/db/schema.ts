@@ -60,6 +60,11 @@ export interface Property {
   maxGuests: number | null
   imageUrl: string | null
   amenities: string | null // JSON array stored as TEXT
+  gallery: string | null // JSON array of image URLs
+  facilities: string | null // JSON array of {icon, label}
+  activities: string | null // JSON array of {image, name, description}
+  locationDetails: string | null // JSON object {description, mapImage, nearby}
+  story: string | null // JSON object {title, content}
   status: PropertyStatus
   createdAt: number
   updatedAt: number

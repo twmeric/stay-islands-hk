@@ -5,6 +5,8 @@ import { useAuthStore } from './store/authStore';
 import HomePage from './pages/HomePage';
 import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailPage from './pages/PropertyDetailPage';
+import ExperiencesPage from './pages/ExperiencesPage';
+import RetreatsPage from './pages/RetreatsPage';
 import MemberPage from './pages/MemberPage';
 import TripPlannerPage from './pages/TripPlannerPage';
 import GuidePage from './pages/GuidePage';
@@ -63,6 +65,8 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/properties/:id" element={<PropertyDetailPage />} />
+          <Route path="/experiences" element={<ExperiencesPage />} />
+          <Route path="/retreats" element={<RetreatsPage />} />
           <Route path="/guide" element={<GuidePage />} />
           <Route path="/invest" element={<InvestPage />} />
           <Route path="/member" element={<MemberPage />} />

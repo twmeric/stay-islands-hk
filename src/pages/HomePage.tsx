@@ -374,12 +374,58 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Services */}
+      {/* Featured Experiences Preview */}
       <section className="py-24 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
+            <p className="text-[#2ec4b6] font-medium mb-2">深入海洋與島嶼文化</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-4">精選海島體驗</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">從夜釣到鯨鯊共游，每一項體驗都由當地團隊客製安排。</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { nameZh: '夜釣之旅', nameEn: 'Night Fishing Trip', duration: '3-4 小時', desc: '星空下出海，學習傳統釣魚技巧，現釣現煮的海鮮晚餐。', img: 'https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80' },
+              { nameZh: '日落巡航', nameEn: 'Sunset Cruise', duration: '2 小時', desc: '搭乘遊艇追逐夕陽，香檳與海洋交織的浪漫時刻。', img: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80' },
+              { nameZh: '鯨鯊與魔鬼魚', nameEn: 'Whale Shark & Manta', duration: '半日', desc: '與溫柔的海洋巨人共游，感受馬爾代夫最震撼的藍。', img: 'https://images.unsplash.com/photo-1582967788606-a171f1080ca8?w=800&q=80' },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                className="group cursor-pointer"
+              >
+                <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4">
+                  <img src={item.img} alt={item.nameZh} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <p className="text-sm text-white/80">{item.nameEn}</p>
+                    <h3 className="text-xl font-bold">{item.nameZh}</h3>
+                  </div>
+                </div>
+                <div className="px-2">
+                  <p className="text-sm text-[#B8902F] font-medium mb-1">{item.duration}</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Link to="/experiences" className="inline-flex items-center gap-2 bg-[#0a4c6b] text-white px-8 py-3 rounded-full font-medium hover:bg-[#083d56] transition">
+              探索所有海島體驗
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Services */}
+      <section className="py-24 px-4 bg-[#f8fafb]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
             <p className="text-[#2ec4b6] font-medium mb-2">專屬旅遊服務</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a]">精選海島體驗</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a]">一站式海島服務</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
@@ -403,6 +449,51 @@ export default function HomePage() {
                 <p className="text-gray-600 text-sm">{item.desc}</p>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Retreats Preview */}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[#B8902F] font-medium mb-2">為自己設計一場深度旅程</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-4">主題 Retreats</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">瑜伽、衝浪、浪漫、釣魚——每一個 Retreat 都是一次專屬生活體驗。</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {[
+              { nameZh: '瑜伽與冒險靜修', nameEn: 'Yoga & Adventure Retreat', duration: '8 天 7 晚', desc: '每日晨間瑜伽與冥想，下午浮潛、無人島探險，晚上在星空下放鬆身心。', img: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80' },
+              { nameZh: '浪漫雙人靜修', nameEn: 'Couple Getaway', duration: '8 天 7 晚', desc: '專為兩人設計的私密時光，包含浪漫晚餐、雙人按摩與專屬日落巡航。', img: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80' },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                className="group cursor-pointer"
+              >
+                <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4">
+                  <img src={item.img} alt={item.nameZh} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <p className="text-sm text-white/80">{item.nameEn}</p>
+                    <h3 className="text-xl font-bold">{item.nameZh}</h3>
+                  </div>
+                </div>
+                <div className="px-2">
+                  <p className="text-sm text-[#B8902F] font-medium mb-1">{item.duration}</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Link to="/retreats" className="inline-flex items-center gap-2 border-2 border-[#0a4c6b] text-[#0a4c6b] px-8 py-3 rounded-full font-medium hover:bg-[#0a4c6b] hover:text-white transition">
+              查看所有 Retreats
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </Link>
           </div>
         </div>
       </section>

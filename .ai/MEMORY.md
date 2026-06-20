@@ -56,6 +56,11 @@ HK Islanders（香港島主俱樂部）是一個**體驗驅動的物業銷售漏
 - 首頁 Hero 右側對齊，避免遮擋度假酒店
 - `/invest` Hero 左下角對齊，加入出租實證區塊
 - `/properties` Hero 加高，mobile 採上圖下文
+- `/properties/:id` 物業詳情頁擴充：圖片畫廊、設施、可體驗活動、位置與週邊、物業故事、諮詢 CTA
+- `/experiences` 海島體驗頁：6 項活動展示（夜釣、浮潛潛水、日落巡航、跳島、鯨鯊魔鬼魚、本地島嶼文化）+ 諮詢表單
+- `/retreats` 主題靜修頁：4 個主題套餐（Yoga、Surf、Couple、Fishing）+ 可收合行程 + 諮詢表單
+- 首頁新增「精選海島體驗」與「主題 Retreats」預覽區塊
+- Header / Footer 導航同步加入新頁面連結
 - AuthPage 自訂登入表單，儲存 JWT token
 - DashboardPage 顯示會員預訂
 - AdminPage 管理員後台（待全面改寫為新 Admin API 介面）

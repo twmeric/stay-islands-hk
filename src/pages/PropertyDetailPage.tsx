@@ -15,6 +15,28 @@ interface RoomType {
   amenities: string | null;
 }
 
+interface Facility {
+  icon: string;
+  label: string;
+}
+
+interface Activity {
+  image: string;
+  name: string;
+  description: string;
+}
+
+interface LocationDetails {
+  description: string;
+  mapImage: string;
+  nearby: string[];
+}
+
+interface Story {
+  title: string;
+  content: string;
+}
+
 interface Property {
   id: number;
   name: string;
@@ -26,7 +48,28 @@ interface Property {
   maxGuests: number | null;
   imageUrl: string | null;
   amenities: string | null;
+  gallery: string | null;
+  facilities: string | null;
+  activities: string | null;
+  locationDetails: string | null;
+  story: string | null;
   roomTypes: RoomType[];
+}
+
+function safeJsonParse<T>(value: string | null | undefined, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function scrollToInquiry() {
+  const el = document.getElementById('inquiry-form');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 export default function PropertyDetailPage() {
@@ -37,6 +80,7 @@ export default function PropertyDetailPage() {
   const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null);
   const [viewMode, setViewMode] = useState<'guest' | 'investor'>('guest');
   const [saved, setSaved] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
 
   // Experience inquiry form state
   const [inquiryName, setInquiryName] = useState('');
@@ -51,44 +95,376 @@ export default function PropertyDetailPage() {
     fetchProperty();
   }, [id]);
 
-  const demoProperty: Property = {
-    id: Number(id) || 1,
-    name: 'Stay Mikado',
-    nameZh: '御海閣',
-    description: 'A boutique overwater villa collection in the Maldives.',
-    descriptionZh: '御海閣坐落於馬爾代夫清澈潟湖之上，提供私密而奢華的度假體驗。每棟水上別墅均配備私人泳池、玻璃地板與無邊際海景，並由專屬管家團隊提供全天候服務。',
-    location: 'North Malé Atoll, Maldives',
-    pricePerNight: 4800,
-    maxGuests: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=1200&q=80',
-    amenities: JSON.stringify(['私人泳池', '水上飛機接送', '24 小時管家', '浮潛裝備', '海鮮晚餐', 'SPA']),
-    roomTypes: [
-      {
-        id: 101,
-        name: 'Lagoon Villa',
-        nameZh: '潟湖別墅',
-        description: 'Overwater villa with lagoon views.',
-        descriptionZh: '坐擁潟湖美景的水上別墅，配備私人露台與下沉式沙發。',
-        pricePerNight: 4800,
-        maxGuests: 2,
-        inventory: 3,
-        imageUrl: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600',
-        amenities: JSON.stringify(['海景露台', '浴缸', '空調', 'Wi-Fi']),
-      },
-      {
-        id: 102,
-        name: 'Ocean Suite',
-        nameZh: '海洋套房',
-        description: 'Spacious suite with private pool.',
-        descriptionZh: '寬敞海洋套房，設有私人無邊際泳池與獨立客廳。',
-        pricePerNight: 7800,
-        maxGuests: 4,
-        inventory: 2,
-        imageUrl: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600',
-        amenities: JSON.stringify(['私人泳池', '客廳', '管家服務', '迎賓香檳']),
-      },
-    ],
+  useEffect(() => {
+    setActiveImage(0);
+  }, [property?.id]);
+
+  const demoProperties: Record<number, Property> = {
+    1: {
+      id: 1,
+      name: 'Stay Mikado',
+      nameZh: '御海閣',
+      description: 'A boutique overwater villa collection in the Maldives.',
+      descriptionZh:
+        '御海閣坐落於馬爾代夫清澈潟湖之上，提供私密而奢華的度假體驗。每棟水上別墅均配備私人泳池、玻璃地板與無邊際海景，並由專屬管家團隊提供全天候服務。',
+      location: 'North Malé Atoll, Maldives',
+      pricePerNight: 4800,
+      maxGuests: 4,
+      imageUrl:
+        'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=1200&q=80',
+      amenities: JSON.stringify([
+        '私人泳池',
+        '水上飛機接送',
+        '24 小時管家',
+        '浮潛裝備',
+        '海鮮晚餐',
+        'SPA',
+      ]),
+      gallery: JSON.stringify([
+        'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=1200&q=80',
+        'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80',
+        'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80',
+        'https://images.unsplash.com/photo-1544144433-d50aff500b91?w=800&q=80',
+        'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800&q=80',
+        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+      ]),
+      facilities: JSON.stringify([
+        { icon: '🏊', label: '私人泳池' },
+        { icon: '✈️', label: '水上飛機接送' },
+        { icon: '🎩', label: '24 小時管家' },
+        { icon: '🤿', label: '浮潛裝備' },
+        { icon: '🦞', label: '海鮮晚餐' },
+        { icon: '💆', label: 'SPA' },
+        { icon: '🧘', label: '瑜伽亭' },
+        { icon: '🏖️', label: '私人甲板' },
+      ]),
+      activities: JSON.stringify([
+        {
+          image:
+            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80',
+          name: '日落巡航',
+          description:
+            '乘著傳統多尼船駛向潟湖盡頭，在香檳與夕陽中結束完美的一天。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1544551762-46a013bb70d5?w=600&q=80',
+          name: '夜釣',
+          description:
+            '跟隨當地漁民出海，在星空下學習傳統釣法，收穫可交由廚師即席烹調。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
+          name: '浮潛',
+          description:
+            '從別墅甲板直接下水，與熱帶魚群、海龜和珊瑚礁不期而遇。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
+          name: '深潛',
+          description:
+            'PADI 認證潛水中心帶你探索 North Malé 環礁的著名潛點。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=80',
+          name: '無人島野餐',
+          description:
+            '包下一座無人沙洲，享受只屬於你的燭光午餐與澄澈海水。',
+        },
+      ]),
+      locationDetails: JSON.stringify({
+        description:
+          '御海閣位於 North Malé Atoll，距離馬累國際機場約 30 分鐘水上飛機航程，是馬爾代夫最經典的潟湖區域之一。',
+        mapImage:
+          'https://images.unsplash.com/photo-1528127269322-539801943592?w=1200&q=80',
+        nearby: [
+          '馬累國際機場：30 分鐘水上飛機',
+          '著名潛點 Manta Point：約 20 分鐘船程',
+          '當地漁村：約 15 分鐘快艇',
+          '無人沙洲：約 10 分鐘快艇',
+        ],
+      }),
+      story: JSON.stringify({
+        title: '御海閣的故事',
+        content:
+          '御海閣誕生於一片被保育完好的潟湖之上，每一棟別墅都以馬爾代夫傳統工藝與現代極簡設計融合。島主希望每位客人不是「入住」一座度假村，而是回歸一片屬於自己的海洋。從日出時管家送來的咖啡，到深夜玻璃地板下緩緩游過的海龜，御海閣相信：真正的奢華，是讓時間慢下來。',
+      }),
+      roomTypes: [
+        {
+          id: 101,
+          name: 'Lagoon Villa',
+          nameZh: '潟湖別墅',
+          description: 'Overwater villa with lagoon views.',
+          descriptionZh: '坐擁潟湖美景的水上別墅，配備私人露台與下沉式沙發。',
+          pricePerNight: 4800,
+          maxGuests: 2,
+          inventory: 3,
+          imageUrl:
+            'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600',
+          amenities: JSON.stringify(['海景露台', '浴缸', '空調', 'Wi-Fi']),
+        },
+        {
+          id: 102,
+          name: 'Ocean Suite',
+          nameZh: '海洋套房',
+          description: 'Spacious suite with private pool.',
+          descriptionZh: '寬敞海洋套房，設有私人無邊際泳池與獨立客廳。',
+          pricePerNight: 7800,
+          maxGuests: 4,
+          inventory: 2,
+          imageUrl:
+            'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600',
+          amenities: JSON.stringify(['私人泳池', '客廳', '管家服務', '迎賓香檳']),
+        },
+      ],
+    },
+    2: {
+      id: 2,
+      name: 'Velaa Private',
+      nameZh: '私享島嶼',
+      description: 'An exclusive private island retreat for the ultimate privacy.',
+      descriptionZh:
+        '整座島嶼只為你與你的摯愛開放。私享島嶼擁有頂級私人管家、米其林主廚團隊與獨立高爾夫球場，是家族團聚、高端慶典與私密靜修的理想之地。',
+      location: 'Noonu Atoll, Maldives',
+      pricePerNight: 12800,
+      maxGuests: 12,
+      imageUrl:
+        'https://images.unsplash.com/photo-1688949078626-a358f500e063?w=1200&q=80',
+      amenities: JSON.stringify([
+        '私人島嶼',
+        '廚師團隊',
+        '遊艇',
+        '管家服務',
+        'SPA',
+        '私人影院',
+      ]),
+      gallery: JSON.stringify([
+        'https://images.unsplash.com/photo-1688949078626-a358f500e063?w=1200&q=80',
+        'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=800&q=80',
+        'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80',
+        'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80',
+        'https://images.unsplash.com/photo-1437719417032-8595fd9e9dc6?w=800&q=80',
+        'https://images.unsplash.com/photo-1602002418082-a4443e081dd1?w=800&q=80',
+      ]),
+      facilities: JSON.stringify([
+        { icon: '👨‍💼', label: '私人島嶼管家' },
+        { icon: '👨‍🍳', label: '米其林主廚餐廳' },
+        { icon: '⛳', label: '高爾夫球場' },
+        { icon: '🚣', label: '水上運動中心' },
+        { icon: '🧸', label: '兒童俱樂部' },
+        { icon: '💒', label: '婚禮場地' },
+        { icon: '🛥️', label: '私人遊艇' },
+        { icon: '🎬', label: '私人影院' },
+      ]),
+      activities: JSON.stringify([
+        {
+          image:
+            'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
+          name: '鯨鯊共游',
+          description:
+            '在專業嚮導陪同下，與溫柔的海洋巨人同游，感受生命的壯闊。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=600&q=80',
+          name: '海龜保育體驗',
+          description:
+            '參與島嶼保育計畫，了解海龜的生活史，並協助記錄與放生。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=80',
+          name: '沙洲燭光晚餐',
+          description:
+            '在只屬於你的沙洲上，由主廚現場烹調，侍酒師搭配美酒。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1528127269322-539801943592?w=600&q=80',
+          name: '傳統漁村探訪',
+          description:
+            '走訪 Noonu 環礁的傳統漁村，認識馬爾代夫的日常生活與手工藝。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
+          name: '環礁浮潛',
+          description:
+            '探索 Noonu 環礁豐富的珊瑚花園與熱帶魚群，適合各級泳者。',
+        },
+      ]),
+      locationDetails: JSON.stringify({
+        description:
+          '私享島嶼坐落於 Noonu Atoll 的靜謐海域，這裡以豐富的海洋生態與原始珊瑚礁聞名，從馬累國際機場可乘內陸航班或水上飛機抵達。',
+        mapImage:
+          'https://images.unsplash.com/photo-1528127269322-539801943592?w=1200&q=80',
+        nearby: [
+          '馬累國際機場：約 45 分鐘水上飛機',
+          '鯨鯊熱點：約 30 分鐘船程',
+          '傳統漁村：約 20 分鐘快艇',
+          '無人沙洲：約 10 分鐘快艇',
+        ],
+      }),
+      story: JSON.stringify({
+        title: '私享島嶼的故事',
+        content:
+          '這座島嶼的名字源於當地語言中的「海龜」。數十年來，這裡一直是綠蠵龜與玳瑁上岸產卵的秘境。現任島主買下島嶼後，堅持只開放給極少數客人，並將大部分海岸線留給自然與保育。在私享島嶼，沒有「其他住客」，只有你的家人、朋友、管家，以及偶爾上岸產卵的海龜。',
+      }),
+      roomTypes: [
+        {
+          id: 201,
+          name: 'Lagoon Villa',
+          nameZh: '潟湖別墅',
+          description: 'Overwater villa with lagoon views.',
+          descriptionZh: '坐擁潟湖美景的水上別墅，配備私人露台與下沉式沙發。',
+          pricePerNight: 12800,
+          maxGuests: 2,
+          inventory: 3,
+          imageUrl:
+            'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600',
+          amenities: JSON.stringify(['海景露台', '浴缸', '空調', 'Wi-Fi']),
+        },
+        {
+          id: 202,
+          name: 'Ocean Suite',
+          nameZh: '海洋套房',
+          description: 'Spacious suite with private pool.',
+          descriptionZh: '寬敞海洋套房，設有私人無邊際泳池與獨立客廳。',
+          pricePerNight: 20800,
+          maxGuests: 4,
+          inventory: 2,
+          imageUrl:
+            'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600',
+          amenities: JSON.stringify(['私人泳池', '客廳', '管家服務', '迎賓香檳']),
+        },
+      ],
+    },
+    3: {
+      id: 3,
+      name: 'Azure Bay',
+      nameZh: '碧海灣',
+      description: 'Beachfront villas with direct reef access.',
+      descriptionZh:
+        '碧海灣是家庭與團體旅客的理想海濱別墅，擁有私人海灘、共用泳池與完整廚房設備。這裡氛圍輕鬆自在，讓你像當地人一樣生活，同時享受馬爾代夫的絕美海景。',
+      location: 'South Ari Atoll, Maldives',
+      pricePerNight: 3200,
+      maxGuests: 3,
+      imageUrl:
+        'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=1200&q=80',
+      amenities: JSON.stringify([
+        '珊瑚礁',
+        '浮潛',
+        '海灘晚餐',
+        '潛水中心',
+        '日落巡航',
+      ]),
+      gallery: JSON.stringify([
+        'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=1200&q=80',
+        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80',
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
+        'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80',
+        'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&q=80',
+        'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80',
+      ]),
+      facilities: JSON.stringify([
+        { icon: '🏖️', label: '私人海灘' },
+        { icon: '🏊‍♀️', label: '共用泳池' },
+        { icon: '🍳', label: '廚房設備' },
+        { icon: '🔥', label: 'BBQ 區' },
+        { icon: '🤿', label: '浮潛中心' },
+        { icon: '🎮', label: '遊戲室' },
+        { icon: '📽️', label: '海灘電影院' },
+        { icon: '🚲', label: '自行車租借' },
+      ]),
+      activities: JSON.stringify([
+        {
+          image:
+            'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=600&q=80',
+          name: '跳島',
+          description:
+            '一日之內造訪多座環礁島嶼，體驗不同風格的沙灘與潟湖。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
+          name: '浮潛',
+          description:
+            '從海灘步行即可抵達珊瑚礁，與小丑魚、海龜一起游泳。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
+          name: '海豚巡遊',
+          description:
+            '在日落時分出海，觀賞成群海豚躍出水面的壯觀畫面。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1528127269322-539801943592?w=600&q=80',
+          name: '本地島嶼文化導覽',
+          description:
+            '走進居民島，品嚐傳統小吃，參觀手工藝作坊與清真寺。',
+        },
+        {
+          image:
+            'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&q=80',
+          name: '海灘電影院',
+          description:
+            '在星空下的沙灘上，躺在懶人沙發中觀賞經典電影。',
+        },
+      ]),
+      locationDetails: JSON.stringify({
+        description:
+          '碧海灣位於 South Ari Atoll，這裡是馬爾代夫最著名的鯨鯊全年出沒熱點，從馬累國際機場出發約 25 分鐘內陸航班再加 15 分鐘快艇即可抵達。',
+        mapImage:
+          'https://images.unsplash.com/photo-1528127269322-539801943592?w=1200&q=80',
+        nearby: [
+          '馬累國際機場：約 25 分鐘內陸航班 + 15 分鐘快艇',
+          '鯨鯊觀賞點：約 20 分鐘船程',
+          '本地居民島：約 10 分鐘快艇',
+          '珊瑚礁：步行可達',
+        ],
+      }),
+      story: JSON.stringify({
+        title: '碧海灣的故事',
+        content:
+          '碧海灣原為當地漁村家族世代守護的海岸。島主從小在這片海灘長大，熟悉每一處珊瑚礁與每一群魚的出沒時間。他將家族土地改建為別墅時，堅持保留原有的椰林、沙灘與礁石，並聘請當地漁民擔任嚮導。來到碧海灣，你會發現這裡不只有美景，還有與海洋共處數代人的溫度。',
+      }),
+      roomTypes: [
+        {
+          id: 301,
+          name: 'Lagoon Villa',
+          nameZh: '潟湖別墅',
+          description: 'Overwater villa with lagoon views.',
+          descriptionZh: '坐擁潟湖美景的水上別墅，配備私人露台與下沉式沙發。',
+          pricePerNight: 3200,
+          maxGuests: 2,
+          inventory: 3,
+          imageUrl:
+            'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600',
+          amenities: JSON.stringify(['海景露台', '浴缸', '空調', 'Wi-Fi']),
+        },
+        {
+          id: 302,
+          name: 'Ocean Suite',
+          nameZh: '海洋套房',
+          description: 'Spacious suite with private pool.',
+          descriptionZh: '寬敞海洋套房，設有私人無邊際泳池與獨立客廳。',
+          pricePerNight: 5200,
+          maxGuests: 4,
+          inventory: 2,
+          imageUrl:
+            'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600',
+          amenities: JSON.stringify(['私人泳池', '客廳', '管家服務', '迎賓香檳']),
+        },
+      ],
+    },
   };
+
+  const demoProperty = demoProperties[Number(id)] || demoProperties[1];
 
   async function fetchProperty() {
     try {
@@ -121,7 +497,8 @@ export default function PropertyDetailPage() {
     const checkOutDate = new Date(checkInDate);
     checkOutDate.setDate(checkOutDate.getDate() + inquiryDays);
 
-    const totalAmount = (room.pricePerNight || property.pricePerNight) * inquiryDays;
+    const totalAmount =
+      (room.pricePerNight || property.pricePerNight) * inquiryDays;
 
     try {
       const res = await client.api.fetch('/api/public/bookings', {
@@ -150,17 +527,40 @@ export default function PropertyDetailPage() {
     }
   }
 
-  if (loading) return <div className="pt-24 flex justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#0a4c6b] border-t-transparent rounded-full" /></div>;
-  if (!property) return <div className="pt-24 text-center text-gray-500">找不到此物業</div>;
+  if (loading)
+    return (
+      <div className="pt-24 flex justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-[#0a4c6b] border-t-transparent rounded-full" />
+      </div>
+    );
+  if (!property)
+    return (
+      <div className="pt-24 text-center text-gray-500">找不到此物業</div>
+    );
 
   const amenities = property.amenities ? JSON.parse(property.amenities) : [];
-  const referencePrice = selectedRoom ? selectedRoom.pricePerNight : property.pricePerNight;
+  const referencePrice = selectedRoom
+    ? selectedRoom.pricePerNight
+    : property.pricePerNight;
+
+  const gallery = safeJsonParse<string[]>(property.gallery, []);
+  const facilities = safeJsonParse<Facility[]>(property.facilities, []);
+  const activities = safeJsonParse<Activity[]>(property.activities, []);
+  const locationDetails = safeJsonParse<LocationDetails>(
+    property.locationDetails,
+    null
+  );
+  const story = safeJsonParse<Story>(property.story, null);
 
   return (
     <div className="pt-16">
       {/* Hero Image */}
       <div className="relative h-[50vh] overflow-hidden">
-        <img src={property.imageUrl || ''} alt={property.nameZh} className="w-full h-full object-cover" />
+        <img
+          src={property.imageUrl || ''}
+          alt={property.nameZh}
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-8 left-8 text-white">
           <p className="text-white/80 text-sm">{property.location}</p>
@@ -200,10 +600,162 @@ export default function PropertyDetailPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Main content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-12">
             <div>
-              <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4">關於此物業</h2>
-              <p className="text-gray-600 leading-relaxed">{property.descriptionZh}</p>
+              <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
+                關於此物業
+              </h2>
+              <p className="text-gray-600 leading-relaxed">
+                {property.descriptionZh}
+              </p>
+            </div>
+
+            {/* Story */}
+            {story && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
+                  {story.title}
+                </h2>
+                <p className="text-gray-600 leading-relaxed italic">
+                  {story.content}
+                </p>
+              </div>
+            )}
+
+            {/* Gallery */}
+            {gallery.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
+                  影像巡禮
+                </h2>
+                <div className="space-y-4">
+                  <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-lg bg-gray-100">
+                    <img
+                      src={gallery[activeImage]}
+                      alt={`${property.nameZh} gallery`}
+                      className="w-full h-full object-cover transition duration-500"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                    {gallery.map((src, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveImage(i)}
+                        className={`aspect-square rounded-xl overflow-hidden border-2 transition ${
+                          activeImage === i
+                            ? 'border-[#0a4c6b]'
+                            : 'border-transparent hover:border-[#2ec4b6]'
+                        }`}
+                      >
+                        <img
+                          src={src}
+                          alt={`${property.nameZh} thumbnail ${i + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Facilities */}
+            {facilities.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-6 font-serif">
+                  設施與服務
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {facilities.map((f, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 bg-[#f0f9f7] rounded-xl p-4"
+                    >
+                      <span className="text-2xl">{f.icon}</span>
+                      <span className="text-sm font-medium text-[#0d1b2a]">
+                        {f.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Activities */}
+            {activities.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-6 font-serif">
+                  可體驗活動
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {activities.map((a, i) => (
+                    <div
+                      key={i}
+                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+                    >
+                      <div className="aspect-[16/10] overflow-hidden">
+                        <img
+                          src={a.image}
+                          alt={a.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-5">
+                        <h3 className="font-bold text-[#0d1b2a] mb-2">
+                          {a.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {a.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Location & Nearby */}
+            {locationDetails && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
+                  位置與週邊
+                </h2>
+                <p className="text-gray-600 leading-relaxed mb-6">
+                  {locationDetails.description}
+                </p>
+                <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-md mb-6">
+                  <img
+                    src={locationDetails.mapImage}
+                    alt={`${property.nameZh} 週邊地圖`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="font-bold text-[#0d1b2a] mb-3">週邊亮點</h3>
+                <ul className="space-y-2">
+                  {locationDetails.nearby.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-gray-600">
+                      <span className="text-[#2ec4b6] mt-1">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Inquiry CTA */}
+            <div className="bg-gradient-to-br from-[#0a4c6b] to-[#0d1b2a] rounded-2xl p-8 sm:p-10 text-center text-white shadow-lg">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 font-serif">
+                想親身體驗這座海島物業？
+              </h2>
+              <p className="text-white/80 mb-6 max-w-xl mx-auto">
+                與我們的物業關係經理聊聊，規劃一趟只屬於你的海島之旅。
+              </p>
+              <button
+                onClick={scrollToInquiry}
+                className="inline-flex items-center justify-center bg-[#B8902F] hover:bg-[#9a7a28] text-white px-8 py-3 rounded-xl font-medium transition"
+              >
+                預約諮詢
+              </button>
             </div>
 
             {/* Island Owner View: Life Preview */}
@@ -211,30 +763,52 @@ export default function PropertyDetailPage() {
               <div className="bg-gradient-to-br from-[#f8f5ed] to-[#fffdf8] border border-[#B8902F]/20 rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-[#B8902F] text-xl">✨</span>
-                  <h2 className="text-2xl font-bold text-[#0d1b2a]">如果這裡成為你的海島之家</h2>
+                  <h2 className="text-2xl font-bold text-[#0d1b2a]">
+                    如果這裡成為你的海島之家
+                  </h2>
                 </div>
 
                 {/* Butler / Personal Touch */}
                 <div className="flex items-start gap-3 bg-white rounded-xl p-4 border border-[#B8902F]/10 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-[#0a4c6b] flex items-center justify-center text-white text-sm font-bold">A</div>
+                  <div className="w-10 h-10 rounded-full bg-[#0a4c6b] flex items-center justify-center text-white text-sm font-bold">
+                    A
+                  </div>
                   <div>
                     <p className="text-sm text-gray-500">你的物業管家</p>
                     <p className="font-semibold text-[#0d1b2a]">Aisha</p>
-                    <p className="text-gray-600 text-sm mt-1">「我已經為你記下了你喜歡的枕頭、咖啡，還有你希望早晨浮潛的時間。」</p>
+                    <p className="text-gray-600 text-sm mt-1">
+                      「我已經為你記下了你喜歡的枕頭、咖啡，還有你希望早晨浮潛的時間。」
+                    </p>
                   </div>
                 </div>
 
                 {/* A Day in the Life */}
                 <div className="space-y-4 mb-6">
-                  <h3 className="font-bold text-[#0d1b2a]">你的一天，可能會是這樣</h3>
+                  <h3 className="font-bold text-[#0d1b2a]">
+                    你的一天，可能會是這樣
+                  </h3>
                   {[
-                    { time: '07:00', desc: '在你的私人露台喝咖啡，看著海龜從玻璃地板下游過。' },
-                    { time: '11:00', desc: '管家安排了一艘小船，送你到無人沙洲野餐。' },
+                    {
+                      time: '07:00',
+                      desc: '在你的私人露台喝咖啡，看著海龜從玻璃地板下游過。',
+                    },
+                    {
+                      time: '11:00',
+                      desc: '管家安排了一艘小船，送你到無人沙洲野餐。',
+                    },
                     { time: '15:00', desc: '在房子裡午睡，或者什麼都不做。' },
-                    { time: '19:00', desc: '海灘上的私人晚餐，只有你和你的家人。' },
+                    {
+                      time: '19:00',
+                      desc: '海灘上的私人晚餐，只有你和你的家人。',
+                    },
                   ].map((item, i) => (
-                    <div key={i} className="flex gap-4 bg-white rounded-xl p-4 border border-[#B8902F]/10">
-                      <span className="text-[#B8902F] font-bold text-sm w-12 shrink-0">{item.time}</span>
+                    <div
+                      key={i}
+                      className="flex gap-4 bg-white rounded-xl p-4 border border-[#B8902F]/10"
+                    >
+                      <span className="text-[#B8902F] font-bold text-sm w-12 shrink-0">
+                        {item.time}
+                      </span>
                       <p className="text-gray-600 text-sm">{item.desc}</p>
                     </div>
                   ))}
@@ -242,11 +816,22 @@ export default function PropertyDetailPage() {
 
                 {/* What ownership quietly includes */}
                 <div className="bg-white rounded-xl p-5 border border-[#B8902F]/10 mb-6">
-                  <h3 className="font-bold text-[#0d1b2a] mb-3">當你不在的時候，我們會照顧它</h3>
+                  <h3 className="font-bold text-[#0d1b2a] mb-3">
+                    當你不在的時候，我們會照顧它
+                  </h3>
                   <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 專業團隊代為管理與出租</li>
-                    <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 每年為你保留專屬入住時段</li>
-                    <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 物業維護、清潔、管家服務一應俱全</li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#2ec4b6]">✓</span>{' '}
+                      專業團隊代為管理與出租
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#2ec4b6]">✓</span>{' '}
+                      每年為你保留專屬入住時段
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#2ec4b6]">✓</span>{' '}
+                      物業維護、清潔、管家服務一應俱全
+                    </li>
                   </ul>
                 </div>
 
@@ -254,11 +839,15 @@ export default function PropertyDetailPage() {
                 <div className="bg-[#0a4c6b] text-white rounded-xl p-4 mb-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white/80 text-sm">本季開放業主體驗的名額</p>
+                      <p className="text-white/80 text-sm">
+                        本季開放業主體驗的名額
+                      </p>
                       <p className="text-2xl font-bold">僅餘 2 組</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-white/80 text-sm">本月想先來體驗的旅客</p>
+                      <p className="text-white/80 text-sm">
+                        本月想先來體驗的旅客
+                      </p>
                       <p className="text-2xl font-bold">18</p>
                     </div>
                   </div>
@@ -266,10 +855,16 @@ export default function PropertyDetailPage() {
 
                 {/* Social Proof */}
                 <div className="flex items-start gap-3 bg-white rounded-xl p-4 border border-gray-100 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-[#0a4c6b] flex items-center justify-center text-white text-sm font-bold">陳</div>
+                  <div className="w-10 h-10 rounded-full bg-[#0a4c6b] flex items-center justify-center text-white text-sm font-bold">
+                    陳
+                  </div>
                   <div>
-                    <p className="text-gray-700 text-sm italic">「我本來只打算度假。第三天，我坐在露台上看海龜，突然想：為什麼不能每年回來？」</p>
-                    <p className="text-xs text-gray-500 mt-1">陳先生，御海閣海島業主，2025 年入住</p>
+                    <p className="text-gray-700 text-sm italic">
+                      「我本來只打算度假。第三天，我坐在露台上看海龜，突然想：為什麼不能每年回來？」
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      陳先生，御海閣海島業主，2025 年入住
+                    </p>
                   </div>
                 </div>
 
@@ -282,7 +877,9 @@ export default function PropertyDetailPage() {
                       : 'bg-white border-2 border-[#B8902F] text-[#B8902F] hover:bg-[#B8902F]/5'
                   }`}
                 >
-                  {saved ? '✓ 已儲存到我的海島之家清單' : '💾 儲存到我的海島之家清單'}
+                  {saved
+                    ? '✓ 已儲存到我的海島之家清單'
+                    : '💾 儲存到我的海島之家清單'}
                 </button>
 
                 {/* Soft CTA */}
@@ -292,16 +889,25 @@ export default function PropertyDetailPage() {
                 >
                   我想多了解成為海島業主的方式
                 </button>
-                <p className="text-xs text-gray-500 text-center mt-2">沒有壓力，只是一次輕鬆的對話</p>
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  沒有壓力，只是一次輕鬆的對話
+                </p>
               </div>
             )}
 
             {amenities.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4">設施與服務</h2>
+                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
+                  其他設施標籤
+                </h2>
                 <div className="flex flex-wrap gap-3">
                   {amenities.map((a: string, i: number) => (
-                    <span key={i} className="bg-[#f0f9f7] text-[#0a4c6b] px-4 py-2 rounded-full text-sm font-medium">{a}</span>
+                    <span
+                      key={i}
+                      className="bg-[#f0f9f7] text-[#0a4c6b] px-4 py-2 rounded-full text-sm font-medium"
+                    >
+                      {a}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -309,27 +915,45 @@ export default function PropertyDetailPage() {
 
             {/* Room Types */}
             <div>
-              <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4">房型選擇</h2>
+              <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
+                房型選擇
+              </h2>
               <div className="space-y-4">
                 {property.roomTypes.map((room) => {
-                  const roomAmenities = room.amenities ? JSON.parse(room.amenities) : [];
+                  const roomAmenities = room.amenities
+                    ? JSON.parse(room.amenities)
+                    : [];
                   return (
                     <div
                       key={room.id}
-                      className={`border rounded-xl p-4 cursor-pointer transition ${selectedRoom?.id === room.id ? 'border-[#0a4c6b] bg-[#f0f9f7]' : 'border-gray-200 hover:border-[#2ec4b6]'}`}
+                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                        selectedRoom?.id === room.id
+                          ? 'border-[#0a4c6b] bg-[#f0f9f7]'
+                          : 'border-gray-200 hover:border-[#2ec4b6]'
+                      }`}
                       onClick={() => setSelectedRoom(room)}
                     >
                       <div className="flex gap-4">
                         {room.imageUrl && (
-                          <img src={room.imageUrl} alt={room.nameZh} className="w-32 h-24 object-cover rounded-lg" />
+                          <img
+                            src={room.imageUrl}
+                            alt={room.nameZh}
+                            className="w-32 h-24 object-cover rounded-lg"
+                          />
                         )}
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-semibold text-[#0d1b2a]">{room.nameZh}</h3>
-                            <span className="font-bold text-[#0a4c6b]">HK${room.pricePerNight.toLocaleString()}/晚</span>
+                            <h3 className="font-semibold text-[#0d1b2a]">
+                              {room.nameZh}
+                            </h3>
+                            <span className="font-bold text-[#0a4c6b]">
+                              HK${room.pricePerNight.toLocaleString()}/晚
+                            </span>
                           </div>
                           <p className="text-sm text-gray-500">{room.name}</p>
-                          <p className="text-sm text-gray-600 mt-1">{room.descriptionZh}</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {room.descriptionZh}
+                          </p>
                           <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                             <span>最多 {room.maxGuests} 位</span>
                             <span>剩餘 {room.inventory} 間</span>
@@ -337,7 +961,12 @@ export default function PropertyDetailPage() {
                           {roomAmenities.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mt-2">
                               {roomAmenities.map((a: string, i: number) => (
-                                <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{a}</span>
+                                <span
+                                  key={i}
+                                  className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded"
+                                >
+                                  {a}
+                                </span>
                               ))}
                             </div>
                           )}
@@ -354,17 +983,23 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-1">
             {viewMode === 'investor' ? (
               <div className="sticky top-20 bg-gradient-to-br from-[#f8f5ed] to-[#fffdf8] border border-[#B8902F]/20 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-xl font-bold text-[#0d1b2a] mb-4">你的業主體驗</h3>
+                <h3 className="text-xl font-bold text-[#0d1b2a] mb-4">
+                  你的業主體驗
+                </h3>
                 <div className="space-y-4">
                   <div className="bg-white rounded-xl p-4 border border-[#B8902F]/10">
                     <p className="text-sm text-gray-500 mb-1">體驗長度</p>
                     <p className="text-2xl font-bold text-[#0d1b2a]">由你決定</p>
-                    <p className="text-xs text-gray-400 mt-1">從 3 晚起，到每年定期回來</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      從 3 晚起，到每年定期回來
+                    </p>
                   </div>
                   <div className="bg-white rounded-xl p-4 border border-[#B8902F]/10">
                     <p className="text-sm text-gray-500 mb-1">專屬管家</p>
                     <p className="text-2xl font-bold text-[#B8902F]">Aisha</p>
-                    <p className="text-xs text-gray-400 mt-1">會記得你喜歡的一切</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      會記得你喜歡的一切
+                    </p>
                   </div>
                   <div className="bg-[#0a4c6b] text-white rounded-xl p-4">
                     <p className="text-white/80 text-sm">本季開放體驗名額</p>
@@ -378,7 +1013,9 @@ export default function PropertyDetailPage() {
                         : 'bg-white border-2 border-[#B8902F] text-[#B8902F] hover:bg-[#B8902F]/5'
                     }`}
                   >
-                    {saved ? '✓ 已儲存到我的海島之家清單' : '💾 儲存到我的海島之家清單'}
+                    {saved
+                      ? '✓ 已儲存到我的海島之家清單'
+                      : '💾 儲存到我的海島之家清單'}
                   </button>
                   <button
                     onClick={() => navigate('/invest')}
@@ -386,12 +1023,19 @@ export default function PropertyDetailPage() {
                   >
                     我想多了解成為海島業主
                   </button>
-                  <p className="text-xs text-gray-500 text-center">沒有壓力，只是一次輕鬆的對話</p>
+                  <p className="text-xs text-gray-500 text-center">
+                    沒有壓力，只是一次輕鬆的對話
+                  </p>
                 </div>
               </div>
             ) : (
-              <div className="sticky top-20 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-xl font-bold text-[#0d1b2a] mb-4">預約你的海島之家體驗</h3>
+              <div
+                id="inquiry-form"
+                className="sticky top-20 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm"
+              >
+                <h3 className="text-xl font-bold text-[#0d1b2a] mb-4">
+                  預約你的海島之家體驗
+                </h3>
                 {inquirySubmitted ? (
                   <div className="bg-[#f0f9f7] border border-[#2ec4b6]/20 rounded-xl p-5 text-center">
                     <p className="text-[#0a4c6b] font-medium leading-relaxed">
@@ -401,7 +1045,9 @@ export default function PropertyDetailPage() {
                 ) : (
                   <form onSubmit={handleInquirySubmit} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        姓名
+                      </label>
                       <input
                         type="text"
                         required
@@ -411,7 +1057,9 @@ export default function PropertyDetailPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">電郵</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        電郵
+                      </label>
                       <input
                         type="email"
                         required
@@ -421,7 +1069,9 @@ export default function PropertyDetailPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        電話
+                      </label>
                       <input
                         type="tel"
                         required
@@ -431,7 +1081,9 @@ export default function PropertyDetailPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">預計入住日期（選填）</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        預計入住日期（選填）
+                      </label>
                       <input
                         type="date"
                         value={inquiryCheckIn}
@@ -440,20 +1092,28 @@ export default function PropertyDetailPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">想體驗的天數</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        想體驗的天數
+                      </label>
                       <select
                         required
                         value={inquiryDays}
                         onChange={(e) => setInquiryDays(Number(e.target.value))}
                         className="w-full border rounded-lg px-3 py-2 text-sm"
                       >
-                        {Array.from({ length: 14 }, (_, i) => i + 1).map((n) => (
-                          <option key={n} value={n}>{n} 天</option>
-                        ))}
+                        {Array.from({ length: 14 }, (_, i) => i + 1).map(
+                          (n) => (
+                            <option key={n} value={n}>
+                              {n} 天
+                            </option>
+                          )
+                        )}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">留言（選填）</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        留言（選填）
+                      </label>
                       <textarea
                         value={inquiryMessage}
                         onChange={(e) => setInquiryMessage(e.target.value)}
@@ -467,9 +1127,13 @@ export default function PropertyDetailPage() {
                       <p className="text-sm text-gray-500 mb-1">參考價格</p>
                       <p className="text-2xl font-bold text-[#0a4c6b]">
                         HK${referencePrice.toLocaleString()}
-                        <span className="text-sm font-normal text-gray-500">/晚</span>
+                        <span className="text-sm font-normal text-gray-500">
+                          /晚
+                        </span>
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">實際價格將由物業關係經理確認</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        實際價格將由物業關係經理確認
+                      </p>
                     </div>
 
                     <button
@@ -478,7 +1142,9 @@ export default function PropertyDetailPage() {
                     >
                       提交體驗查詢
                     </button>
-                    <p className="text-xs text-gray-500 text-center">沒有壓力，只是一次輕鬆的對話</p>
+                    <p className="text-xs text-gray-500 text-center">
+                      沒有壓力，只是一次輕鬆的對話
+                    </p>
                   </form>
                 )}
               </div>

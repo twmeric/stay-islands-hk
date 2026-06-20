@@ -21,6 +21,11 @@ CREATE TABLE IF NOT EXISTS properties (
   max_guests INTEGER DEFAULT 2,
   image_url TEXT,
   amenities TEXT, -- JSON array stored as TEXT
+  gallery TEXT, -- JSON array of image URLs
+  facilities TEXT, -- JSON array of {icon, label}
+  activities TEXT, -- JSON array of {image, name, description}
+  location_details TEXT, -- JSON object {description, mapImage, nearby}
+  story TEXT, -- JSON object {title, content}
   status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'draft')),
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
