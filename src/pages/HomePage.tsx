@@ -97,8 +97,8 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-snug md:leading-tight"
           >
-            <span className="md:hidden">一片海，一個家<br />一次住進夢想裡</span>
-            <span className="hidden md:inline">一片海，一個家<br />一次住進夢想裡</span>
+            <span className="md:hidden">一片海，一個家<br />住進夢想裡</span>
+            <span className="hidden md:inline">一片海，一個家<br />住進夢想裡</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -106,8 +106,8 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto md:mx-0"
           >
-            在馬爾代夫，為自己預留一片海。<br />
-            滿足你“曾經擁有”的海島業主夢想。
+            <span className="block text-[#B8902F] font-semibold mb-1">短暫擁有，真實感受</span>
+            <span className="block">滿足你的海島業主夢想</span>
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
