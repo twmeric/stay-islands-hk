@@ -116,7 +116,7 @@ export default function Layout() {
               <h4 className="font-medium mb-3">聯絡我們</h4>
               <div className="space-y-2 text-sm text-gray-400">
                 <p>WhatsApp: +852 9XXX XXXX</p>
-                <p>Email: hello@stayislands.hk</p>
+                <p>Email: hello@hkislanders.com</p>
                 <p>營業時間: 週一至週六 10:00-19:00</p>
               </div>
             </div>
