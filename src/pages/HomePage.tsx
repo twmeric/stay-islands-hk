@@ -26,20 +26,30 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section - Immersive */}
-      <section className="relative h-screen flex items-center justify-center md:justify-end overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0">
+      <section className="relative min-h-screen flex flex-col overflow-hidden bg-[#0d1b2a] md:flex md:items-center md:justify-end">
+        {/* Desktop background */}
+        <div className="absolute inset-0 hidden md:block">
           <img
             src="https://images.unsplash.com/photo-1540202404-a2f29016b523?w=1920&q=80"
             alt="Maldives ocean"
-            className="w-full h-full object-cover object-[65%_center] md:object-[60%_center]"
+            className="w-full h-full object-cover object-[60%_center]"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a4c6b]/60 via-[#0a4c6b]/30 to-[#0d1b2a]/80" />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0a4c6b]/20 to-[#0d1b2a]/80" />
         </div>
 
+        {/* Mobile top image */}
+        <div className="relative w-full h-[55vh] md:hidden">
+          <img
+            src="https://images.unsplash.com/photo-1540202404-a2f29016b523?w=1920&q=80"
+            alt="Maldives ocean"
+            className="w-full h-full object-cover object-[50%_35%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a4c6b]/40 via-transparent to-[#0d1b2a]" />
+        </div>
+
         {/* Content */}
-        <div className="relative z-10 w-full max-w-xl mx-auto md:mx-0 md:ml-auto px-6 sm:px-8 md:px-12 lg:px-20 text-center md:text-left text-white md:max-w-2xl lg:max-w-3xl">
+        <div className="relative z-10 flex-1 flex flex-col justify-center w-full px-6 sm:px-8 md:mx-0 md:ml-auto md:max-w-2xl lg:max-w-3xl md:pl-12 lg:pl-20 md:pr-12 lg:pr-20 py-12 md:py-0 text-center md:text-left text-white bg-[#0d1b2a] md:bg-transparent">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -52,9 +62,10 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
+            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-snug md:leading-tight"
           >
-            留住。感受。<br />放鬆身心。
+            <span className="md:hidden">留住<br />感受<br />放鬆身心</span>
+            <span className="hidden md:inline">留住 · 感受<br />放鬆身心</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
