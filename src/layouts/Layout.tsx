@@ -31,7 +31,7 @@ export default function Layout() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
             <Link to="/properties" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">度假物業</Link>
-            <Link to="/invest" className="text-[#B8902F] hover:text-[#9a7a28] transition text-sm font-medium">海島業主計劃</Link>
+            <Link to="/invest" className="text-black hover:text-[#0a4c6b] transition text-sm font-medium">島主計劃</Link>
             <Link to="/guide" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">旅遊指南</Link>
             <Link to="/experiences" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">海島體驗</Link>
             <Link to="/retreats" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">主題 Retreats</Link>
@@ -60,7 +60,7 @@ export default function Layout() {
         {mobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-lg px-4 py-4 space-y-3">
             <Link to="/properties" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">度假物業</Link>
-            <Link to="/invest" onClick={() => setMobileMenu(false)} className="block text-[#B8902F] py-2">海島業主計劃</Link>
+            <Link to="/invest" onClick={() => setMobileMenu(false)} className="block text-black py-2">島主計劃</Link>
             <Link to="/guide" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">旅遊指南</Link>
             <Link to="/experiences" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">海島體驗</Link>
             <Link to="/retreats" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">主題 Retreats</Link>
