@@ -2427,7 +2427,7 @@ function PropertiesSection() {
 export default function AdminPage() {
   const navigate = useNavigate();
   const { user, isAdmin, isChecking, adminRole } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'bookings' | 'inquiries' | 'properties' | 'experiences' | 'retreats' | 'accounts'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'inquiries' | 'properties' | 'experiences' | 'accounts'>('bookings');
 
   // Guard: redirect to login if not authenticated as admin
   useEffect(() => {
@@ -2592,7 +2592,6 @@ export default function AdminPage() {
     { key: 'inquiries', label: '旅客諮詢' },
     { key: 'properties', label: '住宿管理' },
     { key: 'experiences', label: '海島體驗' },
-    { key: 'retreats', label: '主題靜修' },
     ...(adminRole === 'superadmin' ? [{ key: 'accounts', label: '帳戶管理' }] : []),
   ];
 
@@ -2654,7 +2653,7 @@ export default function AdminPage() {
                           <span>{new Date(b.checkOut * 1000).toLocaleDateString('zh-HK')}</span>
                         </td>
                         <td className="px-4 py-3">{b.guests}</td>
-                        <td className="px-4 py-3 font-medium">HK${b.totalPrice?.toLocaleString()}</td>
+                        <td className="px-4 py-3 font-medium">HK${b.totalAmount?.toLocaleString()}</td>
                         <td className="px-4 py-3">
                           {(() => {
                             const addons = (() => {
@@ -2841,9 +2840,10 @@ export default function AdminPage() {
             </div>
           </div>
         ) : activeTab === 'experiences' ? (
-          <ExperiencesSection />
-        ) : activeTab === 'retreats' ? (
-          <RetreatsSection />
+          <div className="space-y-12">
+            <ExperiencesSection />
+            <RetreatsSection />
+          </div>
         ) : (
           <PropertiesSection />
         )}
