@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Users, Check, Fish, Waves, Ship, Sunset, MapPin, Anchor, Heart, Sparkles, Leaf, Loader2, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Clock, Users, Fish, Waves, Ship, Sunset, MapPin, Anchor, Heart, Sparkles, Leaf, Loader2 } from 'lucide-react';
 import { client } from '../api/client';
 
 interface Experience {
@@ -196,204 +196,7 @@ function mapApiRetreat(item: ApiRetreat): Experience {
   };
 }
 
-interface InquiryFormData {
-  name: string;
-  email: string;
-  phone: string;
-  activity: string;
-  checkIn: string;
-  guests: number;
-  notes: string;
-}
-
-function InquiryForm({
-  activity,
-  onClose,
-}: {
-  activity: string;
-  onClose: () => void;
-}) {
-  const [form, setForm] = useState<InquiryFormData>({
-    name: '',
-    email: '',
-    phone: '',
-    activity,
-    checkIn: '',
-    guests: 2,
-    notes: '',
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    setSubmitting(true);
-
-    try {
-      const res = await client.api.fetch('/api/public/inquiries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          property_id: null,
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          message: `對 ${form.activity} 有興趣，預計 ${form.checkIn || '未定'} 出發，${form.guests} 人。${form.notes ? `備註：${form.notes}` : ''}`,
-          check_in: form.checkIn || null,
-          guests: form.guests,
-        }),
-      });
-
-      if (res.ok) {
-        setSubmitted(true);
-      } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || '提交失敗，請稍後再試');
-      }
-    } catch (err) {
-      console.error('Inquiry submit error:', err);
-      setError('提交時發生錯誤，請檢查網絡連線');
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  if (submitted) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-[#f0f9f7] rounded-2xl p-6 text-center"
-      >
-        <div className="w-12 h-12 rounded-full bg-[#2ec4b6] text-white flex items-center justify-center mx-auto mb-3">
-          <Check className="w-6 h-6" />
-        </div>
-        <h4 className="text-lg font-bold text-[#0d1b2a] mb-1">我們已收到你的體驗諮詢</h4>
-        <p className="text-sm text-gray-600">專屬管家會在 24 小時內聯繫你。</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-4 text-sm text-[#0a4c6b] font-medium hover:underline"
-        >
-          關閉
-        </button>
-      </motion.div>
-    );
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h4 className="font-bold text-[#0d1b2a]">客製化此體驗</h4>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition"
-          aria-label="關閉"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">想參加的活動</label>
-        <input
-          type="text"
-          value={form.activity}
-          readOnly
-          className="w-full border rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-600"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">姓名</label>
-          <input
-            required
-            type="text"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
-            placeholder="您的姓名"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-            required
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
-            placeholder="name@example.com"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">電話／WhatsApp</label>
-          <input
-            required
-            type="tel"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
-            placeholder="+852"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">預計日期</label>
-          <input
-            type="date"
-            value={form.checkIn}
-            onChange={(e) => setForm({ ...form, checkIn: e.target.value })}
-            className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">人數</label>
-        <input
-          required
-          type="number"
-          min={1}
-          max={20}
-          value={form.guests}
-          onChange={(e) => setForm({ ...form, guests: Number(e.target.value) })}
-          className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">備註（選填）</label>
-        <textarea
-          value={form.notes}
-          onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          rows={3}
-          className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
-          placeholder="請告訴我們你的特別需求或問題..."
-        />
-      </div>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full bg-[#B8902F] text-white py-3 rounded-xl font-semibold hover:bg-[#9a7a28] transition disabled:opacity-60"
-      >
-        {submitting ? '提交中...' : '送出諮詢'}
-      </button>
-    </form>
-  );
-}
-
 export default function ExperiencesPage() {
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [apiExperiences, setApiExperiences] = useState<Experience[]>([]);
   const [apiRetreats, setApiRetreats] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
@@ -555,9 +358,6 @@ export default function ExperiencesPage() {
                       {exp.icon}
                       <span>{exp.name}</span>
                     </div>
-                    <div className="absolute top-4 right-4 bg-[#0a4c6b] text-white px-3 py-1 rounded-full text-xs font-medium">
-                      {exp.category === 'retreat' ? '主題靜修' : '單日體驗'}
-                    </div>
                     <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
                       {exp.priceNote}
                     </div>
@@ -593,28 +393,6 @@ export default function ExperiencesPage() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => setActiveId(activeId === exp.id ? null : exp.id)}
-                      className="w-full mt-6 bg-[#0a4c6b] text-white py-3 rounded-xl font-semibold hover:bg-[#083d56] transition"
-                    >
-                      {activeId === exp.id ? '收起表單' : '客製化此體驗'}
-                    </button>
-
-                    <AnimatePresence>
-                      {activeId === exp.id && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="pt-6">
-                            <InquiryForm activity={exp.name} onClose={() => setActiveId(null)} />
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
                 </motion.div>
               ))}
