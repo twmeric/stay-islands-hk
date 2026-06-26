@@ -84,6 +84,7 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null);
+  const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
   const [activeImage, setActiveImage] = useState(0);
   const [roomGalleryIndex, setRoomGalleryIndex] = useState(0);
 
@@ -578,6 +579,7 @@ export default function PropertyDetailPage() {
           guests: 1,
           total_amount: totalAmount,
           currency: 'HKD',
+          addons: selectedActivities.map((a) => ({ name: a.name, description: a.description })),
         }),
       });
       if (!res.ok) {
@@ -713,29 +715,48 @@ export default function PropertyDetailPage() {
                 <h2 className="text-2xl font-bold text-[#0d1b2a] mb-6 font-serif">
                   可體驗活動
                 </h2>
+                <p className="text-gray-600 mb-6">點選有興趣的活動，會一併加入你的預約諮詢。</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {activities.map((a, i) => (
-                    <div
-                      key={i}
-                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
-                    >
-                      <div className="aspect-[16/10] overflow-hidden">
-                        <img
-                          src={a.image}
-                          alt={a.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-5">
-                        <h3 className="font-bold text-[#0d1b2a] mb-2">
-                          {a.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          {a.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                  {activities.map((a, i) => {
+                    const isSelected = selectedActivities.some((sa) => sa.name === a.name);
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() =>
+                          setSelectedActivities((prev) =>
+                            isSelected ? prev.filter((sa) => sa.name !== a.name) : [...prev, a]
+                          )
+                        }
+                        className={`text-left bg-white rounded-2xl shadow-lg border overflow-hidden transition ${
+                          isSelected
+                            ? 'border-[#0a4c6b] ring-2 ring-[#0a4c6b]/20'
+                            : 'border-gray-100 hover:border-[#2ec4b6]'
+                        }`}
+                      >
+                        <div className="relative aspect-[16/10] overflow-hidden">
+                          <img
+                            src={a.image}
+                            alt={a.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {isSelected && (
+                            <div className="absolute top-3 right-3 bg-[#0a4c6b] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">
+                              ✓
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-5">
+                          <h3 className="font-bold text-[#0d1b2a] mb-2">
+                            {a.name}
+                          </h3>
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            {a.description}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1108,6 +1129,36 @@ export default function PropertyDetailPage() {
                       placeholder="告訴我們你的住宿需求或特別安排..."
                     />
                   </div>
+
+                  {selectedActivities.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        已選加購活動
+                      </label>
+                      <div className="space-y-2">
+                        {selectedActivities.map((a, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between bg-[#f0f9f7] rounded-lg px-3 py-2 text-sm"
+                          >
+                            <span className="text-[#0a4c6b] font-medium">{a.name}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSelectedActivities((prev) =>
+                                  prev.filter((sa) => sa.name !== a.name)
+                                )
+                              }
+                              className="text-gray-400 hover:text-red-500 transition"
+                              aria-label="移除"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="border-t pt-4">
                     <p className="text-sm text-gray-500 mb-1">參考價格</p>

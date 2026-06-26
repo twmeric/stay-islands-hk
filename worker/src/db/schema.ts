@@ -202,6 +202,7 @@ export interface Booking {
   status: BookingStatus
   paymentStatus: PaymentStatus
   voucherCode: string | null
+  addons: string | null
   createdAt: number
   updatedAt: number
 }

@@ -1282,6 +1282,7 @@ function parseBookingBody(body: Record<string, unknown>): {
   currency: string
   status: BookingStatus
   voucherCode: string | null
+  addons: string
 } {
   const propertyId = Number(body.propertyId)
   const roomTypeId = Number(body.roomTypeId)
@@ -1309,6 +1310,7 @@ function parseBookingBody(body: Record<string, unknown>): {
     currency: typeof body.currency === 'string' ? body.currency.toUpperCase() : 'HKD',
     status,
     voucherCode: typeof body.voucherCode === 'string' ? body.voucherCode.trim() || null : null,
+    addons: Array.isArray(body.addons) ? JSON.stringify(body.addons) : '[]',
   }
 }
 
@@ -1378,8 +1380,8 @@ app.post('/bookings', requireAdmin, async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       parsed.customerId,
       parsed.propertyId,
@@ -1392,6 +1394,7 @@ app.post('/bookings', requireAdmin, async (c) => {
       parsed.status,
       'unpaid',
       parsed.voucherCode,
+      parsed.addons,
     ]
   )
 
@@ -1472,6 +1475,10 @@ app.put('/bookings/:id', requireAdmin, async (c) => {
   if (body.voucherCode !== undefined) {
     fields.push('voucher_code = ?')
     values.push(typeof body.voucherCode === 'string' ? body.voucherCode.trim() || null : null)
+  }
+  if (body.addons !== undefined) {
+    fields.push('addons = ?')
+    values.push(Array.isArray(body.addons) ? JSON.stringify(body.addons) : '[]')
   }
 
   if (fields.length === 0) return c.json({ error: 'No fields to update' }, 400)

@@ -2636,13 +2636,14 @@ export default function AdminPage() {
                     <th className="px-4 py-3 text-left font-medium text-gray-600">入住/退房</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">人數</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">金額</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-600">加購活動</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">狀態</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">操作</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {bookings.length === 0 ? (
-                    <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-500">暫無訂單</td></tr>
+                    <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-500">暫無訂單</td></tr>
                   ) : (
                     bookings.map((b) => (
                       <tr key={b.id} className="hover:bg-gray-50">
@@ -2654,6 +2655,27 @@ export default function AdminPage() {
                         </td>
                         <td className="px-4 py-3">{b.guests}</td>
                         <td className="px-4 py-3 font-medium">HK${b.totalPrice?.toLocaleString()}</td>
+                        <td className="px-4 py-3">
+                          {(() => {
+                            const addons = (() => {
+                              try {
+                                return JSON.parse(b.addons || '[]');
+                              } catch {
+                                return [];
+                              }
+                            })();
+                            if (!addons.length) return <span className="text-gray-400">—</span>;
+                            const names = addons.map((a: any) => a.name).filter(Boolean);
+                            return (
+                              <span
+                                className="text-xs bg-[#f0f9f7] text-[#0a4c6b] px-2 py-1 rounded-full cursor-help"
+                                title={names.join('、')}
+                              >
+                                {names.length} 項
+                              </span>
+                            );
+                          })()}
+                        </td>
                         <td className="px-4 py-3">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[b.status] || 'bg-gray-100'}`}>
                             {b.status === 'pending' ? '待處理' : b.status === 'confirmed' ? '已確認' : b.status === 'cancelled' ? '已取消' : '已完成'}
