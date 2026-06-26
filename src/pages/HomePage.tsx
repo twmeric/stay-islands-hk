@@ -597,6 +597,17 @@ export default function HomePage() {
               規劃我的海島假期
             </Link>
           </div>
+
+          {/* Travel agency license */}
+          <div className="mt-12 flex flex-col items-center">
+            <img
+              src="/happy-day-logo.png"
+              alt="HAPPY:DAY 悅假期"
+              className="h-12 w-auto mb-3"
+            />
+            <p className="text-white/70 text-sm">由持牌旅行社 HAPPY:DAY 悅假期 為你安排</p>
+            <p className="text-white/50 text-xs mt-1">旅行社牌照號碼：354018</p>
+          </div>
         </div>
       </section>
     </div>
