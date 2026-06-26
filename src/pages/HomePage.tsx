@@ -82,8 +82,13 @@ export default function HomePage() {
   }
 
   const activeProperties = properties.filter((p: any) => p.status === 'active').slice(0, 3);
-  const activeExperiences = experiences.filter((e: any) => e.status === 'active').slice(0, 3);
-  const activeRetreats = retreats.filter((r: any) => r.status === 'active').slice(0, 2);
+  const activeExperiences = experiences.filter((e: any) => e.status === 'active');
+  const activeRetreats = retreats.filter((r: any) => r.status === 'active');
+  const featuredExperiences = (
+    activeExperiences.length > 0 || activeRetreats.length > 0
+      ? [...activeExperiences, ...activeRetreats]
+      : [...fallbackExperiences, ...fallbackRetreats]
+  ).slice(0, 3);
 
   return (
     <div>
@@ -390,7 +395,7 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <p className="text-[#2ec4b6] font-medium mb-2">深入海洋與島嶼文化</p>
             <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-4">精選海島體驗</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">從夜釣到鯨鯊共游，每一項體驗都由當地團隊客製安排。</p>
+            <p className="text-gray-600 max-w-2xl mx-auto">從單日海島體驗到多天主題靜修，每一項都由當地團隊客製安排。</p>
           </div>
           {dataLoading ? (
             <div className="text-center py-12">
@@ -398,7 +403,7 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {(activeExperiences.length > 0 ? activeExperiences : fallbackExperiences).map((item: any, i: number) => (
+              {featuredExperiences.map((item: any, i: number) => (
                 <motion.div
                   key={item.id || i}
                   initial={{ opacity: 0, y: 30 }}
@@ -461,54 +466,6 @@ export default function HomePage() {
                 <p className="text-gray-600 text-sm">{item.desc}</p>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Retreats Preview */}
-      <section className="py-24 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-[#B8902F] font-medium mb-2">為自己設計一場深度旅程</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-4">主題 Retreats</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">瑜伽、衝浪、浪漫、釣魚——每一個 Retreat 都是一次專屬生活體驗。</p>
-          </div>
-          {dataLoading ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">載入 Retreats 中…</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {(activeRetreats.length > 0 ? activeRetreats : fallbackRetreats).map((item: any, i: number) => (
-                <motion.div
-                  key={item.id || i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.15 }}
-                  className="group cursor-pointer"
-                >
-                  <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4">
-                    <img src={item.imageUrl} alt={item.nameZh} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <p className="text-sm text-white/80">{item.name}</p>
-                      <h3 className="text-xl font-bold">{item.nameZh}</h3>
-                    </div>
-                  </div>
-                  <div className="px-2">
-                    <p className="text-sm text-[#B8902F] font-medium mb-1">{item.duration}</p>
-                    <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-          <div className="text-center mt-12">
-            <Link to="/retreats" className="inline-flex items-center gap-2 border-2 border-[#0a4c6b] text-[#0a4c6b] px-8 py-3 rounded-full font-medium hover:bg-[#0a4c6b] hover:text-white transition">
-              查看所有 Retreats
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </Link>
           </div>
         </div>
       </section>

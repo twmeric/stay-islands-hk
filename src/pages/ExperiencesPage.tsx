@@ -14,6 +14,7 @@ interface Experience {
   priceNote: string;
   image: string;
   icon: React.ReactNode;
+  category: 'experience' | 'retreat';
 }
 
 interface ApiExperience {
@@ -33,6 +34,24 @@ interface ApiExperience {
   status: string;
 }
 
+interface ApiRetreat {
+  id: number;
+  name: string;
+  nameZh: string;
+  slug: string;
+  description: string;
+  descriptionZh: string;
+  duration: string;
+  location: string;
+  audience: string;
+  itinerary: string;
+  priceNote: string;
+  imageUrl: string;
+  iconName: string | null;
+  sortOrder: number;
+  status: string;
+}
+
 const fallbackExperiences: Experience[] = [
   {
     id: 'night-fishing',
@@ -45,6 +64,7 @@ const fallbackExperiences: Experience[] = [
     priceNote: '按行程報價',
     image: 'https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80',
     icon: <Fish className="w-5 h-5" />,
+    category: 'experience',
   },
   {
     id: 'snorkeling-diving',
@@ -57,6 +77,7 @@ const fallbackExperiences: Experience[] = [
     priceNote: '按行程報價',
     image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=800&q=80',
     icon: <Waves className="w-5 h-5" />,
+    category: 'experience',
   },
   {
     id: 'sunset-cruise',
@@ -69,6 +90,7 @@ const fallbackExperiences: Experience[] = [
     priceNote: '按行程報價',
     image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80',
     icon: <Sunset className="w-5 h-5" />,
+    category: 'experience',
   },
   {
     id: 'island-hopping',
@@ -81,6 +103,7 @@ const fallbackExperiences: Experience[] = [
     priceNote: '按行程報價',
     image: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800&q=80',
     icon: <Ship className="w-5 h-5" />,
+    category: 'experience',
   },
   {
     id: 'whale-shark-manta',
@@ -93,6 +116,7 @@ const fallbackExperiences: Experience[] = [
     priceNote: '按行程報價',
     image: 'https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=800&q=80',
     icon: <Sparkles className="w-5 h-5" />,
+    category: 'experience',
   },
   {
     id: 'local-island',
@@ -105,6 +129,7 @@ const fallbackExperiences: Experience[] = [
     priceNote: '按行程報價',
     image: 'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=800&q=80',
     icon: <MapPin className="w-5 h-5" />,
+    category: 'experience',
   },
 ];
 
@@ -148,6 +173,26 @@ function mapApiExperience(item: ApiExperience): Experience {
     priceNote: item.priceNote,
     image: item.imageUrl,
     icon: getIconByName(item.iconName),
+    category: 'experience',
+  };
+}
+
+function mapApiRetreat(item: ApiRetreat): Experience {
+  const itinerary = safeJsonParse<{ day: string; title: string; desc: string }[]>(item.itinerary, []);
+  return {
+    id: item.slug,
+    name: item.name,
+    nameZh: item.nameZh,
+    duration: item.duration,
+    groupSize: item.audience,
+    includes: itinerary.length > 0
+      ? itinerary.slice(0, 4).map((it) => it.title)
+      : ['住宿', '每日活動', '餐飲', '專屬管家'],
+    description: item.description,
+    priceNote: item.priceNote,
+    image: item.imageUrl,
+    icon: getIconByName(item.iconName),
+    category: 'retreat',
   };
 }
 
@@ -350,22 +395,33 @@ function InquiryForm({
 export default function ExperiencesPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [apiExperiences, setApiExperiences] = useState<Experience[]>([]);
+  const [apiRetreats, setApiRetreats] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'experience' | 'retreat'>('all');
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
       try {
-        const res = await client.api.fetch('/api/public/experiences');
-        if (!res.ok) {
-          throw new Error(`API error ${res.status}`);
+        const [expRes, retRes] = await Promise.all([
+          client.api.fetch('/api/public/experiences'),
+          client.api.fetch('/api/public/retreats'),
+        ]);
+        if (!expRes.ok) {
+          throw new Error(`Experiences API error ${expRes.status}`);
         }
-        const json = (await res.json()) as { data?: ApiExperience[] };
-        const list = Array.isArray(json?.data) ? json.data.map(mapApiExperience) : [];
+        if (!retRes.ok) {
+          throw new Error(`Retreats API error ${retRes.status}`);
+        }
+        const expJson = (await expRes.json()) as { data?: ApiExperience[] };
+        const retJson = (await retRes.json()) as { data?: ApiRetreat[] };
+        const expList = Array.isArray(expJson?.data) ? expJson.data.map(mapApiExperience) : [];
+        const retList = Array.isArray(retJson?.data) ? retJson.data.map(mapApiRetreat) : [];
         if (mounted) {
-          setApiExperiences(list);
+          setApiExperiences(expList);
+          setApiRetreats(retList);
         }
       } catch (err) {
         console.error('Experiences load error:', err);
@@ -385,7 +441,13 @@ export default function ExperiencesPage() {
     };
   }, []);
 
-  const displayExperiences = apiExperiences.length > 0 ? apiExperiences : fallbackExperiences;
+  const combinedItems = apiExperiences.length > 0 || apiRetreats.length > 0
+    ? [...apiExperiences, ...apiRetreats]
+    : [...fallbackExperiences];
+
+  const filteredItems = filter === 'all'
+    ? combinedItems
+    : combinedItems.filter((item) => item.category === filter);
 
   return (
     <div className="pt-20 pb-16">
@@ -446,6 +508,26 @@ export default function ExperiencesPage() {
       {/* Activities Grid */}
       <section className="py-16 px-4 bg-[#f8fafb]">
         <div className="max-w-7xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {[
+              { key: 'all', label: '全部' },
+              { key: 'experience', label: '單日體驗' },
+              { key: 'retreat', label: '主題靜修' },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setFilter(tab.key as typeof filter)}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition ${
+                  filter === tab.key
+                    ? 'bg-[#0a4c6b] text-white'
+                    : 'bg-white text-[#0a4c6b] border border-[#0a4c6b]/20 hover:border-[#0a4c6b]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="w-10 h-10 text-[#0a4c6b] animate-spin mb-4" />
@@ -453,7 +535,7 @@ export default function ExperiencesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {displayExperiences.map((exp, i) => (
+              {filteredItems.map((exp, i) => (
                 <motion.div
                   key={exp.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -472,6 +554,9 @@ export default function ExperiencesPage() {
                     <div className="absolute top-4 left-4 bg-[#B8902F] text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
                       {exp.icon}
                       <span>{exp.name}</span>
+                    </div>
+                    <div className="absolute top-4 right-4 bg-[#0a4c6b] text-white px-3 py-1 rounded-full text-xs font-medium">
+                      {exp.category === 'retreat' ? '主題靜修' : '單日體驗'}
                     </div>
                     <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
                       {exp.priceNote}

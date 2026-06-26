@@ -34,7 +34,6 @@ export default function Layout() {
             <Link to="/invest" className="text-black hover:text-[#0a4c6b] transition text-sm font-medium">更多可能</Link>
             <Link to="/guide" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">旅遊指南</Link>
             <Link to="/experiences" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">海島體驗</Link>
-            <Link to="/retreats" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">主題靜修</Link>
             {user ? (
               <div className="flex items-center gap-4">
                 <Link to={isAdmin ? '/admin' : '/member'} className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">
@@ -62,7 +61,6 @@ export default function Layout() {
             <Link to="/invest" onClick={() => setMobileMenu(false)} className="block text-black py-2">更多可能</Link>
             <Link to="/guide" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">旅遊指南</Link>
             <Link to="/experiences" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">海島體驗</Link>
-            <Link to="/retreats" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">主題靜修</Link>
             {user ? (
               <>
                 <Link to={isAdmin ? '/admin' : '/member'} onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">
@@ -97,7 +95,6 @@ export default function Layout() {
                 <Link to="/invest" className="block hover:text-white transition">更多可能</Link>
                 <Link to="/guide" className="block hover:text-white transition">旅遊指南</Link>
                 <Link to="/experiences" className="block hover:text-white transition">海島體驗</Link>
-                <Link to="/retreats" className="block hover:text-white transition">主題靜修</Link>
               </div>
             </div>
             <div>
