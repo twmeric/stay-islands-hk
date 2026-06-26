@@ -22,6 +22,20 @@ import {
   Zap,
 } from 'lucide-react';
 
+function ImagePreview({ url, className = '' }: { url: string | null | undefined; className?: string }) {
+  if (!url || !url.trim()) return null;
+  return (
+    <div className={`mt-1 ${className}`}>
+      <img
+        src={url}
+        alt="預覽"
+        className="w-16 h-16 object-cover rounded-lg border border-gray-200 bg-gray-50"
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
+    </div>
+  );
+}
+
 interface AdminAccount {
   id: number;
   userId: string;
@@ -515,6 +529,7 @@ function ExperiencesSection() {
                 onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
               />
+              <ImagePreview url={form.imageUrl} />
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">圖示</label>
@@ -960,6 +975,7 @@ function RetreatsSection() {
                 onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
               />
+              <ImagePreview url={form.imageUrl} />
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">圖示</label>
@@ -1715,6 +1731,7 @@ function PropertiesSection() {
                 onChange={(e) => setPropertyForm({ ...propertyForm, imageUrl: e.target.value })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
               />
+              <ImagePreview url={propertyForm.imageUrl} />
             </div>
             <div className="md:col-span-2">
               <label className="block text-xs text-gray-500 mb-1">英文描述</label>
@@ -1753,6 +1770,7 @@ function PropertiesSection() {
               )}
               {propertyForm.gallery.map((url, idx) => (
                 <div key={idx} className="flex items-center gap-2">
+                  <ImagePreview url={url} />
                   <input
                     type="text"
                     value={url}
@@ -1838,6 +1856,7 @@ function PropertiesSection() {
                       placeholder="圖片 URL"
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
                     />
+                    <ImagePreview url={a.image} />
                   </div>
                   <div className="col-span-12 md:col-span-3">
                     <input
@@ -1901,6 +1920,7 @@ function PropertiesSection() {
                   }
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
                 />
+                <ImagePreview url={propertyForm.locationDetails.mapImage} />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -2135,6 +2155,7 @@ function PropertiesSection() {
                       onChange={(e) => setRoomTypeForm({ ...roomTypeForm, imageUrl: e.target.value })}
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
                     />
+                    <ImagePreview url={roomTypeForm.imageUrl} />
                   </div>
                   <div className="md:col-span-3">
                     <label className="block text-xs text-gray-500 mb-1">英文描述</label>
@@ -2190,6 +2211,7 @@ function PropertiesSection() {
                     )}
                     {roomTypeForm.gallery.map((url, idx) => (
                       <div key={idx} className="flex items-center gap-2">
+                        <ImagePreview url={url} />
                         <input
                           type="text"
                           value={url}
