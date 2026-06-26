@@ -12,7 +12,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) navigate(isAdmin ? '/admin' : '/dashboard');
+    if (user) navigate(isAdmin ? '/admin' : '/member');
   }, [user, isAdmin]);
 
   async function handleLogin(e: React.FormEvent) {
@@ -49,7 +49,7 @@ export default function AuthPage() {
       const adminData = await adminRes.json();
       setAdminStatus(adminData.isAdmin, adminData.role);
 
-      navigate(adminData.isAdmin ? '/admin' : '/dashboard');
+      navigate(adminData.isAdmin ? '/admin' : '/member');
     } catch (err) {
       console.error(err);
       setError('登入時發生錯誤，請稍後再試');

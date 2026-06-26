@@ -7,7 +7,6 @@ import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailPage from './pages/PropertyDetailPage';
 import ExperiencesPage from './pages/ExperiencesPage';
 import RetreatsPage from './pages/RetreatsPage';
-import MemberPage from './pages/MemberPage';
 import TripPlannerPage from './pages/TripPlannerPage';
 import GuidePage from './pages/GuidePage';
 import InvestPage from './pages/InvestPage';
@@ -69,11 +68,9 @@ export default function App() {
           <Route path="/retreats" element={<RetreatsPage />} />
           <Route path="/guide" element={<GuidePage />} />
           <Route path="/invest" element={<InvestPage />} />
-          <Route path="/member" element={<MemberPage />} />
           <Route path="/trip-planner" element={<TripPlannerPage />} />
-          {/* Legacy routes redirect to /member */}
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/member" element={<DashboardPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Route>
       </Routes>
