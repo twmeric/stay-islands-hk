@@ -95,9 +95,6 @@ export default function PropertiesPage() {
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
                         HK${property.pricePerNight.toLocaleString()}/晚
                       </div>
-                      <div className="absolute top-4 left-4 bg-[#B8902F] text-white px-3 py-1 rounded-full text-xs font-medium">
-                        開放業主體驗
-                      </div>
                     </div>
                     <div className="p-6">
                       <p className="text-sm text-[#2ec4b6] font-medium">{property.location}</p>
