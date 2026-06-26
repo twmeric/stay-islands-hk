@@ -768,40 +768,6 @@ export default function PropertyDetailPage() {
               </div>
             )}
 
-            {/* Inquiry CTA */}
-            <div className="bg-gradient-to-br from-[#0a4c6b] to-[#0d1b2a] rounded-2xl p-8 sm:p-10 text-center text-white shadow-lg">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 font-serif">
-                想預訂這趟海島假期？
-              </h2>
-              <p className="text-white/80 mb-6 max-w-xl mx-auto">
-                與我們的管家聊聊，規劃一趟只屬於你的海島假期。
-              </p>
-              <button
-                onClick={scrollToInquiry}
-                className="inline-flex items-center justify-center bg-[#B8902F] hover:bg-[#9a7a28] text-white px-8 py-3 rounded-xl font-medium transition"
-              >
-                聯繫管家
-              </button>
-            </div>
-
-            {amenities.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
-                  其他設施標籤
-                </h2>
-                <div className="flex flex-wrap gap-3">
-                  {amenities.map((a: string, i: number) => (
-                    <span
-                      key={i}
-                      className="bg-[#f0f9f7] text-[#0a4c6b] px-4 py-2 rounded-full text-sm font-medium"
-                    >
-                      {a}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Room Types */}
             <div>
               <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
@@ -1028,6 +994,22 @@ export default function PropertyDetailPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+
+            {/* Inquiry CTA */}
+            <div className="bg-gradient-to-br from-[#0a4c6b] to-[#0d1b2a] rounded-2xl p-8 sm:p-10 text-center text-white shadow-lg">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 font-serif">
+                想預訂這趟海島假期？
+              </h2>
+              <p className="text-white/80 mb-6 max-w-xl mx-auto">
+                與我們的管家聊聊，規劃一趟只屬於你的海島假期。
+              </p>
+              <button
+                onClick={scrollToInquiry}
+                className="inline-flex items-center justify-center bg-[#B8902F] hover:bg-[#9a7a28] text-white px-8 py-3 rounded-xl font-medium transition"
+              >
+                聯繫管家
+              </button>
             </div>
           </div>
 
