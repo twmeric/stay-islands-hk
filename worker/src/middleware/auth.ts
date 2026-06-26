@@ -61,7 +61,7 @@ export function requireRole(
 }
 
 export async function signAccessToken(env: Bindings, payload: AuthPayload): Promise<string> {
-  const exp = Math.floor(Date.now() / 1000) + 15 * 60
+  const exp = Math.floor(Date.now() / 1000) + 24 * 60 * 60
   return jwt.sign({ ...payload, exp }, env.JWT_SECRET)
 }
 
