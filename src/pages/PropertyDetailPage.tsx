@@ -636,15 +636,6 @@ export default function PropertyDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-12">
-            <div>
-              <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
-                關於此物業
-              </h2>
-              <p className="text-gray-600 leading-relaxed">
-                {property.descriptionZh}
-              </p>
-            </div>
-
             {/* Story */}
             {story && (
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
