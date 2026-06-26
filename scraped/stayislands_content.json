@@ -1,0 +1,1915 @@
+[
+  {
+    "bgImages": [],
+    "bodyText": [
+      "Customise Consent Preferences",
+      "We use cookies to help you navigate efficiently and perform certain functions. You will find detailed information about all cookies under each consent category below.",
+      "The cookies that are categorised as \"Necessary\" are stored on your browser as they are essential for enabling the basic functionalities of the site. ... Show more",
+      "Necessary cookies are required to enable the basic features of this site, such as providing secure log-in or adjusting your consent preferences. These cookies do not store any personally identifiable data.",
+      "Functional cookies help perform certain functionalities like sharing the content of the website on social media platforms, collecting feedback, and other third-party features.",
+      "Analytical cookies are used to understand how visitors interact with the website. These cookies help provide information on metrics such as the number of visitors, bounce rate, traffic source, etc.",
+      "Performance cookies are used to understand and analyse the key performance indexes of the website which helps in delivering a better user experience for the visitors.",
+      "Advertisement cookies are used to provide visitors with customised advertisements based on the pages you visited previously and to analyse the effectiveness of the ad campaigns.",
+      "Accept AllSave My PreferencesReject All",
+      "Stay Mikado is a modern island guesthouse in the Maldives, perfect for travellers seeking authentic local living with comfort. Offering warm hospitality, cosy rooms, and easy access to island excursions, it’s the ideal base to explore local culture, vibrant reefs, and pristine shores. Whether for a short escape or a long retreat, every stay is designed to be personal, relaxed, and memorable.",
+      "Thimarafushi is a prominent inhabited island located in Thaa Atoll, approximately 215 kilometers south of Malé. Known as an important commercial and transport hub within the atoll, the island features its own domestic airport, offering convenient connectivity to the capital and surrounding islands.",
+      "Surrounded by crystal-clear lagoons, vibrant coral reefs, and beautiful natural scenery, Thimarafushi offers visitors an authentic Maldivian island experience. The island is home to a warm and welcoming community where locals are known for their friendliness, hospitality, and rich cultural traditions.",
+      "Thaa Atoll is well known for its excellent surf breaks, vibrant marine life, and remarkable dive sites filled with colorful coral reefs. Combining accessibility, natural beauty, and a vibrant local community, Thimarafushi continues to grow as one of the Maldives’ emerging destinations for surfers, divers, anglers, and travelers looking to experience the true charm of island life.",
+      "Discover the perfect accommodation for your Maldives getaway. Choose from our carefully curated room types, each offering a unique blend of comfort, style, and stunning island views.",
+      "Hot & Cold Water Supply",
+      "Tea & Coffee Facilities",
+      "Flat Screen Television",
+      "Ready to experience the Maldives with Stay Islands? Let us handle every detail, from island retreats to open-sea adventures. Your perfect escape starts here.",
+      "H.Noomuraka , 1st floor, Male’, Maldives. 20086",
+      "Copyright © 2026 Stay Islands. All Rights Reserved",
+      "Designed & Developed by Web Lankan"
+    ],
+    "h1": "Stay Mikado",
+    "h2": "Thimarafushi Island | Available Room Types | Extra Amenities | Book Your Stay",
+    "h3": "",
+    "images": [
+      {
+        "alt": "Spinner: White decorative",
+        "height": 40,
+        "src": "https://cdn.userway.org/widgetapp/images/spin_wh.svg",
+        "width": 40
+      },
+      {
+        "alt": "",
+        "height": 60,
+        "src": "https://cdn.userway.org/widgetapp/images/body_wh.svg",
+        "width": 60
+      },
+      {
+        "alt": "Spinner: White decorative",
+        "height": 40,
+        "src": "https://cdn.userway.org/widgetapp/images/spin_wh.svg",
+        "width": 40
+      },
+      {
+        "alt": "",
+        "height": 10,
+        "src": "https://stayislands.mv/wp-content/plugins/cookie-law-info/lite/frontend/images/close.svg",
+        "width": 10
+      },
+      {
+        "alt": "en",
+        "height": 150,
+        "src": "https://www.stayislands.mv/wp-content/plugins/gtranslate/flags/svg/en.svg",
+        "width": 200
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "en",
+        "height": 150,
+        "src": "https://www.stayislands.mv/wp-content/plugins/gtranslate/flags/svg/en.svg",
+        "width": 200
+      },
+      {
+        "alt": "Stay Mikado",
+        "height": 1740,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Rectangle-79-4.webp",
+        "width": 1924
+      },
+      {
+        "alt": "",
+        "height": 20,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/linkedin-si.png",
+        "width": 20
+      },
+      {
+        "alt": "Restaurant",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/965.webp",
+        "width": 94
+      },
+      {
+        "alt": "Coffee Shop",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/966.webp",
+        "width": 94
+      },
+      {
+        "alt": "Laundry",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/968.webp",
+        "width": 94
+      },
+      {
+        "alt": "Shisha Lounge",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/967.webp",
+        "width": 94
+      },
+      {
+        "alt": "Fitness Center",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/969.webp",
+        "width": 94
+      },
+      {
+        "alt": "Bicycle Rental",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/970.webp",
+        "width": 94
+      },
+      {
+        "alt": "Spa",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/971.webp",
+        "width": 94
+      },
+      {
+        "alt": "Karaoke",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/972.webp",
+        "width": 94
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Mikado-intro.webp",
+        "width": 830
+      },
+      {
+        "alt": "Domestic<br>Airport",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/1.webp",
+        "width": 94
+      },
+      {
+        "alt": "Airport <br>Transfer",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-702.webp",
+        "width": 94
+      },
+      {
+        "alt": "Health<br>Center",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/3.webp",
+        "width": 94
+      },
+      {
+        "alt": "Local<br>shops",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/961.webp",
+        "width": 94
+      },
+      {
+        "alt": "Private <br> Beach",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/962.webp",
+        "width": 94
+      },
+      {
+        "alt": "Badminton<br>Court ",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/963.webp",
+        "width": 94
+      },
+      {
+        "alt": "Speedboat<br>Ferry Service",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/2.webp",
+        "width": 94
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-4-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-5-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-6-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-7-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-8-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-9-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-10-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-11-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-12-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-13-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Mikado-intro-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-1-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-2-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-3-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-1-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-2-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-3-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-4-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-5-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-6-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-7-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-8-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-9-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-10-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-11-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-12-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-13-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Mikado-intro-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-1-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-2-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-3-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-4-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-5-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-6-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-7-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-8-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-9-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-10-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-11-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-12-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-13-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Mikado-intro-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-1-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-2-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/mikado-3-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "Triple Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Tripple-Room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Triple Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Tripple-Room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Village Deluxe Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Village-deluxe.webp",
+        "width": 708
+      },
+      {
+        "alt": "Village Deluxe Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Village-deluxe.webp",
+        "width": 708
+      },
+      {
+        "alt": "Deluxe Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Deluxe-room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Deluxe Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Deluxe-room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Family Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Family-apartment.webp",
+        "width": 708
+      },
+      {
+        "alt": "Family Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Family-apartment.webp",
+        "width": 708
+      },
+      {
+        "alt": "Triple Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Tripple-Room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Triple Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Tripple-Room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Village Deluxe Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Village-deluxe.webp",
+        "width": 708
+      },
+      {
+        "alt": "Village Deluxe Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Village-deluxe.webp",
+        "width": 708
+      },
+      {
+        "alt": "Deluxe Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Deluxe-room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Deluxe Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Deluxe-room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Family Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Family-apartment.webp",
+        "width": 708
+      },
+      {
+        "alt": "Family Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Family-apartment.webp",
+        "width": 708
+      },
+      {
+        "alt": "Triple Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Tripple-Room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Triple Room",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Tripple-Room.webp",
+        "width": 708
+      },
+      {
+        "alt": "Village Deluxe Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Village-deluxe.webp",
+        "width": 708
+      },
+      {
+        "alt": "Village Deluxe Suite",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Mikado-Village-deluxe.webp",
+        "width": 708
+      },
+      {
+        "alt": "",
+        "height": 987,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/shutterstock_2264141839-1.webp",
+        "width": 1192
+      },
+      {
+        "alt": "Hot & Cold Water Supply",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/973.webp",
+        "width": 70
+      },
+      {
+        "alt": "Tea & Coffee Facilities",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/975.webp",
+        "width": 70
+      },
+      {
+        "alt": "Flat Screen Television",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/977.webp",
+        "width": 70
+      },
+      {
+        "alt": "Housekeeping Service",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/974.webp",
+        "width": 70
+      },
+      {
+        "alt": "Cable TV Channels",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/978.webp",
+        "width": 70
+      },
+      {
+        "alt": "Safety Deposit Box",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/979.webp",
+        "width": 70
+      },
+      {
+        "alt": "Mini Fridge ",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/980.webp",
+        "width": 70
+      },
+      {
+        "alt": "Ironing Board",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/982.webp",
+        "width": 70
+      },
+      {
+        "alt": "Air Conditioning",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/976.webp",
+        "width": 70
+      },
+      {
+        "alt": "En-suite Bathroom",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/981.webp",
+        "width": 70
+      },
+      {
+        "alt": "",
+        "height": 770,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/shutterstock_2578452439-1-2-scaled.webp",
+        "width": 2560
+      },
+      {
+        "alt": "LinkedIn",
+        "height": 20,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/linkedin-si.png",
+        "width": 20
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "",
+        "height": 1095,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/gradient-layer.png",
+        "width": 3439
+      },
+      {
+        "alt": "",
+        "height": 16,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/maldives-flag.png",
+        "width": 23
+      },
+      {
+        "alt": "Stay Mikado",
+        "height": 1204,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-790-scaled.webp",
+        "width": 2560
+      },
+      {
+        "alt": "Stay Mikado",
+        "height": 1204,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-791-scaled.webp",
+        "width": 2560
+      }
+    ],
+    "title": "Stay Mikado - Stay Islands",
+    "url": "https://www.stayislands.mv/properties/stay-mikado/"
+  },
+  {
+    "bgImages": [],
+    "bodyText": [
+      "Customise Consent Preferences",
+      "We use cookies to help you navigate efficiently and perform certain functions. You will find detailed information about all cookies under each consent category below.",
+      "The cookies that are categorised as \"Necessary\" are stored on your browser as they are essential for enabling the basic functionalities of the site.",
+      "We also use third-party cookies that help us analyse how you use this website, store your preferences, and provide the content and advertisements that are relevant to you. These cookies will only be stored in your browser with your prior consent.",
+      "You can choose to enable or disable some or all of these cookies but disabling some of them may affect your browsing experience.",
+      "Necessary cookies are required to enable the basic features of this site, such as providing secure log-in or adjusting your consent preferences. These cookies do not store any personally identifiable data.",
+      "Functional cookies help perform certain functionalities like sharing the content of the website on social media platforms, collecting feedback, and other third-party features.",
+      "Analytical cookies are used to understand how visitors interact with the website. These cookies help provide information on metrics such as the number of visitors, bounce rate, traffic source, etc.",
+      "Performance cookies are used to understand and analyse the key performance indexes of the website which helps in delivering a better user experience for the visitors.",
+      "Advertisement cookies are used to provide visitors with customised advertisements based on the pages you visited previously and to analyse the effectiveness of the ad campaigns.",
+      "Accept AllSave My PreferencesReject All",
+      "‘Stay Madivaru’ the perfect getaway vacations for both introverts and extroverts with highly versatile activities carried out and incredible services provided, planned and operated by stay islands private limited.",
+      "‘Stay Madivaru’ is a stunning locally build 25m teakwood boat which has been completely refurbished in 2015, bringing out a true uniqueness to this boat by enlightening the modern gestures assuring complete comfort to the passengers from all over the world.",
+      "Laying under the sun, soaking in the bright rays along with the luxury cravings all in one could be experienced at ‘Stay Madivaru’ which boasts a vast saloon, bar dining area and also a sundeck. The saloon is furnished with comfortable dinette sofas perfect to lounge the day away. The sundeck is situated above the saloon, furnished with both sundeck chairs and sun beds, ideal for all sun lovers.",
+      "The Exotic Experience",
+      "of the Maldivian Ocean",
+      "The Maldives is the place on earth where the sand is as white as the snow, the shorelines as blue as a turquoise gem stone, most importantly a homeland to hundreds of species of fishes, including tiny vibrant reef fishes, moray eels and types of tunas. Oceans covered with dense coral reefs featuring a fantasy world under the water. The Indian Ocean surrounding the Maldivian archipelago is full of activities, such as scuba diving, fishing, cruising, and surfing. Cruising on a boat is the most effective way to experience it all. While all islands have their own reef to explore, there are also more obscure experiences to be had, such as diving to see the whale sharks or giant manta rays in certain parts of the ocean.",
+      "Step aboard Stay Madivaru and unwind in thoughtfully designed cabins, crafted for comfort on the open water. Each cabin offers a cosy, well-equipped space to relax between adventures. Whether you’re solo, with a partner, or in a group, every cabin guarantees a restful and memorable stay at sea.",
+      "Ready to experience the Maldives with Stay Islands? Let us handle every detail, from island retreats to open-sea adventures. Your perfect escape starts here.",
+      "H.Noomuraka , 1st floor, Male’, Maldives. 20086",
+      "Copyright © 2026 Stay Islands. All Rights Reserved",
+      "Designed & Developed by Web Lankan"
+    ],
+    "h1": "Stay Madivaru",
+    "h2": "The Exotic Experience\nof the Maldivian Ocean | Available Room Types | Extra Amenities | Book Your Stay",
+    "h3": "",
+    "images": [
+      {
+        "alt": "Spinner: White decorative",
+        "height": 40,
+        "src": "https://cdn.userway.org/widgetapp/images/spin_wh.svg",
+        "width": 40
+      },
+      {
+        "alt": "",
+        "height": 60,
+        "src": "https://cdn.userway.org/widgetapp/images/body_wh.svg",
+        "width": 60
+      },
+      {
+        "alt": "Spinner: White decorative",
+        "height": 40,
+        "src": "https://cdn.userway.org/widgetapp/images/spin_wh.svg",
+        "width": 40
+      },
+      {
+        "alt": "",
+        "height": 10,
+        "src": "https://stayislands.mv/wp-content/plugins/cookie-law-info/lite/frontend/images/close.svg",
+        "width": 10
+      },
+      {
+        "alt": "en",
+        "height": 150,
+        "src": "https://www.stayislands.mv/wp-content/plugins/gtranslate/flags/svg/en.svg",
+        "width": 200
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "en",
+        "height": 150,
+        "src": "https://www.stayislands.mv/wp-content/plugins/gtranslate/flags/svg/en.svg",
+        "width": 200
+      },
+      {
+        "alt": "Stay Madivaru",
+        "height": 1740,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Rectangle-79-4.webp",
+        "width": 1924
+      },
+      {
+        "alt": "",
+        "height": 20,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/linkedin-si.png",
+        "width": 20
+      },
+      {
+        "alt": "1 Yanmar 350 HP <br>engine",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/engine.webp",
+        "width": 94
+      },
+      {
+        "alt": "Dinghy with  <br> outboard engine",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/dinghy.webp",
+        "width": 94
+      },
+      {
+        "alt": "10 knots <br> Cruising speed",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Speed.webp",
+        "width": 94
+      },
+      {
+        "alt": "Internet <br> Wifi",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-701.webp",
+        "width": 94
+      },
+      {
+        "alt": "Sundeck <br>  area",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Sundeck.webp",
+        "width": 94
+      },
+      {
+        "alt": "Snorkeling  <br> Gear",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snorkeling.webp",
+        "width": 94
+      },
+      {
+        "alt": "In house <br> Bar",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/bar.webp",
+        "width": 94
+      },
+      {
+        "alt": "Resting <br> Lounge",
+        "height": 94,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Lounge.webp",
+        "width": 94
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Madivaru-intro.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_3001-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_5597-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_5636-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_7426-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_7433-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/DJI_0160-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_0840-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1961-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1969-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1983-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1961-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1969-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1983-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_3001-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_5597-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_5636-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_7426-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_7433-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/DJI_0160-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_0840-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1961-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1969-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1983-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_3001-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_5597-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_5636-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_7426-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_7433-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/DJI_0160-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_0840-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1961-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1969-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_1983-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Surfing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-SURFING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Surfing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-SURFING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-2-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-2-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Surfing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-SURFING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Surfing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-SURFING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-2-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-2-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Cruising Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-CRUISING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Diving Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-DIVING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-2.webp",
+        "width": 708
+      },
+      {
+        "alt": "Fishing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-FISHING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Surfing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-SURFING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "Surfing Charter",
+        "height": 560,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/06/Madivaru-SURFING-CHARTER-1.webp",
+        "width": 708
+      },
+      {
+        "alt": "",
+        "height": 987,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/shutterstock_2264141839-1.webp",
+        "width": 1192
+      },
+      {
+        "alt": "Cafe",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-716.webp",
+        "width": 70
+      },
+      {
+        "alt": "Library",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-717.webp",
+        "width": 70
+      },
+      {
+        "alt": "Restaurant",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-715.webp",
+        "width": 70
+      },
+      {
+        "alt": "Laundry",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-714.webp",
+        "width": 70
+      },
+      {
+        "alt": "Snorkeling",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-713.webp",
+        "width": 70
+      },
+      {
+        "alt": "Spa",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-712.webp",
+        "width": 70
+      },
+      {
+        "alt": "Surfing",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-710.webp",
+        "width": 70
+      },
+      {
+        "alt": "Safe",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-711.webp",
+        "width": 70
+      },
+      {
+        "alt": "",
+        "height": 770,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/shutterstock_2578452439-1-2-scaled.webp",
+        "width": 2560
+      },
+      {
+        "alt": "LinkedIn",
+        "height": 20,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/linkedin-si.png",
+        "width": 20
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "",
+        "height": 1095,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/gradient-layer.png",
+        "width": 3439
+      },
+      {
+        "alt": "",
+        "height": 16,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/maldives-flag.png",
+        "width": 23
+      },
+      {
+        "alt": "Stay Madivaru",
+        "height": 1204,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-790-scaled.webp",
+        "width": 2560
+      },
+      {
+        "alt": "Stay Madivaru",
+        "height": 1204,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-791-scaled.webp",
+        "width": 2560
+      }
+    ],
+    "title": "Stay Madivaru - Stay Islands",
+    "url": "https://www.stayislands.mv/properties/stay-madivaru/"
+  },
+  {
+    "bgImages": [],
+    "bodyText": [
+      "Customise Consent Preferences",
+      "We use cookies to help you navigate efficiently and perform certain functions. You will find detailed information about all cookies under each consent category below.",
+      "The cookies that are categorised as \"Necessary\" are stored on your browser as they are essential for enabling the basic functionalities of the site.",
+      "We also use third-party cookies that help us analyse how you use this website, store your preferences, and provide the content and advertisements that are relevant to you. These cookies will only be stored in your browser with your prior consent.",
+      "You can choose to enable or disable some or all of these cookies but disabling some of them may affect your browsing experience.",
+      "Necessary cookies are required to enable the basic features of this site, such as providing secure log-in or adjusting your consent preferences. These cookies do not store any personally identifiable data.",
+      "Functional cookies help perform certain functionalities like sharing the content of the website on social media platforms, collecting feedback, and other third-party features.",
+      "Analytical cookies are used to understand how visitors interact with the website. These cookies help provide information on metrics such as the number of visitors, bounce rate, traffic source, etc.",
+      "Performance cookies are used to understand and analyse the key performance indexes of the website which helps in delivering a better user experience for the visitors.",
+      "Advertisement cookies are used to provide visitors with customised advertisements based on the pages you visited previously and to analyse the effectiveness of the ad campaigns.",
+      "Accept AllSave My PreferencesReject All",
+      "Indulge in the ultimate Maldivian luxury with Stay Islands’ Private Island offering, an exclusive retreat where seclusion, beauty, and personalised service blend seamlessly. Surrounded by turquoise lagoons and palm trees, this private paradise is perfect for couples, families, or groups seeking complete privacy. Enjoy bespoke dining, curated activities, and sunset cruises, all designed to create an unforgettable island experience just for you.",
+      "Ready to experience the Maldives with Stay Islands? Let us handle every detail, from island retreats to open-sea adventures. Your perfect escape starts here.",
+      "H.Noomuraka , 1st floor, Male’, Maldives. 20086",
+      "Copyright © 2026 Stay Islands. All Rights Reserved",
+      "Designed & Developed by Web Lankan"
+    ],
+    "h1": "Private Island",
+    "h2": " | Available Room Types | Extra Amenities | Book Your Stay",
+    "h3": "",
+    "images": [
+      {
+        "alt": "Spinner: White decorative",
+        "height": 40,
+        "src": "https://cdn.userway.org/widgetapp/images/spin_wh.svg",
+        "width": 40
+      },
+      {
+        "alt": "",
+        "height": 60,
+        "src": "https://cdn.userway.org/widgetapp/images/body_wh.svg",
+        "width": 60
+      },
+      {
+        "alt": "Spinner: White decorative",
+        "height": 40,
+        "src": "https://cdn.userway.org/widgetapp/images/spin_wh.svg",
+        "width": 40
+      },
+      {
+        "alt": "",
+        "height": 10,
+        "src": "https://stayislands.mv/wp-content/plugins/cookie-law-info/lite/frontend/images/close.svg",
+        "width": 10
+      },
+      {
+        "alt": "en",
+        "height": 150,
+        "src": "https://www.stayislands.mv/wp-content/plugins/gtranslate/flags/svg/en.svg",
+        "width": 200
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "en",
+        "height": 150,
+        "src": "https://www.stayislands.mv/wp-content/plugins/gtranslate/flags/svg/en.svg",
+        "width": 200
+      },
+      {
+        "alt": "Private Island",
+        "height": 1740,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Rectangle-79-4.webp",
+        "width": 1924
+      },
+      {
+        "alt": "",
+        "height": 20,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/linkedin-si.png",
+        "width": 20
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/private-island-intro.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/dji_mimo_20250226_172856_20250226172857_1740625371802_photo-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_9410-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_9413-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-25-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-53-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-26-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-45-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Private-Island-Escape-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-06-06-2024-21_32-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/seefromthesky78-1-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-06-06-2024-21_33-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-18-02-2024-12_06-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-25-08-2023-12_51-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 642,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-27-05-2024-19_02-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/weather-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/dji_fly_20250226_181430_0072_1740595445136_photo-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 642,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-27-05-2024-19_02-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/weather-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/dji_fly_20250226_181430_0072_1740595445136_photo-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/dji_mimo_20250226_172856_20250226172857_1740625371802_photo-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_9410-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_9413-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-25-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-53-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-26-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-45-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Private-Island-Escape-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-06-06-2024-21_32-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/seefromthesky78-1-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-06-06-2024-21_33-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-18-02-2024-12_06-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-25-08-2023-12_51-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 642,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-27-05-2024-19_02-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/weather-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/dji_fly_20250226_181430_0072_1740595445136_photo-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/dji_mimo_20250226_172856_20250226172857_1740625371802_photo-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_9410-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/IMG_9413-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-25-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-53-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-26-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Kihaa26-amended-45-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Private-Island-Escape-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-06-06-2024-21_32-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/seefromthesky78-1-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-06-06-2024-21_33-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-18-02-2024-12_06-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 776,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-25-08-2023-12_51-1.webp",
+        "width": 830
+      },
+      {
+        "alt": "",
+        "height": 642,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Snapshot-27-05-2024-19_02-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/weather-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 643,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/dji_fly_20250226_181430_0072_1740595445136_photo-1.webp",
+        "width": 1051
+      },
+      {
+        "alt": "",
+        "height": 987,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/shutterstock_2264141839-1.webp",
+        "width": 1192
+      },
+      {
+        "alt": "Cafe",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-716.webp",
+        "width": 70
+      },
+      {
+        "alt": "Library",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-717.webp",
+        "width": 70
+      },
+      {
+        "alt": "Restaurant",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-715.webp",
+        "width": 70
+      },
+      {
+        "alt": "Laundry",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-714.webp",
+        "width": 70
+      },
+      {
+        "alt": "Snorkeling",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-713.webp",
+        "width": 70
+      },
+      {
+        "alt": "Spa",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-712.webp",
+        "width": 70
+      },
+      {
+        "alt": "Surfing",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-710.webp",
+        "width": 70
+      },
+      {
+        "alt": "Safe",
+        "height": 70,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-711.webp",
+        "width": 70
+      },
+      {
+        "alt": "",
+        "height": 770,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/shutterstock_2578452439-1-2-scaled.webp",
+        "width": 2560
+      },
+      {
+        "alt": "LinkedIn",
+        "height": 20,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/linkedin-si.png",
+        "width": 20
+      },
+      {
+        "alt": "",
+        "height": 180,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/02/Logo-stay-Island.webp",
+        "width": 218
+      },
+      {
+        "alt": "",
+        "height": 1095,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/gradient-layer.png",
+        "width": 3439
+      },
+      {
+        "alt": "",
+        "height": 16,
+        "src": "https://www.stayislands.mv/wp-content/themes/stayisland_git/assets/img/maldives-flag.png",
+        "width": 23
+      },
+      {
+        "alt": "Private Island",
+        "height": 1204,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-790-scaled.webp",
+        "width": 2560
+      },
+      {
+        "alt": "Private Island",
+        "height": 1204,
+        "src": "https://www.stayislands.mv/wp-content/uploads/2026/03/Frame-791-scaled.webp",
+        "width": 2560
+      }
+    ],
+    "title": "Private Island - Stay Islands",
+    "url": "https://www.stayislands.mv/properties/private-island/"
+  }
+]
