@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
-import type { Booking, CmsArticle, Customer, LeadType, Property, RoomType } from '../db/schema'
+import type { Booking, CmsArticle, Customer, Experience, LeadType, Property, Retreat, RoomType } from '../db/schema'
 import { all, first, run } from '../lib/db'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
@@ -85,6 +85,60 @@ app.get('/articles/:slug', async (c) => {
     return c.json({ error: 'Article not found' }, 404)
   }
   return c.json({ data: article })
+})
+
+// GET /api/public/experiences
+app.get('/experiences', async (c) => {
+  const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 200)
+  const offset = Math.max(parseInt(c.req.query('offset') || '0', 10), 0)
+
+  const experiences = await all<Experience>(
+    c.env.DB,
+    'SELECT * FROM experiences WHERE status = ? ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?',
+    ['active', limit, offset]
+  )
+  return c.json({ data: experiences })
+})
+
+// GET /api/public/experiences/:slug
+app.get('/experiences/:slug', async (c) => {
+  const slug = c.req.param('slug')
+  const experience = await first<Experience>(
+    c.env.DB,
+    'SELECT * FROM experiences WHERE slug = ? AND status = ?',
+    [slug, 'active']
+  )
+  if (!experience) {
+    return c.json({ error: 'Experience not found' }, 404)
+  }
+  return c.json({ data: experience })
+})
+
+// GET /api/public/retreats
+app.get('/retreats', async (c) => {
+  const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 200)
+  const offset = Math.max(parseInt(c.req.query('offset') || '0', 10), 0)
+
+  const retreats = await all<Retreat>(
+    c.env.DB,
+    'SELECT * FROM retreats WHERE status = ? ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?',
+    ['active', limit, offset]
+  )
+  return c.json({ data: retreats })
+})
+
+// GET /api/public/retreats/:slug
+app.get('/retreats/:slug', async (c) => {
+  const slug = c.req.param('slug')
+  const retreat = await first<Retreat>(
+    c.env.DB,
+    'SELECT * FROM retreats WHERE slug = ? AND status = ?',
+    [slug, 'active']
+  )
+  if (!retreat) {
+    return c.json({ error: 'Retreat not found' }, 404)
+  }
+  return c.json({ data: retreat })
 })
 
 // POST /api/public/inquiries

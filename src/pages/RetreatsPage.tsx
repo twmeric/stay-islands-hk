@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, MapPin, Users, Check, ChevronDown, ChevronUp, Heart, Leaf, Waves, Fish, Sparkles, X } from 'lucide-react';
+import { Clock, MapPin, Users, Check, ChevronDown, ChevronUp, Heart, Leaf, Waves, Fish, Sparkles, Ship, Sunset, Anchor, Loader2, X } from 'lucide-react';
 import { client } from '../api/client';
 
 interface Retreat {
@@ -17,7 +17,25 @@ interface Retreat {
   icon: React.ReactNode;
 }
 
-const retreats: Retreat[] = [
+interface ApiRetreat {
+  id: number;
+  name: string;
+  nameZh: string;
+  slug: string;
+  description: string;
+  descriptionZh: string;
+  duration: string;
+  location: string;
+  audience: string;
+  itinerary: string;
+  priceNote: string;
+  imageUrl: string;
+  iconName: string | null;
+  sortOrder: number;
+  status: string;
+}
+
+const fallbackRetreats: Retreat[] = [
   {
     id: 'yoga-adventure',
     name: 'Yoga & Adventure Retreat',
@@ -96,6 +114,50 @@ const retreats: Retreat[] = [
     icon: <Fish className="w-5 h-5" />,
   },
 ];
+
+function safeJsonParse<T>(value: string | null, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Fish,
+  Waves,
+  Sunset,
+  Ship,
+  Sparkles,
+  MapPin,
+  Anchor,
+  Heart,
+  Leaf,
+};
+
+function getIconByName(name: string | null): React.ReactNode {
+  if (!name) return <Sparkles className="w-5 h-5" />;
+  const Icon = iconMap[name];
+  if (!Icon) return <Sparkles className="w-5 h-5" />;
+  return <Icon className="w-5 h-5" />;
+}
+
+function mapApiRetreat(item: ApiRetreat): Retreat {
+  return {
+    id: item.slug,
+    name: item.name,
+    nameZh: item.nameZh,
+    duration: item.duration,
+    location: item.location,
+    audience: item.audience,
+    description: item.description,
+    itinerary: safeJsonParse<{ day: string; title: string; desc: string }[]>(item.itinerary, []),
+    priceNote: item.priceNote,
+    image: item.imageUrl,
+    icon: getIconByName(item.iconName),
+  };
+}
 
 interface InquiryFormData {
   name: string;
@@ -296,6 +358,43 @@ function InquiryForm({
 export default function RetreatsPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [expandedItinerary, setExpandedItinerary] = useState<string | null>(null);
+  const [apiRetreats, setApiRetreats] = useState<Retreat[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      try {
+        const res = await client.api.fetch('/api/public/retreats');
+        if (!res.ok) {
+          throw new Error(`API error ${res.status}`);
+        }
+        const json = (await res.json()) as { data?: ApiRetreat[] };
+        const list = Array.isArray(json?.data) ? json.data.map(mapApiRetreat) : [];
+        if (mounted) {
+          setApiRetreats(list);
+        }
+      } catch (err) {
+        console.error('Retreats load error:', err);
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const displayRetreats = apiRetreats.length > 0 ? apiRetreats : fallbackRetreats;
 
   return (
     <div className="pt-20 pb-16">
@@ -356,63 +455,101 @@ export default function RetreatsPage() {
       {/* Retreats Grid */}
       <section className="py-16 px-4 bg-[#f8fafb]">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {retreats.map((retreat, i) => (
-              <motion.div
-                key={retreat.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300"
-              >
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  <img
-                    src={retreat.image}
-                    alt={retreat.nameZh}
-                    className="w-full h-full object-cover hover:scale-105 transition duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <div className="absolute top-4 left-4 bg-[#B8902F] text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
-                    {retreat.icon}
-                    <span>{retreat.name}</span>
-                  </div>
-                  <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
-                    {retreat.priceNote}
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-[#0d1b2a] mb-2">{retreat.nameZh}</h3>
-                  <p className="text-sm text-gray-500 mb-1">{retreat.name}</p>
-
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="w-4 h-4 text-[#2ec4b6]" />
-                      <span>{retreat.duration}</span>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-10 h-10 text-[#0a4c6b] animate-spin mb-4" />
+              <p className="text-gray-500">載入 Retreats 中…</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {displayRetreats.map((retreat, i) => (
+                <motion.div
+                  key={retreat.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300"
+                >
+                  <div className="relative aspect-[16/9] overflow-hidden">
+                    <img
+                      src={retreat.image}
+                      alt={retreat.nameZh}
+                      className="w-full h-full object-cover hover:scale-105 transition duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute top-4 left-4 bg-[#B8902F] text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
+                      {retreat.icon}
+                      <span>{retreat.name}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 text-[#2ec4b6]" />
-                      <span>{retreat.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="w-4 h-4 text-[#2ec4b6]" />
-                      <span>適合：{retreat.audience}</span>
+                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
+                      {retreat.priceNote}
                     </div>
                   </div>
+                  <div className="p-6">
+                    <h3 className="text-2xl font-bold text-[#0d1b2a] mb-2">{retreat.nameZh}</h3>
+                    <p className="text-sm text-gray-500 mb-1">{retreat.name}</p>
 
-                  <p className="text-gray-600 text-sm mt-4 leading-relaxed">{retreat.description}</p>
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="w-4 h-4 text-[#2ec4b6]" />
+                        <span>{retreat.duration}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin className="w-4 h-4 text-[#2ec4b6]" />
+                        <span>{retreat.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Users className="w-4 h-4 text-[#2ec4b6]" />
+                        <span>適合：{retreat.audience}</span>
+                      </div>
+                    </div>
 
-                  {/* Collapsible Itinerary */}
-                  <div className="mt-5 border-t border-gray-100 pt-4">
+                    <p className="text-gray-600 text-sm mt-4 leading-relaxed">{retreat.description}</p>
+
+                    {/* Collapsible Itinerary */}
+                    <div className="mt-5 border-t border-gray-100 pt-4">
+                      <button
+                        onClick={() => setExpandedItinerary(expandedItinerary === retreat.id ? null : retreat.id)}
+                        className="flex items-center gap-2 text-sm font-medium text-[#0a4c6b] hover:text-[#083d56] transition"
+                      >
+                        {expandedItinerary === retreat.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        每日行程概覽
+                      </button>
+                      <AnimatePresence>
+                        {expandedItinerary === retreat.id && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pt-4 space-y-3">
+                              {retreat.itinerary.map((item, idx) => (
+                                <div key={idx} className="flex gap-3 text-sm">
+                                  <span className="font-semibold text-[#B8902F] min-w-[4.5rem]">{item.day}</span>
+                                  <div>
+                                    <p className="font-medium text-[#0d1b2a]">{item.title}</p>
+                                    <p className="text-gray-500 text-xs">{item.desc}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
                     <button
-                      onClick={() => setExpandedItinerary(expandedItinerary === retreat.id ? null : retreat.id)}
-                      className="flex items-center gap-2 text-sm font-medium text-[#0a4c6b] hover:text-[#083d56] transition"
+                      onClick={() => setActiveId(activeId === retreat.id ? null : retreat.id)}
+                      className="w-full mt-6 bg-[#0a4c6b] text-white py-3 rounded-xl font-semibold hover:bg-[#083d56] transition"
                     >
-                      {expandedItinerary === retreat.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      每日行程概覽
+                      {activeId === retreat.id ? '收起表單' : '諮詢此 Retreat'}
                     </button>
+
                     <AnimatePresence>
-                      {expandedItinerary === retreat.id && (
+                      {activeId === retreat.id && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
@@ -420,48 +557,17 @@ export default function RetreatsPage() {
                           transition={{ duration: 0.3 }}
                           className="overflow-hidden"
                         >
-                          <div className="pt-4 space-y-3">
-                            {retreat.itinerary.map((item, idx) => (
-                              <div key={idx} className="flex gap-3 text-sm">
-                                <span className="font-semibold text-[#B8902F] min-w-[4.5rem]">{item.day}</span>
-                                <div>
-                                  <p className="font-medium text-[#0d1b2a]">{item.title}</p>
-                                  <p className="text-gray-500 text-xs">{item.desc}</p>
-                                </div>
-                              </div>
-                            ))}
+                          <div className="pt-6">
+                            <InquiryForm retreat={retreat.name} onClose={() => setActiveId(null)} />
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
-
-                  <button
-                    onClick={() => setActiveId(activeId === retreat.id ? null : retreat.id)}
-                    className="w-full mt-6 bg-[#0a4c6b] text-white py-3 rounded-xl font-semibold hover:bg-[#083d56] transition"
-                  >
-                    {activeId === retreat.id ? '收起表單' : '諮詢此 Retreat'}
-                  </button>
-
-                  <AnimatePresence>
-                    {activeId === retreat.id && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pt-6">
-                          <InquiryForm retreat={retreat.name} onClose={() => setActiveId(null)} />
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -33,7 +33,46 @@ export interface SeedRoomType {
   inventory: number
   imageUrl: string | null
   amenities: string
+  bedType: string
+  view: string
+  sizeSqm: number
+  occupancy: string
+  gallery: string
+  features: string
   status: 'available'
+}
+
+export interface SeedExperience {
+  name: string
+  nameZh: string
+  slug: string
+  description: string | null
+  descriptionZh: string | null
+  duration: string
+  groupSize: string
+  includes: string
+  priceNote: string
+  imageUrl: string
+  iconName: string
+  sortOrder: number
+  status: 'active' | 'inactive'
+}
+
+export interface SeedRetreat {
+  name: string
+  nameZh: string
+  slug: string
+  description: string | null
+  descriptionZh: string | null
+  duration: string
+  location: string
+  audience: string
+  itinerary: string
+  priceNote: string
+  imageUrl: string
+  iconName: string
+  sortOrder: number
+  status: 'active' | 'inactive'
 }
 
 const demoProperties: SeedProperty[] = [
@@ -158,8 +197,8 @@ const demoProperties: SeedProperty[] = [
       'https://images.unsplash.com/photo-1602002418082-a4443e081dd1?w=800&q=80',
     ]),
     facilities: JSON.stringify([
-      { icon: '👨‍💼', label: '私人島嶼管家' },
-      { icon: '👨‍🍳', label: '米其林主廚餐廳' },
+      { icon: '👨\u200d💼', label: '私人島嶼管家' },
+      { icon: '👨\u200d🍳', label: '米其林主廚餐廳' },
       { icon: '⛳', label: '高爾夫球場' },
       { icon: '🚣', label: '水上運動中心' },
       { icon: '🧸', label: '兒童俱樂部' },
@@ -251,7 +290,7 @@ const demoProperties: SeedProperty[] = [
     ]),
     facilities: JSON.stringify([
       { icon: '🏖️', label: '私人海灘' },
-      { icon: '🏊‍♀️', label: '共用泳池' },
+      { icon: '🏊\u200d♀️', label: '共用泳池' },
       { icon: '🍳', label: '廚房設備' },
       { icon: '🔥', label: 'BBQ 區' },
       { icon: '🤿', label: '浮潛中心' },
@@ -317,7 +356,225 @@ const demoProperties: SeedProperty[] = [
   },
 ]
 
-function lagoonVilla(basePrice: number): Omit<SeedRoomType, 'propertyId'> {
+const demoExperiences: SeedExperience[] = [
+  {
+    name: 'Night Fishing Trip',
+    nameZh: '夜釣之旅',
+    slug: 'night-fishing',
+    description:
+      'Set sail under the stars, learn traditional Maldivian fishing techniques, and enjoy a freshly cooked seafood dinner on board.',
+    descriptionZh:
+      '在星空下出海，學習傳統釣魚技巧，現釣現煮的海鮮晚餐是最大回報。',
+    duration: '3-4 小時',
+    groupSize: '2-8 人',
+    includes: JSON.stringify(['專業漁夫', '釣具', '船上晚餐', '飲料']),
+    priceNote: '按行程報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80',
+    iconName: 'Fish',
+    sortOrder: 1,
+    status: 'active',
+  },
+  {
+    name: 'Snorkeling & Diving',
+    nameZh: '浮潛與潛水',
+    slug: 'snorkeling-diving',
+    description:
+      'Explore vibrant coral gardens and swim alongside turtles and tropical fish. Routes available for beginners to certified divers.',
+    descriptionZh:
+      '探索環礁珊瑚花園，與海龜、熱帶魚共游，從初學者到持證潛水員都能找到適合路線。',
+    duration: '半日或全日',
+    groupSize: '2-6 人',
+    includes: JSON.stringify(['裝備', '專業教練', '船程', '午餐']),
+    priceNote: '按行程報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=800&q=80',
+    iconName: 'Waves',
+    sortOrder: 2,
+    status: 'active',
+  },
+  {
+    name: 'Sunset Cruise',
+    nameZh: '日落巡航',
+    slug: 'sunset-cruise',
+    description:
+      'Sail into the golden hour with champagne in hand, watching dolphins leap across the horizon.',
+    descriptionZh:
+      '在金色夕陽中出海，看海豚躍出水面，為一天畫下完美句點。',
+    duration: '2 小時',
+    groupSize: '2-12 人',
+    includes: JSON.stringify(['香檳／飲料', '小點', '船上音樂']),
+    priceNote: '按行程報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80',
+    iconName: 'Sunset',
+    sortOrder: 3,
+    status: 'active',
+  },
+  {
+    name: 'Island Hopping',
+    nameZh: '跳島探索',
+    slug: 'island-hopping',
+    description:
+      'Visit uninhabited islands and local communities in one day, experiencing the many faces of the Maldives.',
+    descriptionZh:
+      '一天穿梭多座無人島與本地島嶼，感受馬爾代夫的多元面貌。',
+    duration: '全日',
+    groupSize: '4-10 人',
+    includes: JSON.stringify(['船程', '導覽', '沙洲午餐', '浮潛']),
+    priceNote: '按行程報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800&q=80',
+    iconName: 'Ship',
+    sortOrder: 4,
+    status: 'active',
+  },
+  {
+    name: 'Whale Shark & Manta Encounter',
+    nameZh: '鯨鯊與魔鬼魚共游',
+    slug: 'whale-shark-manta',
+    description:
+      'Swim alongside gentle whale sharks and manta rays in South Ari Atoll — a once-in-a-lifetime ocean encounter.',
+    descriptionZh:
+      '在 South Ari 環礁與溫柔的鯨鯊和魔鬼魚同游，一生難忘的海洋奇遇。',
+    duration: '半日',
+    groupSize: '2-6 人',
+    includes: JSON.stringify(['專業船長', '浮潛裝備', '海洋生物解說']),
+    priceNote: '按行程報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=800&q=80',
+    iconName: 'Sparkles',
+    sortOrder: 5,
+    status: 'active',
+  },
+  {
+    name: 'Local Island Visit',
+    nameZh: '本地島嶼文化體驗',
+    slug: 'local-island',
+    description:
+      'Step into a Maldivian community to learn about local crafts, fishing village life, and island stories.',
+    descriptionZh:
+      '走進馬爾代夫本地社區，了解傳統工藝、漁村生活與島嶼故事。',
+    duration: '半日',
+    groupSize: '2-8 人',
+    includes: JSON.stringify(['當地導遊', '文化導覽', '傳統小點']),
+    priceNote: '按行程報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=800&q=80',
+    iconName: 'MapPin',
+    sortOrder: 6,
+    status: 'active',
+  },
+]
+
+const demoRetreats: SeedRetreat[] = [
+  {
+    name: 'Yoga & Adventure Retreat',
+    nameZh: '瑜伽與冒險靜修',
+    slug: 'yoga-adventure',
+    description:
+      'Begin each day with sunrise yoga and meditation, spend afternoons snorkeling or exploring uninhabited islands, and unwind under the stars.',
+    descriptionZh:
+      '每日晨間瑜伽、冥想，下午安排浮潛、無人島探險，晚上享受星空下的放鬆。',
+    duration: '8 天 7 晚',
+    location: 'North Malé Atoll',
+    audience: '瑜伽練習者、想要身心平衡的旅客',
+    itinerary: JSON.stringify([
+      { day: 'Day 1', title: '抵達', desc: '迎賓晚餐、日落冥想' },
+      { day: 'Day 2-6', title: '瑜伽與冒險', desc: '晨間瑜伽、活動體驗、自由時間' },
+      { day: 'Day 7', title: '文化與告別', desc: '文化導覽、告別晚宴' },
+      { day: 'Day 8', title: '離島', desc: '帶著平靜的心啟程' },
+    ]),
+    priceNote: '按人數與房型報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80',
+    iconName: 'Leaf',
+    sortOrder: 1,
+    status: 'active',
+  },
+  {
+    name: 'Surf Retreat',
+    nameZh: '衝浪靜修',
+    slug: 'surf',
+    description:
+      'Led by experienced surf coaches, this retreat takes you to the best breaks in the Maldives for learning, practice, and pure wave joy.',
+    descriptionZh:
+      '由經驗豐富的衝浪教練帶領，前往馬爾代夫最佳浪點，學習、練習、享受海浪。',
+    duration: '8 天 7 晚',
+    location: 'South Malé / Central Atolls',
+    audience: '初學者到中級衝浪者',
+    itinerary: JSON.stringify([
+      { day: 'Day 1', title: '適應日', desc: '抵達、浪況介紹、歡迎晚餐' },
+      { day: 'Day 2-4', title: '浪點探索', desc: '每日兩次衝浪、教練指導' },
+      { day: 'Day 5-6', title: '影片分析', desc: '動作檢討、自由衝浪' },
+      { day: 'Day 7', title: '告別派對', desc: '最後一浪、海灘派對' },
+      { day: 'Day 8', title: '離島', desc: '帶著新技巧回家' },
+    ]),
+    priceNote: '按人數與房型報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1502680390469-be436bb09401?w=800&q=80',
+    iconName: 'Waves',
+    sortOrder: 2,
+    status: 'active',
+  },
+  {
+    name: 'Couple Getaway',
+    nameZh: '浪漫雙人靜修',
+    slug: 'couple',
+    description:
+      'Private sandbank dinners, couples spa, sunset cruises, and uninhabited island picnics — create memories made just for two.',
+    descriptionZh:
+      '私人沙洲晚餐、雙人 SPA、日落巡航、無人島野餐，為兩人創造專屬回憶。',
+    duration: '8 天 7 晚',
+    location: 'North Malé Atoll',
+    audience: '情侶、蜜月、週年紀念',
+    itinerary: JSON.stringify([
+      { day: 'Day 1', title: '浪漫抵達', desc: '房型浪漫布置、迎賓香檳' },
+      { day: 'Day 2', title: '沙洲燭光晚餐', desc: '私人沙洲、專屬廚師' },
+      { day: 'Day 3', title: '浮潛共游', desc: '與海龜和熱帶魚共游' },
+      { day: 'Day 4', title: '雙人 SPA', desc: '海邊療程、放鬆身心' },
+      { day: 'Day 5', title: '日落巡航', desc: '私人遊艇、海豚相伴' },
+      { day: 'Day 6-7', title: '自由時光', desc: '無人島野餐、星空電影' },
+      { day: 'Day 8', title: '離島', desc: '帶著回憶啟程' },
+    ]),
+    priceNote: '按人數與房型報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80',
+    iconName: 'Heart',
+    sortOrder: 3,
+    status: 'active',
+  },
+  {
+    name: 'Fishing Package',
+    nameZh: '釣魚套餐',
+    slug: 'fishing',
+    description:
+      'From traditional night fishing to professional big-game fishing, local fishermen guide you to the best spots for an authentic Maldivian ocean experience.',
+    descriptionZh:
+      '從傳統夜釣到專業海釣，由當地漁夫帶領前往最佳釣點，體驗馬爾代夫的海洋文化。',
+    duration: '10 天 9 晚',
+    location: '多個環礁',
+    audience: '釣魚愛好者、團體',
+    itinerary: JSON.stringify([
+      { day: 'Day 1-2', title: '夜釣體驗', desc: '傳統釣法、船上晚餐' },
+      { day: 'Day 3-5', title: '礁釣', desc: '環礁釣點、多樣魚種' },
+      { day: 'Day 6-8', title: '深海釣', desc: '大魚挑戰、專業裝備' },
+      { day: 'Day 9', title: '魚獲烹飪', desc: '主廚料理、本地島嶼探訪' },
+      { day: 'Day 10', title: '離島', desc: '滿載回憶與故事' },
+    ]),
+    priceNote: '按人數與房型報價',
+    imageUrl:
+      'https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80',
+    iconName: 'Fish',
+    sortOrder: 4,
+    status: 'active',
+  },
+]
+
+function lagoonVilla(
+  basePrice: number,
+  overrides: Partial<Omit<SeedRoomType, 'propertyId' | 'name' | 'nameZh' | 'description' | 'descriptionZh' | 'pricePerNight' | 'maxGuests' | 'inventory' | 'imageUrl' | 'amenities' | 'status'>> = {}
+): Omit<SeedRoomType, 'propertyId'> {
   return {
     name: 'Lagoon Villa',
     nameZh: '潟湖別墅',
@@ -329,11 +586,30 @@ function lagoonVilla(basePrice: number): Omit<SeedRoomType, 'propertyId'> {
     imageUrl:
       'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600',
     amenities: JSON.stringify(['海景露台', '浴缸', '空調', 'Wi-Fi']),
+    bedType: 'King',
+    view: 'Lagoon View',
+    sizeSqm: 65,
+    occupancy: '2 Adults',
+    gallery: JSON.stringify([
+      'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80',
+      'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80',
+    ]),
+    features: JSON.stringify([
+      '私人露台',
+      '下沉式沙發',
+      '海景浴缸',
+      '空調',
+      'Wi-Fi',
+    ]),
     status: 'available',
+    ...overrides,
   }
 }
 
-function oceanSuite(basePrice: number): Omit<SeedRoomType, 'propertyId'> {
+function oceanSuite(
+  basePrice: number,
+  overrides: Partial<Omit<SeedRoomType, 'propertyId' | 'name' | 'nameZh' | 'description' | 'descriptionZh' | 'pricePerNight' | 'maxGuests' | 'inventory' | 'imageUrl' | 'amenities' | 'status'>> = {}
+): Omit<SeedRoomType, 'propertyId'> {
   return {
     name: 'Ocean Suite',
     nameZh: '海洋套房',
@@ -345,7 +621,22 @@ function oceanSuite(basePrice: number): Omit<SeedRoomType, 'propertyId'> {
     imageUrl:
       'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600',
     amenities: JSON.stringify(['私人泳池', '客廳', '管家服務', '迎賓香檳']),
+    bedType: '2 King',
+    view: 'Ocean View',
+    sizeSqm: 110,
+    occupancy: '4 Adults',
+    gallery: JSON.stringify([
+      'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80',
+      'https://images.unsplash.com/photo-1544144433-d50aff500b91?w=800&q=80',
+    ]),
+    features: JSON.stringify([
+      '私人無邊際泳池',
+      '獨立客廳',
+      '迎賓香檳',
+      '管家服務',
+    ]),
     status: 'available',
+    ...overrides,
   }
 }
 
@@ -362,9 +653,7 @@ async function seedAdmin(db: D1Database): Promise<void> {
   )
 }
 
-export async function seedDatabase(db: D1Database): Promise<void> {
-  await seedAdmin(db)
-
+async function seedPropertiesAndRoomTypes(db: D1Database): Promise<void> {
   const check = await db
     .prepare('SELECT COUNT(*) as count FROM properties')
     .first<{ count: number }>()
@@ -407,8 +696,8 @@ export async function seedDatabase(db: D1Database): Promise<void> {
       await run(
         db,
         `INSERT INTO room_types
-          (property_id, name, name_zh, description, description_zh, price_per_night, max_guests, inventory, image_url, amenities, status)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (property_id, name, name_zh, description, description_zh, price_per_night, max_guests, inventory, image_url, amenities, bed_type, view, size_sqm, occupancy, gallery, features, status)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           room.propertyId,
           room.name,
@@ -420,9 +709,89 @@ export async function seedDatabase(db: D1Database): Promise<void> {
           room.inventory,
           room.imageUrl,
           room.amenities,
+          room.bedType,
+          room.view,
+          room.sizeSqm,
+          room.occupancy,
+          room.gallery,
+          room.features,
           room.status,
         ]
       )
     }
   }
+}
+
+async function seedExperiences(db: D1Database): Promise<void> {
+  const check = await db
+    .prepare('SELECT COUNT(*) as count FROM experiences')
+    .first<{ count: number }>()
+  if (check && check.count > 0) {
+    return
+  }
+
+  for (const exp of demoExperiences) {
+    await run(
+      db,
+      `INSERT OR IGNORE INTO experiences
+        (name, name_zh, slug, description, description_zh, duration, group_size, includes, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      [
+        exp.name,
+        exp.nameZh,
+        exp.slug,
+        exp.description,
+        exp.descriptionZh,
+        exp.duration,
+        exp.groupSize,
+        exp.includes,
+        exp.priceNote,
+        exp.imageUrl,
+        exp.iconName,
+        exp.sortOrder,
+        exp.status,
+      ]
+    )
+  }
+}
+
+async function seedRetreats(db: D1Database): Promise<void> {
+  const check = await db
+    .prepare('SELECT COUNT(*) as count FROM retreats')
+    .first<{ count: number }>()
+  if (check && check.count > 0) {
+    return
+  }
+
+  for (const retreat of demoRetreats) {
+    await run(
+      db,
+      `INSERT OR IGNORE INTO retreats
+        (name, name_zh, slug, description, description_zh, duration, location, audience, itinerary, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      [
+        retreat.name,
+        retreat.nameZh,
+        retreat.slug,
+        retreat.description,
+        retreat.descriptionZh,
+        retreat.duration,
+        retreat.location,
+        retreat.audience,
+        retreat.itinerary,
+        retreat.priceNote,
+        retreat.imageUrl,
+        retreat.iconName,
+        retreat.sortOrder,
+        retreat.status,
+      ]
+    )
+  }
+}
+
+export async function seedDatabase(db: D1Database): Promise<void> {
+  await seedAdmin(db)
+  await seedPropertiesAndRoomTypes(db)
+  await seedExperiences(db)
+  await seedRetreats(db)
 }

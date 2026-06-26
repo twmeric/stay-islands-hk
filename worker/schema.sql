@@ -43,7 +43,52 @@ CREATE TABLE IF NOT EXISTS room_types (
   inventory INTEGER NOT NULL DEFAULT 1,
   image_url TEXT,
   amenities TEXT, -- JSON array stored as TEXT
+  bed_type TEXT, -- e.g. King / Twin / Queen
+  view TEXT, -- e.g. Ocean View / Lagoon View
+  size_sqm INTEGER, -- room size in square meters
+  occupancy TEXT, -- e.g. 2 Adults + 1 Child
+  gallery TEXT, -- JSON array of image URLs
+  features TEXT, -- JSON array of feature strings
   status TEXT NOT NULL DEFAULT 'available' CHECK(status IN ('available', 'unavailable', 'hidden')),
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
+CREATE TABLE IF NOT EXISTS experiences (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  name_zh TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT,
+  description_zh TEXT,
+  duration TEXT,
+  group_size TEXT,
+  includes TEXT, -- JSON array of strings
+  price_note TEXT,
+  image_url TEXT,
+  icon_name TEXT,
+  sort_order INTEGER DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
+CREATE TABLE IF NOT EXISTS retreats (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  name_zh TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT,
+  description_zh TEXT,
+  duration TEXT,
+  location TEXT,
+  audience TEXT,
+  itinerary TEXT, -- JSON array of {day, title, desc}
+  price_note TEXT,
+  image_url TEXT,
+  icon_name TEXT,
+  sort_order INTEGER DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
 );

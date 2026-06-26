@@ -50,11 +50,11 @@ export default function InvestPage() {
         </div>
         <div className="relative z-10 h-full flex items-end px-6 lg:px-16 pb-16 lg:pb-24">
           <div className="max-w-2xl text-left text-white">
-            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">海島業主計劃</p>
+            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">你的海島，更多可能</p>
             <h1 className="text-5xl lg:text-6xl font-bold mb-6">先體驗，再決定。</h1>
             <p className="text-lg lg:text-xl text-white/90 max-w-xl mb-8">
-              成為海島業主，從住進來開始。
-              HK Islanders 為你預留一片海，讓感覺帶領你。
+              無論是第一次探索、每年回來度假，還是想擁有一處長期屬於自己的海島據點，
+              HK Islanders 都陪你從住進來開始，讓感覺帶領你。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-start">
               <Link
@@ -85,11 +85,11 @@ export default function InvestPage() {
         </div>
         <div className="flex-1 flex items-center justify-center px-6 py-10 text-center text-white">
           <div className="max-w-xl">
-            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">海島業主計劃</p>
+            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">你的海島，更多可能</p>
             <h1 className="text-4xl font-bold mb-6">先體驗，再決定。</h1>
             <p className="text-lg text-white/90 mb-8">
-              成為海島業主，從住進來開始。
-              HK Islanders 為你預留一片海，讓感覺帶領你。
+              無論是第一次探索、每年回來度假，還是想擁有一處長期屬於自己的海島據點，
+              HK Islanders 都陪你從住進來開始，讓感覺帶領你。
             </p>
             <div className="flex flex-col gap-4">
               <Link
@@ -114,11 +114,11 @@ export default function InvestPage() {
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
           <div>
             <p className="text-2xl font-bold text-[#B8902F]">1,240+</p>
-            <p className="text-sm text-white/70">組香港旅客已體驗海島業主生活</p>
+            <p className="text-sm text-white/70">組香港旅客已透過 HK Islanders 體驗馬爾代夫</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-[#B8902F]">38</p>
-            <p className="text-sm text-white/70">位香港海島業主已經落定</p>
+            <p className="text-2xl font-bold text-[#B8902F]">8+</p>
+            <p className="text-sm text-white/70">年當地管家與營運經驗</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-[#B8902F]">15+ 年</p>
@@ -134,16 +134,16 @@ export default function InvestPage() {
       {/* Rental Proof / Demand Evidence */}
       <section className="bg-[#B8902F] py-10 px-4">
         <div className="max-w-5xl mx-auto text-center text-white">
-          <p className="text-white/80 text-sm tracking-widest uppercase mb-4">出租實證</p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-8">有人租，才有投資價值</h2>
+          <p className="text-white/80 text-sm tracking-widest uppercase mb-4">旅客口碑</p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8">持續被選擇，持續被記得</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <p className="text-4xl md:text-5xl font-bold mb-2">73%</p>
-              <p className="text-white/90 text-sm">過去 12 個月 HK Islanders 物業平均入住率</p>
+              <p className="text-white/90 text-sm">過去 12 個月合作物業平均入住率</p>
             </div>
             <div>
               <p className="text-4xl md:text-5xl font-bold mb-2">1,240+</p>
-              <p className="text-white/90 text-sm">組香港旅客透過本平台預訂體驗</p>
+              <p className="text-white/90 text-sm">組香港旅客透過本平台展開海島假期</p>
             </div>
             <div>
               <p className="text-4xl md:text-5xl font-bold mb-2">4.9/5</p>
@@ -151,7 +151,7 @@ export default function InvestPage() {
             </div>
           </div>
           <p className="mt-8 text-white/80 text-sm max-w-2xl mx-auto">
-            每一晚的預訂，都是這片海真實需求的證明。HK Islanders 不只幫你找到海島之家，更讓你看見它持續被需要的價值。
+            每一晚的預訂，都是這片海真實吸引力的證明。HK Islanders 不只幫你找到合適的住宿，更陪你設計一段值得重複回來的關係。
           </p>
         </div>
       </section>
@@ -160,14 +160,14 @@ export default function InvestPage() {
       <section className="py-24 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#2ec4b6] font-medium mb-2">海島業主視角</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a]">擁有一座海島之家，是什麼感覺？</h2>
+            <p className="text-[#2ec4b6] font-medium mb-2">長期陪伴視角</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a]">與一片海建立長期關係，是什麼感覺？</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: '🏝️', title: '這裡永遠是你的', desc: '每年回到同一個地方，管家記得你的名字、你的習慣、你喜歡的角落。' },
-              { icon: '📈', title: '你不在時，它在為你工作', desc: '專業團隊代為管理與出租，讓你的海島之家在空閒時也持續被照顧。' },
-              { icon: '💎', title: '留給下一代的資產', desc: '一片海、一個回憶、一個可以傳給家人的地方。' },
+              { icon: '📅', title: '每次回來，都被記得', desc: '專屬管家記得你的名字、你的習慣、你喜歡的角落，讓每次都像回家。' },
+              { icon: '💎', title: '從假期變成生活的一部分', desc: '當你每年都想念這裡，我們會陪你探索更長期、更屬於你的方式。' },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -190,15 +190,15 @@ export default function InvestPage() {
       <section className="py-24 px-4 bg-[#f8fafb]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#B8902F] font-medium mb-2">海島業主之路</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a]">四步，從旅客變成海島業主</h2>
+            <p className="text-[#B8902F] font-medium mb-2">海島假期設計之路</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a]">四步，設計你的海島假期</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { step: '01', title: '住進來', desc: '以海島業主的身份入住，感受這個地方如何回應你。' },
-              { step: '02', title: '聊聊看', desc: '如果你開始想「每年回來」，我們會陪你聊聊這意味著什麼。' },
-              { step: '03', title: '了解細節', desc: '只有在感覺對了之後，我們才會談結構、稅務與持有方式。' },
-              { step: '04', title: '決定成為業主', desc: '由專業團隊代為管理，你只需決定每年想回來多久。' },
+              { step: '01', title: '住進來', desc: '選一間讓你心动的住宿，真實感受這個地方如何回應你。' },
+              { step: '02', title: '聊聊看', desc: '如果你開始想「每年回來」，我們會陪你聊聊有哪些客製化方式。' },
+              { step: '03', title: '了解細節', desc: '感覺對了之後，我們會一起規劃行程、體驗與長期可能性。' },
+              { step: '04', title: '決定你的節奏', desc: '無論是每年回來度假，還是探索更深度的關係，我們都在。' },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -223,9 +223,9 @@ export default function InvestPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div>
               <p className="text-[#B8902F] font-medium mb-2">輕鬆對話</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a] mb-6">預約一次輕鬆的業主對話</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a] mb-6">預約一次輕鬆的海島諮詢</h2>
               <p className="text-gray-600 mb-8">
-                不是推銷，不是財務分析。我們只是想聽聽你理想的海島之家生活是什麼樣子，
+                不是推銷，不是財務分析。我們只是想聽聽你理想的海島假期是什麼樣子，
                 然後告訴你有哪些方式可以讓它發生。
               </p>
               <div className="bg-[#f8fafb] rounded-2xl p-6 border border-gray-100 mb-8">
@@ -233,14 +233,14 @@ export default function InvestPage() {
                 <ul className="space-y-3 text-sm text-gray-600">
                   <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 你理想的海島之家節奏：熱鬧、私密、還是兩者兼具？</li>
                   <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 你每年想回來多久？一個人、兩個人，還是一家人？</li>
-                  <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 如果你喜歡這裡，成為海島業主有哪些可能的路徑？</li>
-                  <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 如何安排一次業主體驗，讓感覺帶領你決定</li>
+                  <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 如果你喜歡這裡，有哪些更深度的長期方式？</li>
+                  <li className="flex items-start gap-2"><span className="text-[#2ec4b6]">✓</span> 如何安排一次體驗，讓感覺帶領你決定</li>
                 </ul>
               </div>
               <div className="bg-[#0a4c6b] text-white rounded-2xl p-6">
-                <p className="text-white/80 text-sm mb-1">本季開放對話名額</p>
+                <p className="text-white/80 text-sm mb-1">本季開放諮詢名額</p>
                 <p className="text-3xl font-bold">12 個</p>
-                <p className="text-white/60 text-xs mt-2">本月已有 18 位香港旅客預約了業主對話</p>
+                <p className="text-white/60 text-xs mt-2">本月已有 18 位香港旅客預約了海島諮詢</p>
               </div>
             </div>
 
@@ -248,8 +248,8 @@ export default function InvestPage() {
               {submitted ? (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 rounded-full bg-[#2ec4b6] text-white flex items-center justify-center text-2xl mx-auto mb-4">✓</div>
-                  <h3 className="text-2xl font-bold text-[#0d1b2a] mb-2">對話邀請已收到</h3>
-                  <p className="text-gray-600">我們的物業關係經理將在 1 個工作天內與你聯絡，先聽聽你的海島之家想像。</p>
+                  <h3 className="text-2xl font-bold text-[#0d1b2a] mb-2">諮詢邀請已收到</h3>
+                  <p className="text-gray-600">我們的海島假期顧問將在 1 個工作天內與你聯絡，先聽聽你的海島假期想像。</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -277,7 +277,7 @@ export default function InvestPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">有興趣的物業</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">有興趣的住宿</label>
                     <select value={form.property} onChange={(e) => setForm({ ...form, property: e.target.value })} className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]">
                       <option value="">請選擇</option>
                       <option value="mikado">御海閣 Stay Mikado</option>
@@ -288,10 +288,10 @@ export default function InvestPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">留言（選填）</label>
-                    <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={3} className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]" placeholder="請簡述您的投資目標或疑問..." />
+                    <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={3} className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]" placeholder="請簡述您的海島假期想像或疑問..." />
                   </div>
                   <button type="submit" className="w-full bg-[#B8902F] text-white py-3 rounded-xl font-semibold hover:bg-[#9a7a28] transition">
-                    預約業主對話
+                    預約海島諮詢
                   </button>
                   <p className="text-xs text-gray-500 text-center">無任何費用 · 你的資訊將保密處理</p>
                 </form>
@@ -305,11 +305,11 @@ export default function InvestPage() {
       <section className="py-8 px-4 bg-[#f8fafb]">
         <div className="max-w-4xl mx-auto text-center space-y-3">
           <p className="text-xs text-gray-500">
-            成為海島業主涉及長期承諾與財務安排，所有物業資訊僅供參考。
-            正式交易前請諮詢獨立法律、稅務及財務顧問。HK Islanders 提供的是體驗與資訊，並非投資建議。
+            海島物業與長期持有涉及複雜法律、稅務及財務安排，所有資訊僅供參考。
+            正式交易前請諮詢獨立專業顧問。HK Islanders 提供的是度假體驗與資訊，並非投資建議。
           </p>
           <p className="text-xs text-gray-500">
-            「島主」為 HK Islanders 對海島物業業主的暱稱。
+            「島主」為 HK Islanders 對長期海島夥伴的暱稱。
           </p>
         </div>
       </section>

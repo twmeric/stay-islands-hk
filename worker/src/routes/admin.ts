@@ -20,6 +20,7 @@ import type {
   CmsArticle,
   CouponDiscountType,
   Customer,
+  Experience,
   Inquiry,
   InquiryPriority,
   InquiryStatus,
@@ -30,6 +31,7 @@ import type {
   PaymentGateway,
   Property,
   PropertyStatus,
+  Retreat,
   RoomType,
   RoomTypeStatus,
   TransactionStatus,
@@ -302,8 +304,8 @@ app.post('/properties', requireAdmin, async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO properties
-      (name, name_zh, description, description_zh, location, price_per_night, max_guests, image_url, amenities, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      (name, name_zh, description, description_zh, location, price_per_night, max_guests, image_url, amenities, gallery, facilities, activities, location_details, story, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       name,
       nameZh,
@@ -314,6 +316,11 @@ app.post('/properties', requireAdmin, async (c) => {
       body.maxGuests != null ? Number(body.maxGuests) : null,
       typeof body.imageUrl === 'string' ? body.imageUrl.trim() || null : null,
       toJson(body.amenities),
+      toJson(body.gallery),
+      toJson(body.facilities),
+      toJson(body.activities),
+      toJson(body.locationDetails),
+      toJson(body.story),
       status,
     ]
   )
@@ -380,6 +387,26 @@ app.put('/properties/:id', requireAdmin, async (c) => {
   if (body.amenities !== undefined) {
     fields.push('amenities = ?')
     values.push(toJson(body.amenities))
+  }
+  if (body.gallery !== undefined) {
+    fields.push('gallery = ?')
+    values.push(toJson(body.gallery))
+  }
+  if (body.facilities !== undefined) {
+    fields.push('facilities = ?')
+    values.push(toJson(body.facilities))
+  }
+  if (body.activities !== undefined) {
+    fields.push('activities = ?')
+    values.push(toJson(body.activities))
+  }
+  if (body.locationDetails !== undefined) {
+    fields.push('location_details = ?')
+    values.push(toJson(body.locationDetails))
+  }
+  if (body.story !== undefined) {
+    fields.push('story = ?')
+    values.push(toJson(body.story))
   }
   if (body.status !== undefined) {
     const status = String(body.status)
@@ -466,8 +493,8 @@ app.post('/properties/:id/room-types', requireAdmin, async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO room_types
-      (property_id, name, name_zh, description, description_zh, price_per_night, max_guests, inventory, image_url, amenities, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      (property_id, name, name_zh, description, description_zh, price_per_night, max_guests, inventory, image_url, amenities, bed_type, view, size_sqm, occupancy, gallery, features, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       propertyId,
       name,
@@ -479,6 +506,12 @@ app.post('/properties/:id/room-types', requireAdmin, async (c) => {
       Number(body.inventory) || 1,
       typeof body.imageUrl === 'string' ? body.imageUrl.trim() || null : null,
       toJson(body.amenities),
+      typeof body.bedType === 'string' ? body.bedType.trim() || null : null,
+      typeof body.view === 'string' ? body.view.trim() || null : null,
+      body.sizeSqm != null ? Number(body.sizeSqm) : null,
+      typeof body.occupancy === 'string' ? body.occupancy.trim() || null : null,
+      toJson(body.gallery),
+      toJson(body.features),
       status,
     ]
   )
@@ -545,6 +578,30 @@ app.put('/room-types/:id', requireAdmin, async (c) => {
     fields.push('amenities = ?')
     values.push(toJson(body.amenities))
   }
+  if (body.bedType !== undefined) {
+    fields.push('bed_type = ?')
+    values.push(typeof body.bedType === 'string' ? body.bedType.trim() || null : null)
+  }
+  if (body.view !== undefined) {
+    fields.push('view = ?')
+    values.push(typeof body.view === 'string' ? body.view.trim() || null : null)
+  }
+  if (body.sizeSqm !== undefined) {
+    fields.push('size_sqm = ?')
+    values.push(body.sizeSqm != null ? Number(body.sizeSqm) : null)
+  }
+  if (body.occupancy !== undefined) {
+    fields.push('occupancy = ?')
+    values.push(typeof body.occupancy === 'string' ? body.occupancy.trim() || null : null)
+  }
+  if (body.gallery !== undefined) {
+    fields.push('gallery = ?')
+    values.push(toJson(body.gallery))
+  }
+  if (body.features !== undefined) {
+    fields.push('features = ?')
+    values.push(toJson(body.features))
+  }
   if (body.status !== undefined) {
     const status = String(body.status)
     if (!['available', 'unavailable', 'hidden'].includes(status)) {
@@ -587,6 +644,350 @@ app.delete('/room-types/:id', requireAdmin, async (c) => {
     adminId: c.get('adminId') ?? null,
     action: 'delete',
     targetTable: 'room_types',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: { ok: true } })
+})
+
+// ============================================================================
+// Experiences
+// ============================================================================
+
+const validExperienceStatuses = ['active', 'inactive']
+
+app.get('/experiences', requireAdmin, async (c) => {
+  const status = c.req.query('status')
+  const limit = Math.min(parseIntParam(c.req.query('limit'), 100), 200)
+  const offset = Math.max(parseIntParam(c.req.query('offset'), 0), 0)
+
+  let where = 'WHERE 1=1'
+  const params: unknown[] = []
+  if (status && validExperienceStatuses.includes(status)) {
+    where += ' AND status = ?'
+    params.push(status)
+  }
+
+  const experiences = await all<Experience>(
+    c.env.DB,
+    `SELECT * FROM experiences ${where} ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
+  )
+
+  const countRow = await first<{ count: number }>(c.env.DB, `SELECT COUNT(*) as count FROM experiences ${where}`, params)
+  return c.json({ data: experiences, total: countRow?.count ?? 0 })
+})
+
+app.get('/experiences/:id', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid experience id' }, 400)
+
+  const experience = await first<Experience>(c.env.DB, 'SELECT * FROM experiences WHERE id = ?', [id])
+  if (!experience) return c.json({ error: 'Experience not found' }, 404)
+  return c.json({ data: experience })
+})
+
+app.post('/experiences', requireAdmin, async (c) => {
+  const body = await c.req.json<Record<string, unknown>>()
+  const name = typeof body.name === 'string' ? body.name.trim() : ''
+  const nameZh = typeof body.nameZh === 'string' ? body.nameZh.trim() : ''
+  const slug = typeof body.slug === 'string' ? body.slug.trim() : ''
+  if (!name || !nameZh || !slug) {
+    return c.json({ error: 'Missing required fields: name, nameZh, slug' }, 400)
+  }
+
+  const status = validExperienceStatuses.includes(String(body.status)) ? String(body.status) : 'active'
+
+  const result = await run(
+    c.env.DB,
+    `INSERT INTO experiences
+      (name, name_zh, slug, description, description_zh, duration, group_size, includes, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+    [
+      name,
+      nameZh,
+      slug,
+      typeof body.description === 'string' ? body.description.trim() || null : null,
+      typeof body.descriptionZh === 'string' ? body.descriptionZh.trim() || null : null,
+      typeof body.duration === 'string' ? body.duration.trim() || null : null,
+      typeof body.groupSize === 'string' ? body.groupSize.trim() || null : null,
+      toJson(body.includes),
+      typeof body.priceNote === 'string' ? body.priceNote.trim() || null : null,
+      typeof body.imageUrl === 'string' ? body.imageUrl.trim() || null : null,
+      typeof body.iconName === 'string' ? body.iconName.trim() || null : null,
+      Number(body.sortOrder) || 0,
+      status,
+    ]
+  )
+
+  const experience = await first<Experience>(c.env.DB, 'SELECT * FROM experiences WHERE id = ?', [
+    result.meta.last_row_id,
+  ])
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'create',
+    targetTable: 'experiences',
+    targetId: result.meta.last_row_id,
+    after: experience as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: experience }, 201)
+})
+
+app.put('/experiences/:id', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid experience id' }, 400)
+
+  const existing = await first<Experience>(c.env.DB, 'SELECT * FROM experiences WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Experience not found' }, 404)
+
+  const body = await c.req.json<Record<string, unknown>>()
+  const fieldMap: Record<string, string> = {
+    name: 'name',
+    nameZh: 'name_zh',
+    slug: 'slug',
+    description: 'description',
+    descriptionZh: 'description_zh',
+    duration: 'duration',
+    groupSize: 'group_size',
+    includes: 'includes',
+    priceNote: 'price_note',
+    imageUrl: 'image_url',
+    iconName: 'icon_name',
+    sortOrder: 'sort_order',
+    status: 'status',
+  }
+
+  const fields: string[] = []
+  const values: unknown[] = []
+
+  for (const [key, dbKey] of Object.entries(fieldMap)) {
+    if (body[key] !== undefined) {
+      fields.push(`${dbKey} = ?`)
+      if (['includes'].includes(key)) {
+        values.push(toJson(body[key]))
+      } else if (key === 'sortOrder') {
+        values.push(Number(body[key]) || 0)
+      } else if (key === 'status') {
+        const s = String(body[key])
+        if (!validExperienceStatuses.includes(s)) {
+          return c.json({ error: 'Invalid status' }, 400)
+        }
+        values.push(s)
+      } else {
+        values.push(typeof body[key] === 'string' ? String(body[key]).trim() || null : null)
+      }
+    }
+  }
+
+  if (fields.length === 0) return c.json({ error: 'No fields to update' }, 400)
+
+  fields.push('updated_at = unixepoch()')
+  values.push(id)
+
+  await run(c.env.DB, `UPDATE experiences SET ${fields.join(', ')} WHERE id = ?`, values)
+  const updated = await first<Experience>(c.env.DB, 'SELECT * FROM experiences WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'update',
+    targetTable: 'experiences',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+app.delete('/experiences/:id', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid experience id' }, 400)
+
+  const existing = await first<Experience>(c.env.DB, 'SELECT * FROM experiences WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Experience not found' }, 404)
+
+  await run(c.env.DB, 'DELETE FROM experiences WHERE id = ?', [id])
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'delete',
+    targetTable: 'experiences',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: { ok: true } })
+})
+
+// ============================================================================
+// Retreats
+// ============================================================================
+
+const validRetreatStatuses = ['active', 'inactive']
+
+app.get('/retreats', requireAdmin, async (c) => {
+  const status = c.req.query('status')
+  const limit = Math.min(parseIntParam(c.req.query('limit'), 100), 200)
+  const offset = Math.max(parseIntParam(c.req.query('offset'), 0), 0)
+
+  let where = 'WHERE 1=1'
+  const params: unknown[] = []
+  if (status && validRetreatStatuses.includes(status)) {
+    where += ' AND status = ?'
+    params.push(status)
+  }
+
+  const retreats = await all<Retreat>(
+    c.env.DB,
+    `SELECT * FROM retreats ${where} ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
+  )
+
+  const countRow = await first<{ count: number }>(c.env.DB, `SELECT COUNT(*) as count FROM retreats ${where}`, params)
+  return c.json({ data: retreats, total: countRow?.count ?? 0 })
+})
+
+app.get('/retreats/:id', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid retreat id' }, 400)
+
+  const retreat = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [id])
+  if (!retreat) return c.json({ error: 'Retreat not found' }, 404)
+  return c.json({ data: retreat })
+})
+
+app.post('/retreats', requireAdmin, async (c) => {
+  const body = await c.req.json<Record<string, unknown>>()
+  const name = typeof body.name === 'string' ? body.name.trim() : ''
+  const nameZh = typeof body.nameZh === 'string' ? body.nameZh.trim() : ''
+  const slug = typeof body.slug === 'string' ? body.slug.trim() : ''
+  if (!name || !nameZh || !slug) {
+    return c.json({ error: 'Missing required fields: name, nameZh, slug' }, 400)
+  }
+
+  const status = validRetreatStatuses.includes(String(body.status)) ? String(body.status) : 'active'
+
+  const result = await run(
+    c.env.DB,
+    `INSERT INTO retreats
+      (name, name_zh, slug, description, description_zh, duration, location, audience, itinerary, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+    [
+      name,
+      nameZh,
+      slug,
+      typeof body.description === 'string' ? body.description.trim() || null : null,
+      typeof body.descriptionZh === 'string' ? body.descriptionZh.trim() || null : null,
+      typeof body.duration === 'string' ? body.duration.trim() || null : null,
+      typeof body.location === 'string' ? body.location.trim() || null : null,
+      typeof body.audience === 'string' ? body.audience.trim() || null : null,
+      toJson(body.itinerary),
+      typeof body.priceNote === 'string' ? body.priceNote.trim() || null : null,
+      typeof body.imageUrl === 'string' ? body.imageUrl.trim() || null : null,
+      typeof body.iconName === 'string' ? body.iconName.trim() || null : null,
+      Number(body.sortOrder) || 0,
+      status,
+    ]
+  )
+
+  const retreat = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [result.meta.last_row_id])
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'create',
+    targetTable: 'retreats',
+    targetId: result.meta.last_row_id,
+    after: retreat as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: retreat }, 201)
+})
+
+app.put('/retreats/:id', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid retreat id' }, 400)
+
+  const existing = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Retreat not found' }, 404)
+
+  const body = await c.req.json<Record<string, unknown>>()
+  const fieldMap: Record<string, string> = {
+    name: 'name',
+    nameZh: 'name_zh',
+    slug: 'slug',
+    description: 'description',
+    descriptionZh: 'description_zh',
+    duration: 'duration',
+    location: 'location',
+    audience: 'audience',
+    itinerary: 'itinerary',
+    priceNote: 'price_note',
+    imageUrl: 'image_url',
+    iconName: 'icon_name',
+    sortOrder: 'sort_order',
+    status: 'status',
+  }
+
+  const fields: string[] = []
+  const values: unknown[] = []
+
+  for (const [key, dbKey] of Object.entries(fieldMap)) {
+    if (body[key] !== undefined) {
+      fields.push(`${dbKey} = ?`)
+      if (['itinerary'].includes(key)) {
+        values.push(toJson(body[key]))
+      } else if (key === 'sortOrder') {
+        values.push(Number(body[key]) || 0)
+      } else if (key === 'status') {
+        const s = String(body[key])
+        if (!validRetreatStatuses.includes(s)) {
+          return c.json({ error: 'Invalid status' }, 400)
+        }
+        values.push(s)
+      } else {
+        values.push(typeof body[key] === 'string' ? String(body[key]).trim() || null : null)
+      }
+    }
+  }
+
+  if (fields.length === 0) return c.json({ error: 'No fields to update' }, 400)
+
+  fields.push('updated_at = unixepoch()')
+  values.push(id)
+
+  await run(c.env.DB, `UPDATE retreats SET ${fields.join(', ')} WHERE id = ?`, values)
+  const updated = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'update',
+    targetTable: 'retreats',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+app.delete('/retreats/:id', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid retreat id' }, 400)
+
+  const existing = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Retreat not found' }, 404)
+
+  await run(c.env.DB, 'DELETE FROM retreats WHERE id = ?', [id])
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'delete',
+    targetTable: 'retreats',
     targetId: id,
     before: existing as unknown as Record<string, unknown>,
     ip: c.req.header('CF-Connecting-IP') ?? null,

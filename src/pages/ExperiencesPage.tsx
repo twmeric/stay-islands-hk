@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Users, Check, Fish, Waves, Ship, Sunset, MapPin, Anchor, Heart, Sparkles, X } from 'lucide-react';
+import { Clock, Users, Check, Fish, Waves, Ship, Sunset, MapPin, Anchor, Heart, Sparkles, Leaf, Loader2, X } from 'lucide-react';
 import { client } from '../api/client';
 
 interface Experience {
@@ -16,7 +16,24 @@ interface Experience {
   icon: React.ReactNode;
 }
 
-const experiences: Experience[] = [
+interface ApiExperience {
+  id: number;
+  name: string;
+  nameZh: string;
+  slug: string;
+  description: string;
+  descriptionZh: string;
+  duration: string;
+  groupSize: string;
+  includes: string;
+  priceNote: string;
+  imageUrl: string;
+  iconName: string | null;
+  sortOrder: number;
+  status: string;
+}
+
+const fallbackExperiences: Experience[] = [
   {
     id: 'night-fishing',
     name: 'Night Fishing Trip',
@@ -90,6 +107,49 @@ const experiences: Experience[] = [
     icon: <MapPin className="w-5 h-5" />,
   },
 ];
+
+function safeJsonParse<T>(value: string | null, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Fish,
+  Waves,
+  Sunset,
+  Ship,
+  Sparkles,
+  MapPin,
+  Anchor,
+  Heart,
+  Leaf,
+};
+
+function getIconByName(name: string | null): React.ReactNode {
+  if (!name) return <Sparkles className="w-5 h-5" />;
+  const Icon = iconMap[name];
+  if (!Icon) return <Sparkles className="w-5 h-5" />;
+  return <Icon className="w-5 h-5" />;
+}
+
+function mapApiExperience(item: ApiExperience): Experience {
+  return {
+    id: item.slug,
+    name: item.name,
+    nameZh: item.nameZh,
+    duration: item.duration,
+    groupSize: item.groupSize,
+    includes: safeJsonParse<string[]>(item.includes, []),
+    description: item.description,
+    priceNote: item.priceNote,
+    image: item.imageUrl,
+    icon: getIconByName(item.iconName),
+  };
+}
 
 interface InquiryFormData {
   name: string;
@@ -289,6 +349,43 @@ function InquiryForm({
 
 export default function ExperiencesPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [apiExperiences, setApiExperiences] = useState<Experience[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      try {
+        const res = await client.api.fetch('/api/public/experiences');
+        if (!res.ok) {
+          throw new Error(`API error ${res.status}`);
+        }
+        const json = (await res.json()) as { data?: ApiExperience[] };
+        const list = Array.isArray(json?.data) ? json.data.map(mapApiExperience) : [];
+        if (mounted) {
+          setApiExperiences(list);
+        }
+      } catch (err) {
+        console.error('Experiences load error:', err);
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const displayExperiences = apiExperiences.length > 0 ? apiExperiences : fallbackExperiences;
 
   return (
     <div className="pt-20 pb-16">
@@ -349,88 +446,95 @@ export default function ExperiencesPage() {
       {/* Activities Grid */}
       <section className="py-16 px-4 bg-[#f8fafb]">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {experiences.map((exp, i) => (
-              <motion.div
-                key={exp.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <img
-                    src={exp.image}
-                    alt={exp.nameZh}
-                    className="w-full h-full object-cover hover:scale-105 transition duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  <div className="absolute top-4 left-4 bg-[#B8902F] text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
-                    {exp.icon}
-                    <span>{exp.name}</span>
-                  </div>
-                  <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
-                    {exp.priceNote}
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#0d1b2a] mb-2">{exp.nameZh}</h3>
-                  <p className="text-sm text-gray-500 mb-1">{exp.name}</p>
-                  <p className="text-gray-600 text-sm mt-3 leading-relaxed">{exp.description}</p>
-
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="w-4 h-4 text-[#2ec4b6]" />
-                      <span>{exp.duration}</span>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-10 h-10 text-[#0a4c6b] animate-spin mb-4" />
+              <p className="text-gray-500">載入體驗中…</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {displayExperiences.map((exp, i) => (
+                <motion.div
+                  key={exp.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      src={exp.image}
+                      alt={exp.nameZh}
+                      className="w-full h-full object-cover hover:scale-105 transition duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    <div className="absolute top-4 left-4 bg-[#B8902F] text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
+                      {exp.icon}
+                      <span>{exp.name}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="w-4 h-4 text-[#2ec4b6]" />
-                      <span>建議人數：{exp.groupSize}</span>
+                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
+                      {exp.priceNote}
                     </div>
                   </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-[#0d1b2a] mb-2">{exp.nameZh}</h3>
+                    <p className="text-sm text-gray-500 mb-1">{exp.name}</p>
+                    <p className="text-gray-600 text-sm mt-3 leading-relaxed">{exp.description}</p>
 
-                  <div className="mt-4">
-                    <p className="text-xs text-gray-500 mb-2">包含：</p>
-                    <div className="flex flex-wrap gap-2">
-                      {exp.includes.map((item, idx) => (
-                        <span
-                          key={idx}
-                          className="text-xs bg-[#f0f9f7] text-[#0a4c6b] px-2 py-1 rounded-full flex items-center gap-1"
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="w-4 h-4 text-[#2ec4b6]" />
+                        <span>{exp.duration}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Users className="w-4 h-4 text-[#2ec4b6]" />
+                        <span>建議人數：{exp.groupSize}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <p className="text-xs text-gray-500 mb-2">包含：</p>
+                      <div className="flex flex-wrap gap-2">
+                        {exp.includes.map((item, idx) => (
+                          <span
+                            key={idx}
+                            className="text-xs bg-[#f0f9f7] text-[#0a4c6b] px-2 py-1 rounded-full flex items-center gap-1"
+                          >
+                            <Check className="w-3 h-3" />
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setActiveId(activeId === exp.id ? null : exp.id)}
+                      className="w-full mt-6 bg-[#0a4c6b] text-white py-3 rounded-xl font-semibold hover:bg-[#083d56] transition"
+                    >
+                      {activeId === exp.id ? '收起表單' : '客製化此體驗'}
+                    </button>
+
+                    <AnimatePresence>
+                      {activeId === exp.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="overflow-hidden"
                         >
-                          <Check className="w-3 h-3" />
-                          {item}
-                        </span>
-                      ))}
-                    </div>
+                          <div className="pt-6">
+                            <InquiryForm activity={exp.name} onClose={() => setActiveId(null)} />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-
-                  <button
-                    onClick={() => setActiveId(activeId === exp.id ? null : exp.id)}
-                    className="w-full mt-6 bg-[#0a4c6b] text-white py-3 rounded-xl font-semibold hover:bg-[#083d56] transition"
-                  >
-                    {activeId === exp.id ? '收起表單' : '客製化此體驗'}
-                  </button>
-
-                  <AnimatePresence>
-                    {activeId === exp.id && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pt-6">
-                          <InquiryForm activity={exp.name} onClose={() => setActiveId(null)} />
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

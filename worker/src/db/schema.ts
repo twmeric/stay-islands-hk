@@ -82,7 +82,52 @@ export interface RoomType {
   inventory: number
   imageUrl: string | null
   amenities: string | null // JSON array stored as TEXT
+  bedType: string | null
+  view: string | null
+  sizeSqm: number | null
+  occupancy: string | null
+  gallery: string | null // JSON array of image URLs
+  features: string | null // JSON array of strings
   status: RoomTypeStatus
+  createdAt: number
+  updatedAt: number
+}
+
+export interface Experience {
+  id: number
+  name: string
+  nameZh: string
+  slug: string
+  description: string | null
+  descriptionZh: string | null
+  duration: string | null
+  groupSize: string | null
+  includes: string | null // JSON array of strings
+  priceNote: string | null
+  imageUrl: string | null
+  iconName: string | null
+  sortOrder: number
+  status: 'active' | 'inactive'
+  createdAt: number
+  updatedAt: number
+}
+
+export interface Retreat {
+  id: number
+  name: string
+  nameZh: string
+  slug: string
+  description: string | null
+  descriptionZh: string | null
+  duration: string | null
+  location: string | null
+  audience: string | null
+  itinerary: string | null // JSON array of {day, title, desc}
+  priceNote: string | null
+  imageUrl: string | null
+  iconName: string | null
+  sortOrder: number
+  status: 'active' | 'inactive'
   createdAt: number
   updatedAt: number
 }

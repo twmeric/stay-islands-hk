@@ -31,7 +31,7 @@ export default function Layout() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
             <Link to="/properties" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">度假物業</Link>
-            <Link to="/invest" className="text-black hover:text-[#0a4c6b] transition text-sm font-medium">島主計劃</Link>
+            <Link to="/invest" className="text-black hover:text-[#0a4c6b] transition text-sm font-medium">更多可能</Link>
             <Link to="/guide" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">旅遊指南</Link>
             <Link to="/experiences" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">海島體驗</Link>
             <Link to="/retreats" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">主題 Retreats</Link>
@@ -44,7 +44,7 @@ export default function Layout() {
                 <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-600 transition">登出</button>
               </div>
             ) : (
-              <Link to="/invest" className="bg-[#0a4c6b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#083d56] transition">預約業主對話</Link>
+              <Link to="/invest" className="bg-[#0a4c6b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#083d56] transition">預約海島諮詢</Link>
             )}
           </div>
 
@@ -60,7 +60,7 @@ export default function Layout() {
         {mobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-lg px-4 py-4 space-y-3">
             <Link to="/properties" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">度假物業</Link>
-            <Link to="/invest" onClick={() => setMobileMenu(false)} className="block text-black py-2">島主計劃</Link>
+            <Link to="/invest" onClick={() => setMobileMenu(false)} className="block text-black py-2">更多可能</Link>
             <Link to="/guide" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">旅遊指南</Link>
             <Link to="/experiences" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">海島體驗</Link>
             <Link to="/retreats" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">主題 Retreats</Link>
@@ -73,7 +73,7 @@ export default function Layout() {
                 <button onClick={() => { handleLogout(); setMobileMenu(false); }} className="block text-red-500 py-2">登出</button>
               </>
             ) : (
-              <Link to="/invest" onClick={() => setMobileMenu(false)} className="block bg-[#0a4c6b] text-white px-4 py-2 rounded-lg text-center">預約業主對話</Link>
+              <Link to="/invest" onClick={() => setMobileMenu(false)} className="block bg-[#0a4c6b] text-white px-4 py-2 rounded-lg text-center">預約海島諮詢</Link>
             )}
           </div>
         )}
@@ -96,7 +96,7 @@ export default function Layout() {
               <h4 className="font-medium mb-3">快速連結</h4>
               <div className="space-y-2 text-sm text-gray-400">
                 <Link to="/properties" className="block hover:text-white transition">度假物業</Link>
-                <Link to="/invest" className="block hover:text-white transition">海島業主計劃</Link>
+                <Link to="/invest" className="block hover:text-white transition">更多可能</Link>
                 <Link to="/guide" className="block hover:text-white transition">旅遊指南</Link>
                 <Link to="/experiences" className="block hover:text-white transition">海島體驗</Link>
                 <Link to="/retreats" className="block hover:text-white transition">主題 Retreats</Link>
