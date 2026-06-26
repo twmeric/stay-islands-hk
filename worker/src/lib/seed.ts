@@ -649,7 +649,7 @@ async function seedAdmin(db: D1Database): Promise<void> {
     `INSERT INTO admins
       (email, name, role, password_hash, is_active, created_at, updated_at)
       VALUES (?, ?, ?, ?, 1, unixepoch(), unixepoch())`,
-    ['admin@stayislands.hk', 'Super Admin', 'superadmin', bcryptjs.hashSync('stay1234', 10)]
+    ['admin', 'Super Admin', 'superadmin', bcryptjs.hashSync('maid360', 10)]
   )
 }
 

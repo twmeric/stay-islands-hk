@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { client } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import {
@@ -2402,8 +2403,16 @@ function PropertiesSection() {
 // ============================================================================
 
 export default function AdminPage() {
-  const { adminRole } = useAuthStore();
+  const navigate = useNavigate();
+  const { user, isAdmin, isChecking, adminRole } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'bookings' | 'inquiries' | 'properties' | 'experiences' | 'retreats' | 'accounts'>('bookings');
+
+  // Guard: redirect to login if not authenticated as admin
+  useEffect(() => {
+    if (!isChecking && (!user || !isAdmin)) {
+      navigate('/auth');
+    }
+  }, [isChecking, user, isAdmin, navigate]);
   const [bookings, setBookings] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
@@ -2564,6 +2573,15 @@ export default function AdminPage() {
     { key: 'retreats', label: '主題靜修' },
     ...(adminRole === 'superadmin' ? [{ key: 'accounts', label: '帳戶管理' }] : []),
   ];
+
+  // Show spinner while auth state is being restored or if not admin
+  if (isChecking || !user || !isAdmin) {
+    return (
+      <div className="pt-20 pb-16 min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-[#0a4c6b] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="pt-20 pb-16 min-h-screen bg-gray-50">

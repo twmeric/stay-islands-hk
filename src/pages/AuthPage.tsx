@@ -5,15 +5,15 @@ import { useAuthStore } from '../store/authStore';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { user, setUser, setAdminStatus } = useAuthStore();
+  const { user, isAdmin, setUser, setAdminStatus } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) navigate('/dashboard');
-  }, [user]);
+    if (user) navigate(isAdmin ? '/admin' : '/dashboard');
+  }, [user, isAdmin]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -49,7 +49,7 @@ export default function AuthPage() {
       const adminData = await adminRes.json();
       setAdminStatus(adminData.isAdmin, adminData.role);
 
-      navigate('/dashboard');
+      navigate(adminData.isAdmin ? '/admin' : '/dashboard');
     } catch (err) {
       console.error(err);
       setError('登入時發生錯誤，請稍後再試');
@@ -66,13 +66,13 @@ export default function AuthPage() {
           <p className="text-sm text-gray-500 mb-6">登入以繼續管理後台</p>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">電郵地址</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">帳號</label>
               <input
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="輸入您的電郵地址"
+                placeholder="輸入您的帳號"
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b]"
               />
             </div>
