@@ -227,5 +227,173 @@ IRM 在合規框架下進行諮詢，記錄互動日誌。
 本網站所載有關馬爾代夫物業投資、租金回報、升值潛力及管理費用之任何資料、數據、預測或試算結果，僅供參考及教育用途，並不構成任何投資建議、招攬、要約或邀請作出要約購買任何物業或證券。投資海外物業涉及重大風險，包括但不限於市場風險、匯率風險、法律及稅務風險、流動性風險、租賃空置風險及開發商 / 管理公司履約風險。過往表現並不代表未來回報。在作出任何投資決定前，閣下應尋求獨立法律、稅務及財務顧問之意見，並仔細閱讀相關銷售文件。Stay Islands HK 並非持牌地產代理或受規管財務顧問，平台可能僅作為資訊及轉介用途。
 本章節的所有條款、文案與流程必須經香港執業律師最終審閱，並根據實際業務結構調整。
 
+# PART C — 內容管理系統（CMS）設計
+
+## C1. CMS 目標與範圍
+
+為了讓營運團隊無需修改前端程式碼即可更新網站內容，本系統在現有 Admin 後台擴充內容管理功能。本次 CMS 建置範圍涵蓋：
+
+- **住宿（Properties）**：基本資料、圖片畫廊（gallery）、設施（facilities）、可體驗活動（activities）、位置與週邊（location_details）、物業故事（story）
+- **房型（Room Types）**：擴充床型（bed_type）、景觀（view）、面積（size_sqm）、入住人數（occupancy）、房型圖片（gallery）、房型特色（features）
+- **海島體驗（Experiences）**：6 個活動的完整資訊與排序管理
+- **主題靜修（Retreats）**：4 個 Retreat 的完整資訊、行程與排序管理
+
+以下內容**不納入**本次 CMS 範圍，保留寫死於前端：首頁 Hero 文案、About 文案、旅客故事、全站靜態文案、Footer 聯絡資訊。
+
+## C2. 資料模型設計
+
+### C2.1 `properties` 表既有 JSON 欄位
+
+| 欄位 | 型別 | 說明 |
+|---|---|---|
+| `gallery` | TEXT (JSON) | 圖片 URL 陣列 |
+| `facilities` | TEXT (JSON) | `{icon, label}` 陣列 |
+| `activities` | TEXT (JSON) | `{image, name, description}` 陣列 |
+| `location_details` | TEXT (JSON) | `{description, mapImage, nearby}` |
+| `story` | TEXT (JSON) | `{title, content}` |
+
+### C2.2 `room_types` 表擴充欄位
+
+| 欄位 | 型別 | 說明 |
+|---|---|---|
+| `bed_type` | TEXT | 床型，例如 King / Twin / Queen |
+| `view` | TEXT | 景觀，例如 Ocean View / Lagoon View |
+| `size_sqm` | INTEGER | 房間面積（平方公尺） |
+| `occupancy` | TEXT | 入住人數描述 |
+| `gallery` | TEXT (JSON) | 房型圖片 URL 陣列 |
+| `features` | TEXT (JSON) | 房型特色文字陣列 |
+
+### C2.3 `experiences` 表
+
+| 欄位 | 型別 | 說明 |
+|---|---|---|
+| `id` | INTEGER PK | 主鍵 |
+| `name` / `name_zh` | TEXT | 英文 / 中文名稱 |
+| `slug` | TEXT UNIQUE | URL 用識別碼 |
+| `description` / `description_zh` | TEXT | 英文 / 中文描述 |
+| `duration` | TEXT | 活動時長 |
+| `group_size` | TEXT | 建議人數 |
+| `includes` | TEXT (JSON) | 包含項目陣列 |
+| `price_note` | TEXT | 價格說明 |
+| `image_url` | TEXT | 主圖 URL |
+| `icon_name` | TEXT | Lucide icon 名稱 |
+| `sort_order` | INTEGER | 排序權重 |
+| `status` | TEXT | active / inactive |
+
+### C2.4 `retreats` 表
+
+| 欄位 | 型別 | 說明 |
+|---|---|---|
+| `id` | INTEGER PK | 主鍵 |
+| `name` / `name_zh` | TEXT | 英文 / 中文名稱 |
+| `slug` | TEXT UNIQUE | URL 用識別碼 |
+| `description` / `description_zh` | TEXT | 英文 / 中文描述 |
+| `duration` | TEXT | 天數 |
+| `location` | TEXT | 地點 |
+| `audience` | TEXT | 適合對象 |
+| `itinerary` | TEXT (JSON) | 每日行程 `{day, title, desc}` 陣列 |
+| `price_note` | TEXT | 價格說明 |
+| `image_url` | TEXT | 主圖 URL |
+| `icon_name` | TEXT | Lucide icon 名稱 |
+| `sort_order` | INTEGER | 排序權重 |
+| `status` | TEXT | active / inactive |
+
+## C3. API 設計
+
+### C3.1 公開 API（前台讀取）
+
+| 端點 | 說明 |
+|---|---|
+| `GET /api/public/experiences` | 取得所有 active experiences |
+| `GET /api/public/experiences/:slug` | 取得單一 experience |
+| `GET /api/public/retreats` | 取得所有 active retreats |
+| `GET /api/public/retreats/:slug` | 取得單一 retreat |
+| `GET /api/public/properties/:id` | 取得完整物業資料（含 JSON 欄位） |
+| `GET /api/public/properties/:id/rooms` | 取得該物業所有房型（含新欄位） |
+
+### C3.2 Admin API（後台管理）
+
+| 端點 | 說明 |
+|---|---|
+| `GET /api/admin/experiences` | 列表 |
+| `POST /api/admin/experiences` | 新增 |
+| `PATCH /api/admin/experiences/:id` | 更新 |
+| `DELETE /api/admin/experiences/:id` | 刪除 |
+| `GET /api/admin/retreats` | 列表 |
+| `POST /api/admin/retreats` | 新增 |
+| `PATCH /api/admin/retreats/:id` | 更新 |
+| `DELETE /api/admin/retreats/:id` | 刪除 |
+| `PATCH /api/admin/properties/:id` | 擴充支援 JSON 欄位更新 |
+| `PATCH /api/admin/room-types/:id` | 擴充支援新欄位更新 |
+
+## C4. Admin 介面設計
+
+AdminPage 維持單頁多 tab 架構，新增以下 tab：
+
+### C4.1 Experiences Tab
+- 列表顯示 name_zh、duration、status、sort_order
+- 新增 / 編輯表單包含所有欄位
+- includes 使用 textarea，每行一項
+
+### C4.2 Retreats Tab
+- 列表顯示 name_zh、duration、location、status
+- 新增 / 編輯表單包含所有欄位
+- itinerary 使用動態表單或 JSON editor
+
+### C4.3 Properties 編輯擴充
+- 在現有 Property 編輯表單中新增 JSON editor：
+  - Gallery 圖片 URL 列表
+  - Facilities `{icon, label}` 列表
+  - Activities `{image, name, description}` 列表
+  - Location Details `{description, mapImage, nearby}`
+  - Story `{title, content}`
+
+### C4.4 Room Types 編輯擴充
+- 在現有 Room Type 編輯表單中新增：
+  - bed_type、view、size_sqm、occupancy
+  - gallery 圖片 URL 列表
+  - features 特色清單
+
+## C5. 前台頁面串接
+
+### C5.1 ExperiencesPage
+- 移除寫死資料陣列
+- 透過 `useEffect` 呼叫 `GET /api/public/experiences`
+- 保留 API 回傳空陣列時的 fallback demo 資料
+
+### C5.2 RetreatsPage
+- 移除寫死資料陣列
+- 透過 `useEffect` 呼叫 `GET /api/public/retreats`
+- 保留 API 回傳空陣列時的 fallback demo 資料
+
+### C5.3 PropertyDetailPage
+- 房型展示改為「卡片 grid + 點擊展開詳情」
+- 每個房型卡片顯示：圖片、名稱、床型、景觀、面積、入住人數、特色
+- 點擊展開：房型圖片輪播、更多描述、預訂諮詢按鈕
+- 確保所有豐富資料從 API 讀取
+
+### C5.4 HomePage
+- Experiences Preview 從 API 讀取前 3 筆 active experiences
+- Retreats Preview 從 API 讀取前 2 筆 active retreats
+- Properties Preview 從 API 讀取所有 active properties
+
+## C6. 資料遷移與種子
+
+### C6.1 既有寫死資料遷移
+將目前寫死於前台的 Experiences、Retreats、PropertyDetailPage demo 資料，透過種子腳本寫入 D1。
+
+### C6.2 未來維護
+- 新增體驗或 Retreat：直接在 Admin 後台新增
+- 調整房型資訊：直接在 Admin 後台編輯
+- 更換物業圖片或設施：直接在 Admin 後台編輯 Property
+
+## C7. 部署與驗證
+
+1. 建立 D1 migration 檔案並應用
+2. 執行種子腳本填充初始資料
+3. 部署 Worker
+4. 前端 build 並 push 到 main 觸發 Pages 部署
+5. 驗證 Admin CRUD 與前台顯示
+
 — 文件結束 —
 Stay Islands HK PRD/SA&D v2.0 | 2026 年 6 月 | 機密文件
