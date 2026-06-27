@@ -1389,6 +1389,9 @@ app.get('/bookings', requireAdmin, async (c) => {
   const paymentStatus = c.req.query('payment_status')
   const customerId = c.req.query('customer_id')
   const propertyId = c.req.query('property_id')
+  const search = c.req.query('search')?.trim()
+  const checkInFrom = toUnixEpoch(c.req.query('check_in_from'))
+  const checkInTo = toUnixEpoch(c.req.query('check_in_to'))
   const limit = Math.min(parseIntParam(c.req.query('limit'), 20), 100)
   const offset = Math.max(parseIntParam(c.req.query('offset'), 0), 0)
 
@@ -1410,15 +1413,35 @@ app.get('/bookings', requireAdmin, async (c) => {
     where += ' AND property_id = ?'
     params.push(Number(propertyId))
   }
+  if (search) {
+    where += ` AND (
+      b.id = ?
+      OR EXISTS (
+        SELECT 1 FROM customers c
+        WHERE c.id = b.customer_id
+        AND (c.email LIKE ? OR c.name LIKE ? OR c.phone LIKE ?)
+      )
+    )`
+    const like = `%${search}%`
+    params.push(Number(search) || 0, like, like, like)
+  }
+  if (checkInFrom != null) {
+    where += ' AND check_in >= ?'
+    params.push(checkInFrom)
+  }
+  if (checkInTo != null) {
+    where += ' AND check_in <= ?'
+    params.push(checkInTo)
+  }
 
   const bookings = await all<Booking>(
     c.env.DB,
-    `SELECT * FROM bookings ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+    `SELECT b.* FROM bookings b ${where} ORDER BY b.created_at DESC LIMIT ? OFFSET ?`,
     [...params, limit, offset]
   )
   const countRow = await first<{ count: number }>(
     c.env.DB,
-    `SELECT COUNT(*) as count FROM bookings ${where}`,
+    `SELECT COUNT(*) as count FROM bookings b ${where}`,
     params
   )
   return c.json({ data: bookings, total: countRow?.count ?? 0 })
@@ -1722,6 +1745,94 @@ app.patch('/bookings/:id/confirm', requireAdmin, async (c) => {
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
     action: 'confirm',
+    targetTable: 'bookings',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+// PATCH /api/admin/bookings/:id/supplier-status - manually set supplier confirmation status
+app.patch('/bookings/:id/supplier-status', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
+
+  const existing = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Booking not found' }, 404)
+
+  const body = await c.req.json<Record<string, unknown>>()
+  const supplierStatus = typeof body.supplierStatus === 'string' ? body.supplierStatus.trim() : ''
+  if (!['pending', 'confirmed', 'rejected'].includes(supplierStatus)) {
+    return c.json({ error: 'Invalid supplier_status' }, 400)
+  }
+
+  await run(
+    c.env.DB,
+    `UPDATE bookings SET supplier_status = ?, updated_at = unixepoch() WHERE id = ?`,
+    [supplierStatus, id]
+  )
+
+  const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'update_supplier_status',
+    targetTable: 'bookings',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+// PATCH /api/admin/bookings/:id/voucher - generate and assign a voucher code
+app.patch('/bookings/:id/voucher', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
+
+  const existing = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Booking not found' }, 404)
+
+  function generateVoucherCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    let code = 'HKI-'
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return code
+  }
+
+  let voucherCode = existing.voucherCode
+  if (!voucherCode) {
+    let attempts = 0
+    do {
+      voucherCode = generateVoucherCode()
+      const dup = await first<{ count: number }>(
+        c.env.DB,
+        'SELECT COUNT(*) as count FROM bookings WHERE voucher_code = ? AND id != ?',
+        [voucherCode, id]
+      )
+      if ((dup?.count ?? 0) === 0) break
+      attempts++
+    } while (attempts < 10)
+  }
+
+  await run(
+    c.env.DB,
+    `UPDATE bookings SET voucher_code = ?, updated_at = unixepoch() WHERE id = ?`,
+    [voucherCode, id]
+  )
+
+  const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'generate_voucher',
     targetTable: 'bookings',
     targetId: id,
     before: existing as unknown as Record<string, unknown>,

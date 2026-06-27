@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { client } from '../api/client';
 import { useAuthStore } from '../store/authStore';
+import DashboardSection from '../components/admin/DashboardSection';
+import CustomersSection from '../components/admin/CustomersSection';
+import LeadsSection from '../components/admin/LeadsSection';
+import PaymentsSection from '../components/admin/PaymentsSection';
 import {
   Anchor,
   Compass,
@@ -2427,7 +2431,7 @@ function PropertiesSection() {
 export default function AdminPage() {
   const navigate = useNavigate();
   const { user, isAdmin, isChecking, adminRole } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'bookings' | 'inquiries' | 'properties' | 'experiences' | 'accounts'>('bookings');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'inquiries' | 'properties' | 'experiences' | 'customers' | 'leads' | 'payments' | 'accounts'>('dashboard');
 
   // Guard: redirect to login if not authenticated as admin
   useEffect(() => {
@@ -2444,6 +2448,11 @@ export default function AdminPage() {
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
   const [bookingStatusFilter, setBookingStatusFilter] = useState<string>('');
   const [bookingPaymentFilter, setBookingPaymentFilter] = useState<string>('');
+  const [bookingSearch, setBookingSearch] = useState('');
+  const [bookingDateFrom, setBookingDateFrom] = useState('');
+  const [bookingDateTo, setBookingDateTo] = useState('');
+  const [bookingPage, setBookingPage] = useState(1);
+  const [bookingTotal, setBookingTotal] = useState(0);
   const [cancelReason, setCancelReason] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('payme');
   const [paymentReference, setPaymentReference] = useState('');
@@ -2451,6 +2460,10 @@ export default function AdminPage() {
   const [bookingActionLoading, setBookingActionLoading] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [replyId, setReplyId] = useState<number | null>(null);
+  const [editingBooking, setEditingBooking] = useState(false);
+  const [editBookingForm, setEditBookingForm] = useState<{ checkIn: string; checkOut: string; roomTypeId: number; guests: number; totalAmount: number } | null>(null);
+  const [voucherPreview, setVoucherPreview] = useState(false);
+  const bookingLimit = 20;
 
   // Account management state
   const [newEmail, setNewEmail] = useState('');
@@ -2463,17 +2476,24 @@ export default function AdminPage() {
     if (activeTab === 'bookings') fetchBookings();
     else if (activeTab === 'inquiries') fetchInquiries();
     else if (activeTab === 'accounts') fetchAccounts();
-  }, [activeTab, bookingStatusFilter, bookingPaymentFilter]);
+    else setLoading(false);
+  }, [activeTab, bookingStatusFilter, bookingPaymentFilter, bookingSearch, bookingDateFrom, bookingDateTo, bookingPage]);
 
   async function fetchBookings() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+      params.append('limit', String(bookingLimit));
+      params.append('offset', String((bookingPage - 1) * bookingLimit));
       if (bookingStatusFilter) params.append('status', bookingStatusFilter);
       if (bookingPaymentFilter) params.append('payment_status', bookingPaymentFilter);
+      if (bookingSearch.trim()) params.append('search', bookingSearch.trim());
+      if (bookingDateFrom) params.append('check_in_from', String(new Date(bookingDateFrom).getTime() / 1000));
+      if (bookingDateTo) params.append('check_in_to', String(new Date(bookingDateTo).getTime() / 1000 + 24 * 60 * 60 - 1));
       const res = await client.api.fetch(`/api/admin/bookings?${params.toString()}`);
       const data = await res.json();
       setBookings(data.data || []);
+      setBookingTotal(data.total || 0);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }
@@ -2503,10 +2523,7 @@ export default function AdminPage() {
     try {
       await client.api.fetch(`/api/admin/bookings/${id}/confirm`, { method: 'PATCH' });
       await fetchBookings();
-      if (selectedBooking?.id === id) {
-        const refreshed = bookings.find((b) => b.id === id);
-        if (refreshed) setSelectedBooking(refreshed);
-      }
+      await refreshSelectedBooking(id);
     } catch (err) { console.error(err); }
     finally { setBookingActionLoading(false); }
   }
@@ -2521,10 +2538,7 @@ export default function AdminPage() {
       });
       setPaymentReference('');
       await fetchBookings();
-      if (selectedBooking?.id === id) {
-        const refreshed = bookings.find((b) => b.id === id);
-        if (refreshed) setSelectedBooking(refreshed);
-      }
+      await refreshSelectedBooking(id);
     } catch (err) { console.error(err); }
     finally { setBookingActionLoading(false); }
   }
@@ -2540,10 +2554,7 @@ export default function AdminPage() {
       const data = await res.json();
       setCancelReason('');
       await fetchBookings();
-      if (selectedBooking?.id === id) {
-        const refreshed = bookings.find((b) => b.id === id);
-        if (refreshed) setSelectedBooking(refreshed);
-      }
+      await refreshSelectedBooking(id);
       alert(`訂單已取消。依退改政策，應退金額：HK$${data.refund?.amount?.toLocaleString() ?? 0}（${data.refund?.percent ?? 0}%）`);
     } catch (err) { console.error(err); }
     finally { setBookingActionLoading(false); }
@@ -2558,12 +2569,130 @@ export default function AdminPage() {
         body: JSON.stringify({ adminNotes }),
       });
       await fetchBookings();
-      if (selectedBooking?.id === id) {
-        const refreshed = bookings.find((b) => b.id === id);
-        if (refreshed) setSelectedBooking(refreshed);
-      }
+      await refreshSelectedBooking(id);
     } catch (err) { console.error(err); }
     finally { setBookingActionLoading(false); }
+  }
+
+  async function refreshSelectedBooking(id: number) {
+    if (selectedBooking?.id !== id) return;
+    try {
+      const res = await client.api.fetch(`/api/admin/bookings/${id}`);
+      const data = await res.json();
+      if (data.data) setSelectedBooking(data.data);
+    } catch (err) { console.error(err); }
+  }
+
+  async function updateSupplierStatus(id: number, supplierStatus: string) {
+    setBookingActionLoading(true);
+    try {
+      await client.api.fetch(`/api/admin/bookings/${id}/supplier-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ supplierStatus }),
+      });
+      await fetchBookings();
+      await refreshSelectedBooking(id);
+    } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
+  }
+
+  function startEditBooking() {
+    if (!selectedBooking) return;
+    setEditBookingForm({
+      checkIn: new Date(selectedBooking.checkIn * 1000).toISOString().split('T')[0],
+      checkOut: new Date(selectedBooking.checkOut * 1000).toISOString().split('T')[0],
+      roomTypeId: selectedBooking.roomTypeId,
+      guests: selectedBooking.guests,
+      totalAmount: selectedBooking.totalAmount,
+    });
+    setEditingBooking(true);
+  }
+
+  async function saveBookingEdit(id: number) {
+    if (!editBookingForm) return;
+    setBookingActionLoading(true);
+    try {
+      await client.api.fetch(`/api/admin/bookings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          checkIn: new Date(editBookingForm.checkIn).getTime() / 1000,
+          checkOut: new Date(editBookingForm.checkOut).getTime() / 1000,
+          roomTypeId: Number(editBookingForm.roomTypeId),
+          guests: Number(editBookingForm.guests),
+          totalAmount: Number(editBookingForm.totalAmount),
+        }),
+      });
+      setEditingBooking(false);
+      await fetchBookings();
+      await refreshSelectedBooking(id);
+    } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
+  }
+
+  async function generateVoucher(id: number) {
+    setBookingActionLoading(true);
+    try {
+      await client.api.fetch(`/api/admin/bookings/${id}/voucher`, { method: 'PATCH' });
+      await fetchBookings();
+      await refreshSelectedBooking(id);
+      setVoucherPreview(true);
+    } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
+  }
+
+  function exportBookingsCSV() {
+    const headers = ['編號', '狀態', '付款狀態', '供應商狀態', '客戶姓名', '客戶電郵', '客戶電話', '入住', '退房', '人數', '金額', '憑證', '建立時間'];
+    const rows = bookings.map((b) => [
+      b.id,
+      b.status,
+      b.paymentStatus,
+      b.supplierStatus,
+      b.customer?.name || '',
+      b.customer?.email || '',
+      b.customer?.phone || '',
+      new Date(b.checkIn * 1000).toLocaleDateString('zh-HK'),
+      new Date(b.checkOut * 1000).toLocaleDateString('zh-HK'),
+      b.guests,
+      b.totalAmount,
+      b.voucherCode || '',
+      new Date(b.createdAt * 1000).toLocaleString('zh-HK'),
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookings-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function printBookingSummary() {
+    if (!selectedBooking) return;
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(`
+      <html><head><title>訂單 #${selectedBooking.id}</title>
+      <style>body{font-family:sans-serif;padding:40px;max-width:700px;margin:0 auto;color:#333} h1{font-size:24px} .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}</style>
+      </head><body>
+      <h1>HK Islanders 訂單摘要</h1>
+      <h2>訂單 #${selectedBooking.id}</h2>
+      <div class="row"><span>狀態</span><span>${selectedBooking.status}</span></div>
+      <div class="row"><span>付款狀態</span><span>${selectedBooking.paymentStatus}</span></div>
+      <div class="row"><span>供應商狀態</span><span>${selectedBooking.supplierStatus}</span></div>
+      <div class="row"><span>客戶</span><span>${selectedBooking.customer?.name || '—'} (${selectedBooking.customer?.email || '—'})</span></div>
+      <div class="row"><span>電話</span><span>${selectedBooking.customer?.phone || '—'}</span></div>
+      <div class="row"><span>入住 / 退房</span><span>${new Date(selectedBooking.checkIn * 1000).toLocaleDateString('zh-HK')} → ${new Date(selectedBooking.checkOut * 1000).toLocaleDateString('zh-HK')}</span></div>
+      <div class="row"><span>人數</span><span>${selectedBooking.guests}</span></div>
+      <div class="row"><span>總金額</span><span>HK$${selectedBooking.totalAmount?.toLocaleString()}</span></div>
+      <div class="row"><span>憑證</span><span>${selectedBooking.voucherCode || '—'}</span></div>
+      <div class="row"><span>備註</span><span>${selectedBooking.adminNotes || '—'}</span></div>
+      <script>window.print()</script>
+      </body></html>
+    `);
+    w.document.close();
   }
 
   async function replyInquiry(id: number) {
@@ -2658,10 +2787,14 @@ export default function AdminPage() {
   };
 
   const tabs = [
+    { key: 'dashboard', label: '總覽' },
     { key: 'bookings', label: '訂單管理' },
     { key: 'inquiries', label: '旅客諮詢' },
+    { key: 'leads', label: '潛在客' },
+    { key: 'customers', label: '客戶管理' },
     { key: 'properties', label: '住宿管理' },
     { key: 'experiences', label: '海島體驗' },
+    { key: 'payments', label: '付款記錄' },
     ...(adminRole === 'superadmin' ? [{ key: 'accounts', label: '帳戶管理' }] : []),
   ];
 
@@ -2703,7 +2836,7 @@ export default function AdminPage() {
                 <label className="text-sm text-gray-600">訂單狀態</label>
                 <select
                   value={bookingStatusFilter}
-                  onChange={(e) => setBookingStatusFilter(e.target.value)}
+                  onChange={(e) => { setBookingStatusFilter(e.target.value); setBookingPage(1); }}
                   className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
                 >
                   <option value="">全部</option>
@@ -2717,7 +2850,7 @@ export default function AdminPage() {
                 <label className="text-sm text-gray-600">付款狀態</label>
                 <select
                   value={bookingPaymentFilter}
-                  onChange={(e) => setBookingPaymentFilter(e.target.value)}
+                  onChange={(e) => { setBookingPaymentFilter(e.target.value); setBookingPage(1); }}
                   className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
                 >
                   <option value="">全部</option>
@@ -2727,8 +2860,40 @@ export default function AdminPage() {
                   <option value="refunded">已退款</option>
                 </select>
               </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">搜尋</label>
+                <input
+                  type="text"
+                  value={bookingSearch}
+                  onChange={(e) => { setBookingSearch(e.target.value); setBookingPage(1); }}
+                  placeholder="訂單編號 / 客戶 Email / 姓名"
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none w-56"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">入住日期</label>
+                <input
+                  type="date"
+                  value={bookingDateFrom}
+                  onChange={(e) => { setBookingDateFrom(e.target.value); setBookingPage(1); }}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                />
+                <span className="text-gray-400">-</span>
+                <input
+                  type="date"
+                  value={bookingDateTo}
+                  onChange={(e) => { setBookingDateTo(e.target.value); setBookingPage(1); }}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+              <button
+                onClick={exportBookingsCSV}
+                className="ml-auto text-sm bg-[#B8902F]/10 text-[#B8902F] px-3 py-2 rounded-lg hover:bg-[#B8902F]/20 transition"
+              >
+                匯出 CSV
+              </button>
               <div className="text-sm text-gray-500">
-                共 {bookings.length} 筆訂單
+                共 {bookingTotal} 筆訂單
               </div>
             </div>
 
@@ -2803,6 +2968,21 @@ export default function AdminPage() {
                   </tbody>
                 </table>
               </div>
+              {Math.ceil(bookingTotal / bookingLimit) > 1 && (
+                <div className="px-4 py-3 border-t flex items-center justify-between">
+                  <button
+                    onClick={() => setBookingPage((p) => Math.max(1, p - 1))}
+                    disabled={bookingPage === 1}
+                    className="text-xs bg-gray-100 px-3 py-1.5 rounded disabled:opacity-50"
+                  >上一頁</button>
+                  <span className="text-sm text-gray-600">第 {bookingPage} / {Math.ceil(bookingTotal / bookingLimit)} 頁</span>
+                  <button
+                    onClick={() => setBookingPage((p) => Math.min(Math.ceil(bookingTotal / bookingLimit), p + 1))}
+                    disabled={bookingPage === Math.ceil(bookingTotal / bookingLimit)}
+                    className="text-xs bg-gray-100 px-3 py-1.5 rounded disabled:opacity-50"
+                  >下一頁</button>
+                </div>
+              )}
             </div>
 
             {/* Booking Detail Modal */}
@@ -2852,9 +3032,67 @@ export default function AdminPage() {
                       </div>
                     </div>
 
+                    {/* Management actions */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        onClick={startEditBooking}
+                        disabled={bookingActionLoading}
+                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition disabled:opacity-60"
+                      >編輯訂單</button>
+                      <button
+                        onClick={() => generateVoucher(selectedBooking.id)}
+                        disabled={bookingActionLoading || !!selectedBooking.voucherCode}
+                        className="text-xs bg-[#B8902F]/10 hover:bg-[#B8902F]/20 text-[#B8902F] px-3 py-2 rounded-lg transition disabled:opacity-60"
+                      >{selectedBooking.voucherCode ? '已產生憑證' : '產生電子憑證'}</button>
+                      {selectedBooking.voucherCode && (
+                        <button
+                          onClick={() => setVoucherPreview(true)}
+                          className="text-xs bg-[#0a4c6b]/10 hover:bg-[#0a4c6b]/20 text-[#0a4c6b] px-3 py-2 rounded-lg transition"
+                        >預覽憑證</button>
+                      )}
+                      <button
+                        onClick={printBookingSummary}
+                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition"
+                      >列印摘要</button>
+                      <div className="flex items-center gap-2 ml-auto">
+                        <span className="text-sm text-gray-600">供應商狀態</span>
+                        <select
+                          value={selectedBooking.supplierStatus || 'pending'}
+                          onChange={(e) => updateSupplierStatus(selectedBooking.id, e.target.value)}
+                          disabled={bookingActionLoading}
+                          className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm disabled:opacity-60"
+                        >
+                          <option value="pending">待確認</option>
+                          <option value="confirmed">已確認</option>
+                          <option value="rejected">已拒絕</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Customer info */}
+                    {selectedBooking.customer && (
+                      <div className="bg-[#f0f9f7] rounded-xl p-4 space-y-2">
+                        <h4 className="font-semibold text-[#0a4c6b]">客戶資料</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-500">姓名</p>
+                            <p className="font-medium">{selectedBooking.customer.name || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">電郵</p>
+                            <p className="font-medium">{selectedBooking.customer.email || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">電話</p>
+                            <p className="font-medium">{selectedBooking.customer.phone || '—'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Customer & trip info */}
                     <div className="space-y-3">
-                      <h4 className="font-semibold text-[#0d1b2a]">客戶與行程資訊</h4>
+                      <h4 className="font-semibold text-[#0d1b2a]">行程資訊</h4>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-gray-500">入住日期</p>
@@ -3025,6 +3263,99 @@ export default function AdminPage() {
                         )}
                       </div>
                     )}
+
+                    {/* Edit booking modal (inline) */}
+                    {editingBooking && editBookingForm && (
+                      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
+                        <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-bold text-[#0d1b2a]">編輯訂單 #{selectedBooking.id}</h4>
+                            <button onClick={() => setEditingBooking(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">入住日期</label>
+                              <input
+                                type="date"
+                                value={editBookingForm.checkIn}
+                                onChange={(e) => setEditBookingForm({ ...editBookingForm, checkIn: e.target.value })}
+                                className="w-full border rounded-lg px-3 py-2 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">退房日期</label>
+                              <input
+                                type="date"
+                                value={editBookingForm.checkOut}
+                                onChange={(e) => setEditBookingForm({ ...editBookingForm, checkOut: e.target.value })}
+                                className="w-full border rounded-lg px-3 py-2 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">房型 ID</label>
+                              <select
+                                value={editBookingForm.roomTypeId}
+                                onChange={(e) => setEditBookingForm({ ...editBookingForm, roomTypeId: Number(e.target.value) })}
+                                className="w-full border rounded-lg px-3 py-2 text-sm"
+                              >
+                                {selectedBooking.property?.roomTypes?.map((rt: any) => (
+                                  <option key={rt.id} value={rt.id}>{rt.nameZh} (#{rt.id})</option>
+                                )) || <option value={editBookingForm.roomTypeId}>房型 #{editBookingForm.roomTypeId}</option>}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">人數</label>
+                              <input
+                                type="number"
+                                value={editBookingForm.guests}
+                                onChange={(e) => setEditBookingForm({ ...editBookingForm, guests: Number(e.target.value) })}
+                                className="w-full border rounded-lg px-3 py-2 text-sm"
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <label className="block text-xs text-gray-500 mb-1">總金額（HKD）</label>
+                              <input
+                                type="number"
+                                value={editBookingForm.totalAmount}
+                                onChange={(e) => setEditBookingForm({ ...editBookingForm, totalAmount: Number(e.target.value) })}
+                                className="w-full border rounded-lg px-3 py-2 text-sm"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-3">
+                            <button onClick={() => setEditingBooking(false)} className="text-sm text-gray-500 px-3 py-2">取消</button>
+                            <button
+                              onClick={() => saveBookingEdit(selectedBooking.id)}
+                              disabled={bookingActionLoading}
+                              className="bg-[#0a4c6b] text-white px-5 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
+                            >儲存變更</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Voucher preview modal */}
+                    {voucherPreview && selectedBooking.voucherCode && (
+                      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
+                        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center space-y-4">
+                          <h4 className="font-bold text-[#0d1b2a]">電子憑證預覽</h4>
+                          <div className="bg-gradient-to-r from-[#0a4c6b] to-[#2ec4b6] rounded-2xl p-6 text-white">
+                            <p className="text-white/70 text-sm">HK Islanders Voucher</p>
+                            <p className="text-3xl font-mono font-bold mt-2">{selectedBooking.voucherCode}</p>
+                            <p className="text-white/90 text-sm mt-4">
+                              {new Date(selectedBooking.checkIn * 1000).toLocaleDateString('zh-HK')} - {new Date(selectedBooking.checkOut * 1000).toLocaleDateString('zh-HK')}
+                            </p>
+                            <p className="text-white/90 text-sm">{selectedBooking.customer?.name || 'Guest'}</p>
+                            <p className="text-2xl font-bold mt-3">HK${selectedBooking.totalAmount?.toLocaleString()}</p>
+                            <p className="text-white/70 text-xs mt-1">預訂 #{selectedBooking.id}</p>
+                          </div>
+                          <button
+                            onClick={() => setVoucherPreview(false)}
+                            className="text-sm text-gray-500 px-4 py-2"
+                          >關閉</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -3072,6 +3403,14 @@ export default function AdminPage() {
               ))
             )}
           </div>
+        ) : activeTab === 'dashboard' ? (
+          <DashboardSection />
+        ) : activeTab === 'customers' ? (
+          <CustomersSection />
+        ) : activeTab === 'leads' ? (
+          <LeadsSection />
+        ) : activeTab === 'payments' ? (
+          <PaymentsSection />
         ) : activeTab === 'accounts' ? (
           <div className="space-y-6">
             {/* Add new admin form */}
