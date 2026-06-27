@@ -12,7 +12,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) navigate(isAdmin ? '/admin' : '/member');
+    if (user && isAdmin) navigate('/admin');
   }, [user, isAdmin]);
 
   async function handleLogin(e: React.FormEvent) {
@@ -47,9 +47,19 @@ export default function AuthPage() {
 
       const adminRes = await client.api.fetch('/api/admin/check');
       const adminData = await adminRes.json();
-      setAdminStatus(adminData.isAdmin, adminData.role);
+      const role = adminData?.data?.role ?? adminData?.role ?? null;
+      const isAdminConfirmed = adminData?.data?.isAdmin ?? adminData?.isAdmin ?? false;
+      setAdminStatus(isAdminConfirmed, role);
 
-      navigate(adminData.isAdmin ? '/admin' : '/member');
+      if (!isAdminConfirmed) {
+        setError('此帳號沒有後台管理權限');
+        localStorage.removeItem('admin_access_token');
+        localStorage.removeItem('admin_refresh_token');
+        localStorage.removeItem('stayislands_user');
+        return;
+      }
+
+      navigate('/admin');
     } catch (err) {
       console.error(err);
       setError('登入時發生錯誤，請稍後再試');

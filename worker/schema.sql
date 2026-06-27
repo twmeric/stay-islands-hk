@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS properties (
   activities TEXT, -- JSON array of {image, name, description}
   location_details TEXT, -- JSON object {description, mapImage, nearby}
   story TEXT, -- JSON object {title, content}
+  cancellation_policy TEXT, -- JSON object {rules: [{days_before, refund_percent}]}
   status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'draft')),
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
@@ -49,6 +50,7 @@ CREATE TABLE IF NOT EXISTS room_types (
   occupancy TEXT, -- e.g. 2 Adults + 1 Child
   gallery TEXT, -- JSON array of image URLs
   features TEXT, -- JSON array of feature strings
+  cancellation_policy TEXT, -- JSON object {rules: [{days_before, refund_percent}]}
   status TEXT NOT NULL DEFAULT 'available' CHECK(status IN ('available', 'unavailable', 'hidden')),
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
@@ -164,6 +166,16 @@ CREATE TABLE IF NOT EXISTS bookings (
   payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK(payment_status IN ('unpaid', 'partial', 'paid', 'refunded')),
   voucher_code TEXT,
   addons TEXT DEFAULT '[]',
+  payment_method TEXT,
+  payment_reference TEXT,
+  payment_deadline INTEGER,
+  paid_at INTEGER,
+  supplier_status TEXT DEFAULT 'pending' CHECK(supplier_status IN ('pending', 'confirmed', 'rejected')),
+  admin_notes TEXT,
+  cancellation_reason TEXT,
+  refund_amount INTEGER DEFAULT 0,
+  cancelled_at INTEGER,
+  confirmed_at INTEGER,
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
 );

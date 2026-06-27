@@ -301,12 +301,14 @@ app.post('/bookings', async (c) => {
     ])
   }
 
+  const paymentDeadline = Math.floor(Date.now() / 1000) + 48 * 60 * 60 // 48 hours
+
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, unixepoch(), unixepoch())`,
-    [customer?.id ?? null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons]
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, supplier_status, payment_deadline, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, 'pending', ?, unixepoch(), unixepoch())`,
+    [customer?.id ?? null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons, paymentDeadline]
   )
 
   const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [

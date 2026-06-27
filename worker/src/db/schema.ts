@@ -65,6 +65,7 @@ export interface Property {
   activities: string | null // JSON array of {image, name, description}
   locationDetails: string | null // JSON object {description, mapImage, nearby}
   story: string | null // JSON object {title, content}
+  cancellationPolicy: string | null // JSON object {rules: [{days_before, refund_percent}]}
   status: PropertyStatus
   createdAt: number
   updatedAt: number
@@ -88,6 +89,7 @@ export interface RoomType {
   occupancy: string | null
   gallery: string | null // JSON array of image URLs
   features: string | null // JSON array of strings
+  cancellationPolicy: string | null // JSON object {rules: [{days_before, refund_percent}]}
   status: RoomTypeStatus
   createdAt: number
   updatedAt: number
@@ -203,6 +205,16 @@ export interface Booking {
   paymentStatus: PaymentStatus
   voucherCode: string | null
   addons: string | null
+  paymentMethod: string | null
+  paymentReference: string | null
+  paymentDeadline: number | null
+  paidAt: number | null
+  supplierStatus: string | null
+  adminNotes: string | null
+  cancellationReason: string | null
+  refundAmount: number
+  cancelledAt: number | null
+  confirmedAt: number | null
   createdAt: number
   updatedAt: number
 }

@@ -191,6 +191,17 @@ app.post('/auth/logout', requireAdmin, async (c) => {
   return c.json({ data: { ok: true } })
 })
 
+// GET /api/admin/check - verify current admin session and role
+app.get('/check', requireAdmin, async (c) => {
+  return c.json({
+    data: {
+      isAdmin: true,
+      role: c.get('adminRole') ?? null,
+      adminId: c.get('adminId') ?? null,
+    },
+  })
+})
+
 
 // ============================================================================
 // Dashboard
@@ -416,6 +427,10 @@ app.put('/properties/:id', requireAdmin, async (c) => {
     fields.push('status = ?')
     values.push(status)
   }
+  if (body.cancellationPolicy !== undefined) {
+    fields.push('cancellation_policy = ?')
+    values.push(toJson(body.cancellationPolicy))
+  }
 
   if (fields.length === 0) return c.json({ error: 'No fields to update' }, 400)
 
@@ -609,6 +624,10 @@ app.put('/room-types/:id', requireAdmin, async (c) => {
     }
     fields.push('status = ?')
     values.push(status)
+  }
+  if (body.cancellationPolicy !== undefined) {
+    fields.push('cancellation_policy = ?')
+    values.push(toJson(body.cancellationPolicy))
   }
 
   if (fields.length === 0) return c.json({ error: 'No fields to update' }, 400)
@@ -1283,6 +1302,11 @@ function parseBookingBody(body: Record<string, unknown>): {
   status: BookingStatus
   voucherCode: string | null
   addons: string
+  paymentMethod: string | null
+  paymentReference: string | null
+  paymentDeadline: number | null
+  supplierStatus: string
+  adminNotes: string | null
 } {
   const propertyId = Number(body.propertyId)
   const roomTypeId = Number(body.roomTypeId)
@@ -1311,11 +1335,58 @@ function parseBookingBody(body: Record<string, unknown>): {
     status,
     voucherCode: typeof body.voucherCode === 'string' ? body.voucherCode.trim() || null : null,
     addons: Array.isArray(body.addons) ? JSON.stringify(body.addons) : '[]',
+    paymentMethod: typeof body.paymentMethod === 'string' ? body.paymentMethod.trim() || null : null,
+    paymentReference: typeof body.paymentReference === 'string' ? body.paymentReference.trim() || null : null,
+    paymentDeadline: typeof body.paymentDeadline === 'number' ? body.paymentDeadline : null,
+    supplierStatus: typeof body.supplierStatus === 'string' ? body.supplierStatus : 'pending',
+    adminNotes: typeof body.adminNotes === 'string' ? body.adminNotes.trim() || null : null,
   }
+}
+
+interface CancellationRule {
+  daysBefore: number
+  refundPercent: number
+}
+
+interface CancellationPolicy {
+  rules: CancellationRule[]
+}
+
+function parseCancellationPolicy(value: string | null | undefined): CancellationPolicy {
+  if (!value) return { rules: [] }
+  try {
+    const parsed = JSON.parse(value) as CancellationPolicy
+    if (Array.isArray(parsed.rules)) return parsed
+    return { rules: [] }
+  } catch {
+    return { rules: [] }
+  }
+}
+
+function calculateRefund(totalAmount: number, checkIn: number, policyValue: string | null | undefined): { refundAmount: number; refundPercent: number } {
+  const policy = parseCancellationPolicy(policyValue)
+  const rules = policy.rules
+    .filter((r) => typeof r.daysBefore === 'number' && typeof r.refundPercent === 'number')
+    .sort((a, b) => b.daysBefore - a.daysBefore)
+
+  const now = Math.floor(Date.now() / 1000)
+  const daysBeforeCheckIn = Math.max(0, Math.floor((checkIn - now) / (24 * 60 * 60)))
+
+  let matchedPercent = 0
+  for (const rule of rules) {
+    if (daysBeforeCheckIn >= rule.daysBefore) {
+      matchedPercent = rule.refundPercent
+      break
+    }
+  }
+
+  const refundAmount = Math.floor((totalAmount * matchedPercent) / 100)
+  return { refundAmount, refundPercent: matchedPercent }
 }
 
 app.get('/bookings', requireAdmin, async (c) => {
   const status = c.req.query('status')
+  const paymentStatus = c.req.query('payment_status')
   const customerId = c.req.query('customer_id')
   const propertyId = c.req.query('property_id')
   const limit = Math.min(parseIntParam(c.req.query('limit'), 20), 100)
@@ -1326,6 +1397,10 @@ app.get('/bookings', requireAdmin, async (c) => {
   if (status) {
     where += ' AND status = ?'
     params.push(status)
+  }
+  if (paymentStatus) {
+    where += ' AND payment_status = ?'
+    params.push(paymentStatus)
   }
   if (customerId) {
     where += ' AND customer_id = ?'
@@ -1380,8 +1455,8 @@ app.post('/bookings', requireAdmin, async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, payment_method, payment_reference, payment_deadline, supplier_status, admin_notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       parsed.customerId,
       parsed.propertyId,
@@ -1395,6 +1470,11 @@ app.post('/bookings', requireAdmin, async (c) => {
       'unpaid',
       parsed.voucherCode,
       parsed.addons,
+      parsed.paymentMethod,
+      parsed.paymentReference,
+      parsed.paymentDeadline,
+      parsed.supplierStatus,
+      parsed.adminNotes,
     ]
   )
 
@@ -1480,6 +1560,46 @@ app.put('/bookings/:id', requireAdmin, async (c) => {
     fields.push('addons = ?')
     values.push(Array.isArray(body.addons) ? JSON.stringify(body.addons) : '[]')
   }
+  if (body.paymentMethod !== undefined) {
+    fields.push('payment_method = ?')
+    values.push(typeof body.paymentMethod === 'string' ? body.paymentMethod.trim() || null : null)
+  }
+  if (body.paymentReference !== undefined) {
+    fields.push('payment_reference = ?')
+    values.push(typeof body.paymentReference === 'string' ? body.paymentReference.trim() || null : null)
+  }
+  if (body.paymentDeadline !== undefined) {
+    fields.push('payment_deadline = ?')
+    values.push(typeof body.paymentDeadline === 'number' ? body.paymentDeadline : null)
+  }
+  if (body.paidAt !== undefined) {
+    fields.push('paid_at = ?')
+    values.push(typeof body.paidAt === 'number' ? body.paidAt : null)
+  }
+  if (body.supplierStatus !== undefined) {
+    fields.push('supplier_status = ?')
+    values.push(typeof body.supplierStatus === 'string' ? body.supplierStatus : 'pending')
+  }
+  if (body.adminNotes !== undefined) {
+    fields.push('admin_notes = ?')
+    values.push(typeof body.adminNotes === 'string' ? body.adminNotes.trim() || null : null)
+  }
+  if (body.cancellationReason !== undefined) {
+    fields.push('cancellation_reason = ?')
+    values.push(typeof body.cancellationReason === 'string' ? body.cancellationReason.trim() || null : null)
+  }
+  if (body.refundAmount !== undefined) {
+    fields.push('refund_amount = ?')
+    values.push(Number(body.refundAmount) || 0)
+  }
+  if (body.cancelledAt !== undefined) {
+    fields.push('cancelled_at = ?')
+    values.push(typeof body.cancelledAt === 'number' ? body.cancelledAt : null)
+  }
+  if (body.confirmedAt !== undefined) {
+    fields.push('confirmed_at = ?')
+    values.push(typeof body.confirmedAt === 'number' ? body.confirmedAt : null)
+  }
 
   if (fields.length === 0) return c.json({ error: 'No fields to update' }, 400)
 
@@ -1492,6 +1612,116 @@ app.put('/bookings/:id', requireAdmin, async (c) => {
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
     action: 'update',
+    targetTable: 'bookings',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+// PATCH /api/admin/bookings/:id/cancel - cancel booking with automatic refund calculation
+app.patch('/bookings/:id/cancel', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
+
+  const existing = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Booking not found' }, 404)
+
+  const body = await c.req.json<Record<string, unknown>>()
+  const reason = typeof body.reason === 'string' ? body.reason.trim() || null : null
+  const now = Math.floor(Date.now() / 1000)
+
+  // Find applicable cancellation policy from room_type first, then property
+  let policyValue: string | null = null
+  const roomType = await first<RoomType>(c.env.DB, 'SELECT * FROM room_types WHERE id = ?', [existing.roomTypeId])
+  if (roomType?.cancellationPolicy) {
+    policyValue = roomType.cancellationPolicy
+  } else {
+    const property = await first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [existing.propertyId])
+    policyValue = property?.cancellationPolicy ?? null
+  }
+
+  const { refundAmount, refundPercent } = calculateRefund(existing.totalAmount, existing.checkIn, policyValue)
+
+  await run(
+    c.env.DB,
+    `UPDATE bookings SET status = 'cancelled', payment_status = 'refunded', supplier_status = 'rejected', cancellation_reason = ?, refund_amount = ?, cancelled_at = ?, updated_at = unixepoch() WHERE id = ?`,
+    [reason, refundAmount, now, id]
+  )
+
+  const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'cancel',
+    targetTable: 'bookings',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated, refund: { amount: refundAmount, percent: refundPercent } })
+})
+
+// PATCH /api/admin/bookings/:id/mark-paid - mark booking as paid manually
+app.patch('/bookings/:id/mark-paid', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
+
+  const existing = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Booking not found' }, 404)
+
+  const body = await c.req.json<Record<string, unknown>>()
+  const paymentMethod = typeof body.paymentMethod === 'string' ? body.paymentMethod.trim() : 'manual'
+  const paymentReference = typeof body.paymentReference === 'string' ? body.paymentReference.trim() || null : null
+  const now = Math.floor(Date.now() / 1000)
+
+  await run(
+    c.env.DB,
+    `UPDATE bookings SET payment_status = 'paid', payment_method = ?, payment_reference = ?, paid_at = ?, updated_at = unixepoch() WHERE id = ?`,
+    [paymentMethod, paymentReference, now, id]
+  )
+
+  const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'mark_paid',
+    targetTable: 'bookings',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+// PATCH /api/admin/bookings/:id/confirm - confirm booking and supplier availability
+app.patch('/bookings/:id/confirm', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
+
+  const existing = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Booking not found' }, 404)
+
+  const now = Math.floor(Date.now() / 1000)
+
+  await run(
+    c.env.DB,
+    `UPDATE bookings SET status = 'confirmed', supplier_status = 'confirmed', confirmed_at = ?, updated_at = unixepoch() WHERE id = ?`,
+    [now, id]
+  )
+
+  const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'confirm',
     targetTable: 'bookings',
     targetId: id,
     before: existing as unknown as Record<string, unknown>,

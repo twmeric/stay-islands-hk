@@ -36,8 +36,8 @@ export default function Layout() {
             <Link to="/invest" className="text-black hover:text-[#0a4c6b] transition text-sm font-medium">更多可能</Link>
             {user ? (
               <div className="flex items-center gap-4">
-                <Link to={isAdmin ? '/admin' : '/member'} className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">
-                  {isAdmin ? '管理中心' : '會員中心'}
+                <Link to={isAdmin ? '/admin' : '/auth'} className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">
+                  {isAdmin ? '管理中心' : '登入'}
                 </Link>
                 <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-600 transition">登出</button>
               </div>
@@ -63,8 +63,8 @@ export default function Layout() {
             <Link to="/invest" onClick={() => setMobileMenu(false)} className="block text-black py-2">更多可能</Link>
             {user ? (
               <>
-                <Link to={isAdmin ? '/admin' : '/member'} onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">
-                  {isAdmin ? '管理中心' : '會員中心'}
+                <Link to={isAdmin ? '/admin' : '/auth'} onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">
+                  {isAdmin ? '管理中心' : '登入'}
                 </Link>
                 <button onClick={() => { handleLogout(); setMobileMenu(false); }} className="block text-red-500 py-2">登出</button>
               </>

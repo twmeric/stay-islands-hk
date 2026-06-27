@@ -2439,6 +2439,16 @@ export default function AdminPage() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Booking management state
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+  const [bookingStatusFilter, setBookingStatusFilter] = useState<string>('');
+  const [bookingPaymentFilter, setBookingPaymentFilter] = useState<string>('');
+  const [cancelReason, setCancelReason] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('payme');
+  const [paymentReference, setPaymentReference] = useState('');
+  const [adminNotes, setAdminNotes] = useState('');
+  const [bookingActionLoading, setBookingActionLoading] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [replyId, setReplyId] = useState<number | null>(null);
 
@@ -2453,12 +2463,15 @@ export default function AdminPage() {
     if (activeTab === 'bookings') fetchBookings();
     else if (activeTab === 'inquiries') fetchInquiries();
     else if (activeTab === 'accounts') fetchAccounts();
-  }, [activeTab]);
+  }, [activeTab, bookingStatusFilter, bookingPaymentFilter]);
 
   async function fetchBookings() {
     setLoading(true);
     try {
-      const res = await client.api.fetch('/api/admin/bookings');
+      const params = new URLSearchParams();
+      if (bookingStatusFilter) params.append('status', bookingStatusFilter);
+      if (bookingPaymentFilter) params.append('payment_status', bookingPaymentFilter);
+      const res = await client.api.fetch(`/api/admin/bookings?${params.toString()}`);
       const data = await res.json();
       setBookings(data.data || []);
     } catch (err) { console.error(err); }
@@ -2485,15 +2498,72 @@ export default function AdminPage() {
     finally { setLoading(false); }
   }
 
-  async function updateBookingStatus(id: number, status: string, paymentStatus: string) {
+  async function confirmBooking(id: number) {
+    setBookingActionLoading(true);
     try {
-      await client.api.fetch(`/api/admin/bookings/${id}`, {
+      await client.api.fetch(`/api/admin/bookings/${id}/confirm`, { method: 'PATCH' });
+      await fetchBookings();
+      if (selectedBooking?.id === id) {
+        const refreshed = bookings.find((b) => b.id === id);
+        if (refreshed) setSelectedBooking(refreshed);
+      }
+    } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
+  }
+
+  async function markBookingPaid(id: number) {
+    setBookingActionLoading(true);
+    try {
+      await client.api.fetch(`/api/admin/bookings/${id}/mark-paid`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, paymentStatus }),
+        body: JSON.stringify({ paymentMethod, paymentReference }),
       });
-      fetchBookings();
+      setPaymentReference('');
+      await fetchBookings();
+      if (selectedBooking?.id === id) {
+        const refreshed = bookings.find((b) => b.id === id);
+        if (refreshed) setSelectedBooking(refreshed);
+      }
     } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
+  }
+
+  async function cancelBooking(id: number) {
+    setBookingActionLoading(true);
+    try {
+      const res = await client.api.fetch(`/api/admin/bookings/${id}/cancel`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: cancelReason }),
+      });
+      const data = await res.json();
+      setCancelReason('');
+      await fetchBookings();
+      if (selectedBooking?.id === id) {
+        const refreshed = bookings.find((b) => b.id === id);
+        if (refreshed) setSelectedBooking(refreshed);
+      }
+      alert(`訂單已取消。依退改政策，應退金額：HK$${data.refund?.amount?.toLocaleString() ?? 0}（${data.refund?.percent ?? 0}%）`);
+    } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
+  }
+
+  async function saveBookingNotes(id: number) {
+    setBookingActionLoading(true);
+    try {
+      await client.api.fetch(`/api/admin/bookings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminNotes }),
+      });
+      await fetchBookings();
+      if (selectedBooking?.id === id) {
+        const refreshed = bookings.find((b) => b.id === id);
+        if (refreshed) setSelectedBooking(refreshed);
+      }
+    } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
   }
 
   async function replyInquiry(id: number) {
@@ -2626,74 +2696,339 @@ export default function AdminPage() {
         {loading ? (
           <div className="flex justify-center py-20"><div className="animate-spin w-8 h-8 border-2 border-[#0a4c6b] border-t-transparent rounded-full" /></div>
         ) : activeTab === 'bookings' ? (
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">編號</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">入住/退房</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">人數</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">金額</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">加購活動</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">狀態</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {bookings.length === 0 ? (
-                    <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-500">暫無訂單</td></tr>
-                  ) : (
-                    bookings.map((b) => (
-                      <tr key={b.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-mono">#{b.id}</td>
-                        <td className="px-4 py-3">
-                          <span>{new Date(b.checkIn * 1000).toLocaleDateString('zh-HK')}</span>
-                          <span className="text-gray-400 mx-1">→</span>
-                          <span>{new Date(b.checkOut * 1000).toLocaleDateString('zh-HK')}</span>
-                        </td>
-                        <td className="px-4 py-3">{b.guests}</td>
-                        <td className="px-4 py-3 font-medium">HK${b.totalAmount?.toLocaleString()}</td>
-                        <td className="px-4 py-3">
-                          {(() => {
-                            const addons = (() => {
-                              try {
-                                return JSON.parse(b.addons || '[]');
-                              } catch {
-                                return [];
-                              }
-                            })();
-                            if (!addons.length) return <span className="text-gray-400">—</span>;
-                            const names = addons.map((a: any) => a.name).filter(Boolean);
-                            return (
-                              <span
-                                className="text-xs bg-[#f0f9f7] text-[#0a4c6b] px-2 py-1 rounded-full cursor-help"
-                                title={names.join('、')}
-                              >
-                                {names.length} 項
-                              </span>
-                            );
-                          })()}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[b.status] || 'bg-gray-100'}`}>
-                            {b.status === 'pending' ? '待處理' : b.status === 'confirmed' ? '已確認' : b.status === 'cancelled' ? '已取消' : '已完成'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          {b.status === 'pending' && (
-                            <div className="flex gap-2">
-                              <button onClick={() => updateBookingStatus(b.id, 'confirmed', 'paid')} className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">確認</button>
-                              <button onClick={() => updateBookingStatus(b.id, 'cancelled', 'refunded')} className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">拒絕</button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+          <div className="space-y-6">
+            {/* Filters */}
+            <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">訂單狀態</label>
+                <select
+                  value={bookingStatusFilter}
+                  onChange={(e) => setBookingStatusFilter(e.target.value)}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+                >
+                  <option value="">全部</option>
+                  <option value="pending">待處理</option>
+                  <option value="confirmed">已確認</option>
+                  <option value="cancelled">已取消</option>
+                  <option value="completed">已完成</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">付款狀態</label>
+                <select
+                  value={bookingPaymentFilter}
+                  onChange={(e) => setBookingPaymentFilter(e.target.value)}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+                >
+                  <option value="">全部</option>
+                  <option value="unpaid">未付款</option>
+                  <option value="partial">部分付款</option>
+                  <option value="paid">已付款</option>
+                  <option value="refunded">已退款</option>
+                </select>
+              </div>
+              <div className="text-sm text-gray-500">
+                共 {bookings.length} 筆訂單
+              </div>
             </div>
+
+            {/* Bookings Table */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">編號</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">入住/退房</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">人數</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">金額</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">付款</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">狀態</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">供應商</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {bookings.length === 0 ? (
+                      <tr><td colSpan={8} className="px-4 py-12 text-center text-gray-500">暫無訂單</td></tr>
+                    ) : (
+                      bookings.map((b) => (
+                        <tr key={b.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-mono">#{b.id}</td>
+                          <td className="px-4 py-3">
+                            <span>{new Date(b.checkIn * 1000).toLocaleDateString('zh-HK')}</span>
+                            <span className="text-gray-400 mx-1">→</span>
+                            <span>{new Date(b.checkOut * 1000).toLocaleDateString('zh-HK')}</span>
+                          </td>
+                          <td className="px-4 py-3">{b.guests}</td>
+                          <td className="px-4 py-3 font-medium">HK${b.totalAmount?.toLocaleString()}</td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              b.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' :
+                              b.paymentStatus === 'refunded' ? 'bg-blue-100 text-blue-700' :
+                              b.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {b.paymentStatus === 'paid' ? '已付款' : b.paymentStatus === 'refunded' ? '已退款' : b.paymentStatus === 'partial' ? '部分付款' : '未付款'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[b.status] || 'bg-gray-100'}`}>
+                              {b.status === 'pending' ? '待處理' : b.status === 'confirmed' ? '已確認' : b.status === 'cancelled' ? '已取消' : '已完成'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              b.supplierStatus === 'confirmed' ? 'bg-green-100 text-green-700' :
+                              b.supplierStatus === 'rejected' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {b.supplierStatus === 'confirmed' ? '已確認' : b.supplierStatus === 'rejected' ? '已拒絕' : '待確認'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <button
+                              onClick={() => {
+                                setSelectedBooking(b);
+                                setAdminNotes(b.adminNotes || '');
+                              }}
+                              className="text-xs bg-[#0a4c6b] text-white px-3 py-1.5 rounded hover:bg-[#083d56] transition"
+                            >
+                              查看詳情
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Booking Detail Modal */}
+            {selectedBooking && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-[#0d1b2a]">訂單 #{selectedBooking.id}</h3>
+                    <button
+                      onClick={() => setSelectedBooking(null)}
+                      className="text-gray-400 hover:text-gray-600 text-2xl"
+                      aria-label="關閉"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className="p-6 space-y-6">
+                    {/* Status overview */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gray-50 rounded-xl p-4 text-center">
+                        <p className="text-xs text-gray-500 mb-1">訂單狀態</p>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[selectedBooking.status] || 'bg-gray-100'}`}>
+                          {selectedBooking.status === 'pending' ? '待處理' : selectedBooking.status === 'confirmed' ? '已確認' : selectedBooking.status === 'cancelled' ? '已取消' : '已完成'}
+                        </span>
+                      </div>
+                      <div className="bg-gray-50 rounded-xl p-4 text-center">
+                        <p className="text-xs text-gray-500 mb-1">付款狀態</p>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedBooking.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' :
+                          selectedBooking.paymentStatus === 'refunded' ? 'bg-blue-100 text-blue-700' :
+                          selectedBooking.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {selectedBooking.paymentStatus === 'paid' ? '已付款' : selectedBooking.paymentStatus === 'refunded' ? '已退款' : selectedBooking.paymentStatus === 'partial' ? '部分付款' : '未付款'}
+                        </span>
+                      </div>
+                      <div className="bg-gray-50 rounded-xl p-4 text-center">
+                        <p className="text-xs text-gray-500 mb-1">供應商狀態</p>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedBooking.supplierStatus === 'confirmed' ? 'bg-green-100 text-green-700' :
+                          selectedBooking.supplierStatus === 'rejected' ? 'bg-red-100 text-red-700' :
+                          'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {selectedBooking.supplierStatus === 'confirmed' ? '已確認' : selectedBooking.supplierStatus === 'rejected' ? '已拒絕' : '待確認'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Customer & trip info */}
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-[#0d1b2a]">客戶與行程資訊</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">入住日期</p>
+                          <p className="font-medium">{new Date(selectedBooking.checkIn * 1000).toLocaleDateString('zh-HK')}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">退房日期</p>
+                          <p className="font-medium">{new Date(selectedBooking.checkOut * 1000).toLocaleDateString('zh-HK')}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">人數</p>
+                          <p className="font-medium">{selectedBooking.guests} 人</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">總金額</p>
+                          <p className="font-medium">HK${selectedBooking.totalAmount?.toLocaleString()}</p>
+                        </div>
+                        {selectedBooking.paymentDeadline && (
+                          <div>
+                            <p className="text-gray-500">付款截止</p>
+                            <p className="font-medium">{new Date(selectedBooking.paymentDeadline * 1000).toLocaleString('zh-HK')}</p>
+                          </div>
+                        )}
+                        {selectedBooking.paidAt && (
+                          <div>
+                            <p className="text-gray-500">付款時間</p>
+                            <p className="font-medium">{new Date(selectedBooking.paidAt * 1000).toLocaleString('zh-HK')}</p>
+                          </div>
+                        )}
+                        {selectedBooking.paymentMethod && (
+                          <div>
+                            <p className="text-gray-500">付款方式</p>
+                            <p className="font-medium">
+                              {selectedBooking.paymentMethod === 'payme' ? 'PayMe' :
+                               selectedBooking.paymentMethod === 'fps' ? 'FPS 轉數快' :
+                               selectedBooking.paymentMethod === 'bank_transfer' ? '銀行轉帳' : selectedBooking.paymentMethod}
+                            </p>
+                          </div>
+                        )}
+                        {selectedBooking.paymentReference && (
+                          <div>
+                            <p className="text-gray-500">參考編號</p>
+                            <p className="font-medium">{selectedBooking.paymentReference}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Addons */}
+                    {(() => {
+                      const addons = (() => {
+                        try { return JSON.parse(selectedBooking.addons || '[]'); }
+                        catch { return []; }
+                      })();
+                      if (!addons.length) return null;
+                      return (
+                        <div>
+                          <h4 className="font-semibold text-[#0d1b2a] mb-2">加購活動</h4>
+                          <div className="space-y-2">
+                            {addons.map((a: any, i: number) => (
+                              <div key={i} className="bg-[#f0f9f7] rounded-lg px-3 py-2 text-sm">
+                                <p className="font-medium text-[#0a4c6b]">{a.name}</p>
+                                {a.description && <p className="text-gray-600 text-xs mt-0.5">{a.description}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Admin notes */}
+                    <div>
+                      <h4 className="font-semibold text-[#0d1b2a] mb-2">內部備註</h4>
+                      <textarea
+                        value={adminNotes}
+                        onChange={(e) => setAdminNotes(e.target.value)}
+                        rows={3}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+                        placeholder="記錄與客戶或供應商的溝通內容..."
+                      />
+                      <button
+                        onClick={() => saveBookingNotes(selectedBooking.id)}
+                        disabled={bookingActionLoading}
+                        className="mt-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded transition disabled:opacity-60"
+                      >
+                        儲存備註
+                      </button>
+                    </div>
+
+                    {/* Actions */}
+                    {selectedBooking.status !== 'cancelled' && (
+                      <div className="border-t pt-6 space-y-6">
+                        {selectedBooking.status === 'pending' && (
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => confirmBooking(selectedBooking.id)}
+                              disabled={bookingActionLoading}
+                              className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium transition disabled:opacity-60"
+                            >
+                              確認訂單
+                            </button>
+                            <p className="text-xs text-gray-500">確認後訂單狀態與供應商狀態會變為「已確認」</p>
+                          </div>
+                        )}
+
+                        {selectedBooking.paymentStatus !== 'paid' && selectedBooking.paymentStatus !== 'refunded' && (
+                          <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                            <h4 className="font-semibold text-[#0d1b2a]">標記付款</h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <select
+                                value={paymentMethod}
+                                onChange={(e) => setPaymentMethod(e.target.value)}
+                                className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                              >
+                                <option value="payme">PayMe</option>
+                                <option value="fps">FPS 轉數快</option>
+                                <option value="bank_transfer">銀行轉帳</option>
+                                <option value="manual">人工記錄</option>
+                              </select>
+                              <input
+                                type="text"
+                                value={paymentReference}
+                                onChange={(e) => setPaymentReference(e.target.value)}
+                                placeholder="參考編號（選填）"
+                                className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                              />
+                            </div>
+                            <button
+                              onClick={() => markBookingPaid(selectedBooking.id)}
+                              disabled={bookingActionLoading}
+                              className="bg-[#0a4c6b] hover:bg-[#083d56] text-white px-5 py-2 rounded-lg text-sm font-medium transition disabled:opacity-60"
+                            >
+                              標記為已付款
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="bg-red-50 rounded-xl p-4 space-y-3">
+                          <h4 className="font-semibold text-red-700">取消訂單</h4>
+                          <p className="text-xs text-red-600">
+                            系統將根據住宿的退改政策自動計算應退金額。
+                          </p>
+                          <input
+                            type="text"
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            placeholder="取消原因"
+                            className="w-full border border-red-200 rounded-lg px-3 py-2 text-sm"
+                          />
+                          <button
+                            onClick={() => cancelBooking(selectedBooking.id)}
+                            disabled={bookingActionLoading}
+                            className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-medium transition disabled:opacity-60"
+                          >
+                            取消訂單並計算退款
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedBooking.status === 'cancelled' && (
+                      <div className="bg-red-50 rounded-xl p-4">
+                        <h4 className="font-semibold text-red-700 mb-2">取消資訊</h4>
+                        <p className="text-sm"><span className="text-gray-600">取消原因：</span>{selectedBooking.cancellationReason || '—'}</p>
+                        <p className="text-sm mt-1"><span className="text-gray-600">應退金額：</span>HK${selectedBooking.refundAmount?.toLocaleString()}</p>
+                        {selectedBooking.cancelledAt && (
+                          <p className="text-sm mt-1"><span className="text-gray-600">取消時間：</span>{new Date(selectedBooking.cancelledAt * 1000).toLocaleString('zh-HK')}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : activeTab === 'inquiries' ? (
           <div className="space-y-4">

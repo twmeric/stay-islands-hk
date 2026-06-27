@@ -555,9 +555,11 @@ export default function PropertyDetailPage() {
     const room = selectedRoom || property.roomTypes[0];
     if (!room) return;
 
-    const checkInDate = inquiryCheckIn
-      ? new Date(inquiryCheckIn)
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    if (!inquiryCheckIn) {
+      alert('請選擇預計入住日期');
+      return;
+    }
+    const checkInDate = new Date(inquiryCheckIn);
     const checkOutDate = new Date(checkInDate);
     checkOutDate.setDate(checkOutDate.getDate() + inquiryDays);
 
@@ -1089,10 +1091,11 @@ export default function PropertyDetailPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      預計入住日期（選填）
+                      預計入住日期 <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
+                      required
                       value={inquiryCheckIn}
                       onChange={(e) => setInquiryCheckIn(e.target.value)}
                       className="w-full border rounded-lg px-3 py-2 text-sm"

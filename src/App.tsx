@@ -11,7 +11,7 @@ import TripPlannerPage from './pages/TripPlannerPage';
 import GuidePage from './pages/GuidePage';
 import InvestPage from './pages/InvestPage';
 import AuthPage from './pages/AuthPage';
-import DashboardPage from './pages/DashboardPage';
+
 import AdminPage from './pages/AdminPage';
 import Layout from './layouts/Layout';
 
@@ -70,7 +70,6 @@ export default function App() {
           <Route path="/invest" element={<InvestPage />} />
           <Route path="/trip-planner" element={<TripPlannerPage />} />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/member" element={<DashboardPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Route>
       </Routes>
