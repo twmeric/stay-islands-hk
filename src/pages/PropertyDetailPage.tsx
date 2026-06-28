@@ -54,6 +54,7 @@ interface ExperienceItem {
   description: string | null;
   descriptionZh: string | null;
   duration: string | null;
+  price: number | null;
   priceNote: string | null;
   imageUrl: string | null;
   type: 'experience' | 'retreat';
@@ -475,7 +476,8 @@ export default function PropertyDetailPage() {
     checkOutDate.setDate(checkOutDate.getDate() + inquiryDays);
 
     const totalAmount =
-      (room.pricePerNight || property.pricePerNight) * inquiryDays;
+      (room.pricePerNight || property.pricePerNight) * inquiryDays +
+      selectedActivities.reduce((sum, a) => sum + (a.price || 0), 0);
 
     try {
       const res = await client.api.fetch('/api/public/bookings', {
@@ -526,6 +528,8 @@ export default function PropertyDetailPage() {
   const referencePrice = selectedRoom
     ? selectedRoom.pricePerNight
     : property.pricePerNight;
+  const referenceTotal = referencePrice * inquiryDays +
+    selectedActivities.reduce((sum, a) => sum + (a.price || 0), 0);
 
   const gallery = safeJsonParse<string[]>(property.gallery, []);
   const facilities = safeJsonParse<Facility[]>(property.facilities, []);
@@ -1108,15 +1112,12 @@ export default function PropertyDetailPage() {
                   )}
 
                   <div className="border-t pt-4">
-                    <p className="text-sm text-gray-500 mb-1">參考價格</p>
+                    <p className="text-sm text-gray-500 mb-1">參考總價</p>
                     <p className="text-2xl font-bold text-[#0a4c6b]">
-                      HK${referencePrice.toLocaleString()}
-                      <span className="text-sm font-normal text-gray-500">
-                        /晚
-                      </span>
+                      HK${referenceTotal.toLocaleString()}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
-                      實際價格將由管家確認
+                      已包含 {inquiryDays} 晚住宿及 {selectedActivities.length} 項加購體驗，實際價格將由管家確認
                     </p>
                   </div>
 
