@@ -217,7 +217,7 @@ app.post('/cloudwapi/incoming', async (c) => {
 app.post('/salesmartly/incoming', async (c) => {
   const secret = c.env.SALESMARTLY_WEBHOOK_SECRET
   if (secret) {
-    const token = c.req.query('token') || c.req.header('X-SaleSmartly-Token')
+    const token = c.req.query('token')
     if (token !== secret) {
       return c.json({ error: 'Unauthorized' }, 401)
     }
