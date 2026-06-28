@@ -413,10 +413,15 @@ export default function ExperiencesPage() {
                       </div>
                     </div>
 
-                    <div className="mt-5 pt-4 border-t border-gray-100">
+                    <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between gap-4">
+                      {exp.price != null ? (
+                        <p className="text-lg font-bold text-[#0a4c6b]">HK${exp.price.toLocaleString()}</p>
+                      ) : (
+                        <p className="text-sm text-gray-500">{exp.priceNote}</p>
+                      )}
                       <button
                         onClick={() => setSelectedExperience(exp)}
-                        className="w-full bg-[#0a4c6b] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#083d56] transition"
+                        className="bg-[#0a4c6b] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#083d56] transition"
                       >
                         了解更多
                       </button>
@@ -506,7 +511,11 @@ export default function ExperiencesPage() {
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <p className="text-sm text-gray-500">{selectedExperience.priceNote}</p>
+                  {selectedExperience.price != null ? (
+                    <p className="text-lg font-bold text-[#0a4c6b]">HK${selectedExperience.price.toLocaleString()}</p>
+                  ) : (
+                    <p className="text-sm text-gray-500">{selectedExperience.priceNote}</p>
+                  )}
                   <a
                     href="/plan"
                     className="bg-[#B8902F] text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#9a7a28] transition"
