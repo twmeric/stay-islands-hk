@@ -50,6 +50,7 @@ export interface SeedExperience {
   duration: string
   groupSize: string
   includes: string
+  price: number | null
   priceNote: string
   imageUrl: string
   iconName: string
@@ -778,8 +779,8 @@ async function seedExperiences(db: D1Database): Promise<void> {
     await run(
       db,
       `INSERT OR IGNORE INTO experiences
-        (name, name_zh, slug, description, description_zh, duration, group_size, includes, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+        (name, name_zh, slug, description, description_zh, duration, group_size, includes, price, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
       [
         exp.name,
         exp.nameZh,
@@ -789,6 +790,7 @@ async function seedExperiences(db: D1Database): Promise<void> {
         exp.duration,
         exp.groupSize,
         exp.includes,
+        exp.price,
         exp.priceNote,
         exp.imageUrl,
         exp.iconName,

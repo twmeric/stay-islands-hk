@@ -306,7 +306,7 @@ app.get('/bookings/token/:token', async (c) => {
 })
 
 // POST /api/public/bookings
-app.post('/bookings', async (c) => {
+app.post('/api/public/bookings', async (c) => {
   const body = await c.req.json<Record<string, unknown>>()
 
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
@@ -315,9 +315,8 @@ app.post('/bookings', async (c) => {
   const propertyId = Number(body.property_id)
   const roomTypeId = Number(body.room_type_id)
   const guests = Number(body.guests) || 1
-  const totalAmount = Number(body.total_amount) || 0
   const currency = typeof body.currency === 'string' ? body.currency.toUpperCase() : 'HKD'
-  const addons = Array.isArray(body.addons) ? JSON.stringify(body.addons) : '[]'
+  const rawAddons = Array.isArray(body.addons) ? body.addons : []
   const referralCode = typeof body.referral_code === 'string' ? body.referral_code.trim().toUpperCase() || null : null
   const checkIn = toUnixEpoch(body.check_in)
   const checkOut = toUnixEpoch(body.check_out)
@@ -327,6 +326,29 @@ app.post('/bookings', async (c) => {
   if (!Number.isFinite(roomTypeId)) return c.json({ error: 'Missing or invalid room_type_id' }, 400)
   if (checkIn == null) return c.json({ error: 'Missing or invalid check_in' }, 400)
   if (checkOut == null) return c.json({ error: 'Missing or invalid check_out' }, 400)
+
+  const [property, roomType] = await Promise.all([
+    first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [propertyId]),
+    first<RoomType>(c.env.DB, 'SELECT * FROM room_types WHERE id = ?', [roomTypeId]),
+  ])
+  if (!property) return c.json({ error: 'Property not found' }, 404)
+  if (!roomType) return c.json({ error: 'Room type not found' }, 404)
+
+  // Server-side pricing: room cost + addon experience/retreat prices.
+  // This guarantees the stored total is correct regardless of frontend calculation.
+  const nights = Math.max(1, Math.round((checkOut - checkIn) / 86400))
+  let totalAmount = (roomType.pricePerNight || 0) * nights
+  const addons = rawAddons.filter((a) => a && typeof a === 'object')
+  for (const addon of addons) {
+    const item = addon as Record<string, unknown>
+    if (item.type === 'experience') {
+      const expId = Number(item.id)
+      if (Number.isFinite(expId)) {
+        const exp = await first<Experience>(c.env.DB, 'SELECT price FROM experiences WHERE id = ?', [expId])
+        totalAmount += exp?.price || 0
+      }
+    }
+  }
 
   // Do NOT create a customer record at the inquiry stage.
   // A customer is only created when the booking is actually paid or a lead is converted.
@@ -338,7 +360,7 @@ app.post('/bookings', async (c) => {
     `INSERT INTO bookings
       (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, addons, referral_code, customer_name, customer_email, customer_phone, supplier_status, payment_deadline, token, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, ?, ?, ?, ?, 'pending', ?, ?, unixepoch(), unixepoch())`,
-    [null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, addons, referralCode, name, email, phone, paymentDeadline, token]
+    [null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, JSON.stringify(addons), referralCode, name, email, phone, paymentDeadline, token]
   )
 
   const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [
