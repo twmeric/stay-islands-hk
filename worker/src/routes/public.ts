@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
 import type { Booking, CmsArticle, Customer, Experience, LeadType, Payment, Property, Retreat, RoomType } from '../db/schema'
 import { all, first, run } from '../lib/db'
+import { notifyReferrerOnLead } from './referral'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -168,6 +169,7 @@ app.post('/leads', async (c) => {
     phone?: unknown
     source?: unknown
     metadata?: unknown
+    referral_code?: unknown
   }>()
 
   const email = typeof body.email === 'string' ? body.email.trim() : ''
@@ -192,16 +194,31 @@ app.post('/leads', async (c) => {
     body.metadata && typeof body.metadata === 'object'
       ? JSON.stringify(body.metadata)
       : null
+  const referralCode =
+    typeof body.referral_code === 'string' ? body.referral_code.trim().toUpperCase() || null : null
 
   const result = await run(
     c.env.DB,
     `INSERT INTO leads
-      (name, email, phone, lead_type, source, status, metadata, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, 'new', ?, unixepoch(), unixepoch())`,
-    [name, email, phone, leadType, source, metadata]
+      (name, email, phone, lead_type, source, status, metadata, referral_code, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, 'new', ?, ?, unixepoch(), unixepoch())`,
+    [name, email, phone, leadType, source, metadata, referralCode]
   )
 
-  return c.json({ data: { id: result.meta.last_row_id, status: 'new' } }, 201)
+  const leadId = result.meta.last_row_id ?? 0
+
+  // Notify the referrer immediately when a referred visitor leaves contact info.
+  // This keeps partners motivated before the deal closes.
+  c.executionCtx.waitUntil(
+    notifyReferrerOnLead(c.env, {
+      name,
+      email,
+      phone,
+      referralCode,
+    })
+  )
+
+  return c.json({ data: { id: leadId, status: 'new' } }, 201)
 })
 
 function toUnixEpoch(value: unknown): number | null {

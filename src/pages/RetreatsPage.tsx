@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, MapPin, Users, Check, ChevronDown, ChevronUp, Heart, Leaf, Waves, Fish, Sparkles, Ship, Sunset, Anchor, Loader2, X } from 'lucide-react';
 import { client } from '../api/client';
+import { getRefCode } from '../lib/referral';
 
 interface Retreat {
   id: string;
@@ -204,6 +205,7 @@ function InquiryForm({
           phone: form.phone,
           lead_type: 'experience_inquiry',
           source: 'retreats_page',
+          referral_code: getRefCode(),
           metadata: {
             retreat: form.retreat,
             check_in: form.checkIn || null,

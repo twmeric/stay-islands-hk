@@ -11,6 +11,7 @@ interface Lead {
   status: string;
   assignedAdminId: number | null;
   notes: string | null;
+  referralCode: string | null;
   createdAt: number;
 }
 
@@ -138,6 +139,7 @@ export default function LeadsSection() {
                 <th className="px-4 py-3 text-left font-medium text-gray-600">電話</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">類型</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">來源</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-600">推薦碼</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">狀態</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">備註</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">建立時間</th>
@@ -146,9 +148,9 @@ export default function LeadsSection() {
             </thead>
             <tbody className="divide-y">
               {loading ? (
-                <tr><td colSpan={8} className="px-4 py-12 text-center text-gray-500">載入中…</td></tr>
+                <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-500">載入中…</td></tr>
               ) : leads.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-12 text-center text-gray-500">暫無潛在客</td></tr>
+                <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-500">暫無潛在客</td></tr>
               ) : (
                 leads.map((l) => (
                   <tr key={l.id} className="hover:bg-gray-50">
@@ -159,6 +161,13 @@ export default function LeadsSection() {
                     <td className="px-4 py-3 text-gray-600">{l.phone || '—'}</td>
                     <td className="px-4 py-3 text-gray-600">{typeLabelMap[l.leadType] || l.leadType}</td>
                     <td className="px-4 py-3 text-gray-600">{(l.source && sourceLabelMap[l.source]) || l.source || '—'}</td>
+                    <td className="px-4 py-3">
+                      {l.referralCode ? (
+                        <span className="font-mono text-xs text-[#0a4c6b]">{l.referralCode}</span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <select
                         value={l.status}

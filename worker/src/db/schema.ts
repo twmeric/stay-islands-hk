@@ -164,6 +164,7 @@ export interface Lead {
   assignedAdminId: number | null
   notes: string | null
   metadata: string | null // JSON object stored as TEXT
+  referralCode: string | null
   createdAt: number
   updatedAt: number
 }

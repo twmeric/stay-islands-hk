@@ -413,3 +413,39 @@ export async function handleReferralWhatsAppMessage(
     message: buildWelcomeMessage(env, referrer),
   }
 }
+
+// ============================================================================
+// Lead notification — keep referrers motivated before the deal closes
+// ============================================================================
+
+export function buildLeadNotificationMessage(
+  env: Bindings,
+  referrer: Referrer,
+  lead: { name: string | null; email: string; phone: string | null }
+): string {
+  const link = buildReferralLink(env, referrer.referralCode)
+  return `🎉 好消息！你推薦的朋友已經留下聯絡資料，我們正在跟進中。\n\n姓名：${lead.name || '—'}\n電郵：${lead.email}\n電話：${lead.phone || '—'}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
+}
+
+export async function notifyReferrerOnLead(
+  env: Bindings,
+  lead: { name: string | null; email: string; phone: string | null; referralCode: string | null }
+): Promise<void> {
+  if (!lead.referralCode) return
+
+  const referrer = await first<Referrer>(
+    env.DB,
+    'SELECT * FROM referrers WHERE referral_code = ? AND status = ?',
+    [lead.referralCode, 'active']
+  )
+  if (!referrer || !referrer.phone) return
+
+  try {
+    await sendCloudwapiMessage(env, {
+      phone: referrer.phone,
+      message: buildLeadNotificationMessage(env, referrer, lead),
+    })
+  } catch (err) {
+    console.error('[referral] lead notification failed:', err)
+  }
+}

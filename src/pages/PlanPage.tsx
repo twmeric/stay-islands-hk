@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { client } from '../api/client';
+import { getRefCode } from '../lib/referral';
 
 export default function InvestPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', vibe: '', property: '', message: '' });
@@ -19,6 +20,7 @@ export default function InvestPage() {
           phone: form.phone,
           lead_type: 'island_owner_talk',
           source: 'plan_page',
+          referral_code: getRefCode(),
           metadata: {
             vibe: form.vibe,
             property: form.property,

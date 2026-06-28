@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { client } from '../api/client';
+import { getRefCode } from '../lib/referral';
 
 const fallbackProperties = [
   { id: 1, name: 'Stay Mikado', nameZh: '御海閣', imageUrl: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=600', pricePerNight: 4800, status: 'active' },
@@ -67,6 +68,7 @@ export default function HomePage() {
           email: leadEmail.trim(),
           lead_type: 'inspiration_guide',
           source: 'homepage',
+          referral_code: getRefCode(),
         }),
       });
       if (res.ok) {
