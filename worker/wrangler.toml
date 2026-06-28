@@ -23,6 +23,7 @@ id = "f66f62ad0a694bf6ac33b0e961e0b8e5"
 # 環境變數（非敏感）
 [vars]
 FRONTEND_URL = "https://stay-islands-hk.pages.dev"
+BUSINESS_WHATSAPP_NUMBER = "85262322466"
 
 # Secrets（請使用 `wrangler secret put <NAME>` 設置，勿在此寫入值）：
 # - CLOUDWAPI_API_KEY

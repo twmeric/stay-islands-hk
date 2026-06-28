@@ -192,6 +192,7 @@ export interface Booking {
   paidAt: number | null
   supplierStatus: string | null
   token: string | null
+  referralCode: string | null
   adminNotes: string | null
   cancellationReason: string | null
   refundAmount: number
@@ -211,6 +212,43 @@ export interface Payment {
   status: TransactionStatus
   payload: string | null // JSON response from payment gateway
   createdAt: number
+}
+
+// =============================================================================
+// 4.5 Referral Module
+// =============================================================================
+
+export interface Referrer {
+  id: number
+  name: string
+  phone: string | null
+  referralCode: string
+  token: string
+  status: 'active' | 'inactive'
+  totalReferrals: number
+  totalCommission: number
+  paidCommission: number
+  createdAt: number
+  updatedAt: number
+}
+
+export interface ReferralOrder {
+  id: number
+  bookingId: number
+  referrerId: number
+  orderAmount: number
+  commissionAmount: number
+  currency: string
+  status: 'pending' | 'approved' | 'paid' | 'cancelled'
+  paidAt: number | null
+  createdAt: number
+  updatedAt: number
+}
+
+export interface ReferralSettings {
+  id: number
+  rules: string // JSON object
+  updatedAt: number
 }
 
 // =============================================================================

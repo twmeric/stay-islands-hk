@@ -292,6 +292,7 @@ app.post('/bookings', async (c) => {
   const currency = typeof body.currency === 'string' ? body.currency.toUpperCase() : 'HKD'
   const voucherCode = typeof body.voucher_code === 'string' ? body.voucher_code.trim() || null : null
   const addons = Array.isArray(body.addons) ? JSON.stringify(body.addons) : '[]'
+  const referralCode = typeof body.referral_code === 'string' ? body.referral_code.trim().toUpperCase() || null : null
   const checkIn = toUnixEpoch(body.check_in)
   const checkOut = toUnixEpoch(body.check_out)
 
@@ -319,9 +320,9 @@ app.post('/bookings', async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, supplier_status, payment_deadline, token, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, 'pending', ?, ?, unixepoch(), unixepoch())`,
-    [customer?.id ?? null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons, paymentDeadline, token]
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, referral_code, supplier_status, payment_deadline, token, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, ?, 'pending', ?, ?, unixepoch(), unixepoch())`,
+    [customer?.id ?? null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons, referralCode, paymentDeadline, token]
   )
 
   const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [

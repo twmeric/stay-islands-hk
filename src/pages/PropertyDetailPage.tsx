@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { client } from '../api/client';
+import { getRefCode } from '../lib/referral';
 
 interface RoomType {
   id: number;
@@ -496,6 +497,7 @@ export default function PropertyDetailPage() {
             name: a.name,
             nameZh: a.nameZh,
           })),
+          referral_code: getRefCode(),
         }),
       });
       if (!res.ok) {

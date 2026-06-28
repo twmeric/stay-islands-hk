@@ -2466,13 +2466,487 @@ function PropertiesSection() {
 }
 
 // ============================================================================
+// Referral Section
+// ============================================================================
+
+interface ReferrerItem {
+  id: number;
+  name: string;
+  phone: string | null;
+  referralCode: string;
+  token: string;
+  status: 'active' | 'inactive';
+  totalReferrals: number;
+  totalCommission: number;
+  paidCommission: number;
+  referralLink: string;
+  dashboardLink: string;
+  whatsappDeeplink: string;
+  qrCodeUrl: string;
+}
+
+interface ReferralOrderItem {
+  id: number;
+  booking_id: number;
+  booking_token: string | null;
+  referrer_id: number;
+  referrer_name: string;
+  order_amount: number;
+  commission_amount: number;
+  currency: string;
+  status: 'pending' | 'approved' | 'paid' | 'cancelled';
+  created_at: number;
+}
+
+interface ReferralRules {
+  mode: 'percentage' | 'fixed';
+  percentage: number;
+  fixed_amount: number;
+  currency: string;
+}
+
+function ReferralSection() {
+  const [subTab, setSubTab] = useState<'partners' | 'orders' | 'settings'>('partners');
+  const [referrers, setReferrers] = useState<ReferrerItem[]>([]);
+  const [orders, setOrders] = useState<ReferralOrderItem[]>([]);
+  const [rules, setRules] = useState<ReferralRules>({ mode: 'percentage', percentage: 5, fixed_amount: 0, currency: 'HKD' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (subTab === 'partners') loadReferrers();
+    else if (subTab === 'orders') loadOrders();
+    else if (subTab === 'settings') loadSettings();
+  }, [subTab]);
+
+  async function loadReferrers() {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await client.api.fetch('/api/admin/referral/referrals');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '載入失敗');
+      setReferrers(data.data || []);
+    } catch (err: any) {
+      setError(err.message || '載入夥伴失敗');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadOrders() {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await client.api.fetch('/api/admin/referral/referral-orders');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '載入失敗');
+      setOrders(data.data || []);
+    } catch (err: any) {
+      setError(err.message || '載入佣金紀錄失敗');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadSettings() {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await client.api.fetch('/api/admin/referral/referral-settings');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '載入失敗');
+      setRules(data.data || { mode: 'percentage', percentage: 5, fixed_amount: 0, currency: 'HKD' });
+    } catch (err: any) {
+      setError(err.message || '載入規則失敗');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function createReferrer(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    if (!newName.trim()) {
+      setError('請輸入夥伴名稱');
+      return;
+    }
+    try {
+      const res = await client.api.fetch('/api/admin/referral/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName.trim(), phone: newPhone.trim() || null }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '建立失敗');
+      setNewName('');
+      setNewPhone('');
+      setSuccess('夥伴已建立，請複製 QR Code 或 deeplink 發送');
+      await loadReferrers();
+    } catch (err: any) {
+      setError(err.message || '建立失敗');
+    }
+  }
+
+  async function toggleStatus(id: number, current: 'active' | 'inactive') {
+    const next = current === 'active' ? 'inactive' : 'active';
+    try {
+      const res = await client.api.fetch(`/api/admin/referral/referrals/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: next }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '更新失敗');
+      }
+      await loadReferrers();
+    } catch (err: any) {
+      setError(err.message || '更新失敗');
+    }
+  }
+
+  async function resendWelcome(id: number) {
+    setError('');
+    setSuccess('');
+    try {
+      const res = await client.api.fetch(`/api/admin/referral/referrals/${id}/resend`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '發送失敗');
+      setSuccess('歡迎訊息已重新發送');
+    } catch (err: any) {
+      setError(err.message || '發送失敗');
+    }
+  }
+
+  async function updateOrderStatus(id: number, status: ReferralOrderItem['status']) {
+    try {
+      const res = await client.api.fetch(`/api/admin/referral/referral-orders/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '更新失敗');
+      }
+      await loadOrders();
+    } catch (err: any) {
+      setError(err.message || '更新失敗');
+    }
+  }
+
+  async function saveSettings(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    try {
+      const res = await client.api.fetch('/api/admin/referral/referral-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rules),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '儲存失敗');
+      setRules(data.data);
+      setSuccess('佣金規則已更新');
+    } catch (err: any) {
+      setError(err.message || '儲存失敗');
+    }
+  }
+
+  function copy(text: string, key: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 1500);
+    });
+  }
+
+  const statusBadge = (status: string) => {
+    const map: Record<string, string> = {
+      pending: 'bg-yellow-100 text-yellow-700',
+      approved: 'bg-blue-100 text-blue-700',
+      paid: 'bg-green-100 text-green-700',
+      cancelled: 'bg-gray-100 text-gray-600',
+      active: 'bg-green-100 text-green-700',
+      inactive: 'bg-gray-100 text-gray-600',
+    };
+    const label: Record<string, string> = {
+      pending: '待核准', approved: '已核准', paid: '已付款', cancelled: '已取消',
+      active: '啟用', inactive: '停用',
+    };
+    return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${map[status] || 'bg-gray-100'}`}>{label[status] || status}</span>;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-[#0d1b2a] mb-4">分享夥伴管理</h2>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { key: 'partners', label: '夥伴管理' },
+            { key: 'orders', label: '佣金紀錄' },
+            { key: 'settings', label: '佣金規則' },
+          ].map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setSubTab(t.key as typeof subTab)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                subTab === t.key
+                  ? 'bg-[#0a4c6b] text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {error && <div className="bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>}
+      {success && <div className="bg-green-50 text-green-700 rounded-xl px-4 py-3 text-sm">{success}</div>}
+
+      {subTab === 'partners' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl p-6 shadow-sm">
+            <h3 className="font-bold text-[#0d1b2a] mb-4">新增夥伴</h3>
+            <form onSubmit={createReferrer} className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="夥伴名稱"
+                className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+              />
+              <input
+                type="tel"
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+                placeholder="WhatsApp 電話（選填）"
+                className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-[#0a4c6b] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#083d56] transition disabled:opacity-60"
+              >
+                建立
+              </button>
+            </form>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <h3 className="font-bold text-[#0d1b2a]">夥伴列表</h3>
+            </div>
+            {loading ? (
+              <div className="p-8 text-center text-gray-500">載入中…</div>
+            ) : referrers.length === 0 ? (
+              <div className="p-8 text-center text-gray-400">尚未建立任何夥伴</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">名稱</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">Code</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">狀態</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">成交 / 佣金</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">連結</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {referrers.map((r) => (
+                      <tr key={r.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-[#0d1b2a]">{r.name}</p>
+                          {r.phone && <p className="text-xs text-gray-500">{r.phone}</p>}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-[#0a4c6b]">{r.referralCode}</td>
+                        <td className="px-4 py-3">{statusBadge(r.status)}</td>
+                        <td className="px-4 py-3">
+                          <p>{r.totalReferrals} 單</p>
+                          <p className="text-xs text-gray-500">HK${r.totalCommission.toLocaleString()} / HK${r.paidCommission.toLocaleString()}</p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              onClick={() => copy(r.referralLink, `link-${r.id}`)}
+                              className="text-xs bg-[#f0f9f7] text-[#0a4c6b] px-2 py-1 rounded hover:bg-[#e0f3ef] transition"
+                            >
+                              {copiedKey === `link-${r.id}` ? '已複製' : '分享連結'}
+                            </button>
+                            <button
+                              onClick={() => copy(r.dashboardLink, `dash-${r.id}`)}
+                              className="text-xs bg-[#f0f9f7] text-[#0a4c6b] px-2 py-1 rounded hover:bg-[#e0f3ef] transition"
+                            >
+                              {copiedKey === `dash-${r.id}` ? '已複製' : 'Dashboard'}
+                            </button>
+                            <button
+                              onClick={() => copy(r.whatsappDeeplink, `wa-${r.id}`)}
+                              className="text-xs bg-[#f0f9f7] text-[#0a4c6b] px-2 py-1 rounded hover:bg-[#e0f3ef] transition"
+                            >
+                              {copiedKey === `wa-${r.id}` ? '已複製' : 'WhatsApp'}
+                            </button>
+                            <a
+                              href={r.qrCodeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs bg-[#f8f5ed] text-[#B8902F] px-2 py-1 rounded hover:bg-[#f0e9db] transition"
+                            >
+                              QR Code
+                            </a>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => toggleStatus(r.id, r.status)}
+                              className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition"
+                            >
+                              {r.status === 'active' ? '停用' : '啟用'}
+                            </button>
+                            {r.phone && (
+                              <button
+                                onClick={() => resendWelcome(r.id)}
+                                className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition"
+                              >
+                                重發訊息
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {subTab === 'orders' && (
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="font-bold text-[#0d1b2a]">佣金紀錄</h3>
+          </div>
+          {loading ? (
+            <div className="p-8 text-center text-gray-500">載入中…</div>
+          ) : orders.length === 0 ? (
+            <div className="p-8 text-center text-gray-400">暫無佣金紀錄</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">訂單</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">夥伴</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">金額</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">佣金</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">狀態</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">更新</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {orders.map((o) => (
+                    <tr key={o.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 font-mono">#{o.booking_token || o.booking_id}</td>
+                      <td className="px-4 py-3">{o.referrer_name}</td>
+                      <td className="px-4 py-3">HK${o.order_amount.toLocaleString()}</td>
+                      <td className="px-4 py-3 font-medium text-[#0a4c6b]">HK${o.commission_amount.toLocaleString()}</td>
+                      <td className="px-4 py-3">{statusBadge(o.status)}</td>
+                      <td className="px-4 py-3">
+                        <select
+                          value={o.status}
+                          onChange={(e) => updateOrderStatus(o.id, e.target.value as ReferralOrderItem['status'])}
+                          className="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+                        >
+                          <option value="pending">待核准</option>
+                          <option value="approved">已核准</option>
+                          <option value="paid">已付款</option>
+                          <option value="cancelled">已取消</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {subTab === 'settings' && (
+        <div className="bg-white rounded-2xl p-6 shadow-sm max-w-xl">
+          <h3 className="font-bold text-[#0d1b2a] mb-4">佣金規則</h3>
+          <form onSubmit={saveSettings} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">計算模式</label>
+              <select
+                value={rules.mode}
+                onChange={(e) => setRules({ ...rules, mode: e.target.value as 'percentage' | 'fixed' })}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+              >
+                <option value="percentage">百分比 (%)</option>
+                <option value="fixed">固定金額</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {rules.mode === 'percentage' ? '百分比 (%)' : '固定金額 (HKD)'}
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={rules.mode === 'percentage' ? 0.1 : 1}
+                value={rules.mode === 'percentage' ? rules.percentage : rules.fixed_amount}
+                onChange={(e) =>
+                  setRules({
+                    ...rules,
+                    [rules.mode === 'percentage' ? 'percentage' : 'fixed_amount']: Number(e.target.value),
+                  })
+                }
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">貨幣</label>
+              <input
+                type="text"
+                value={rules.currency}
+                onChange={(e) => setRules({ ...rules, currency: e.target.value.toUpperCase() })}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-[#0a4c6b] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#083d56] transition disabled:opacity-60"
+            >
+              儲存規則
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
 // Main Admin Page
 // ============================================================================
 
 export default function AdminPage() {
   const navigate = useNavigate();
   const { user, isAdmin, isChecking, adminRole } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'properties' | 'experiences' | 'customers' | 'leads' | 'payments' | 'accounts'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'properties' | 'experiences' | 'customers' | 'leads' | 'payments' | 'referral' | 'accounts'>('dashboard');
 
   // Guard: redirect to login if not authenticated as admin
   useEffect(() => {
@@ -3563,6 +4037,8 @@ export default function AdminPage() {
           <LeadsSection />
         ) : activeTab === 'payments' ? (
           <PaymentsSection />
+        ) : activeTab === 'referral' ? (
+          <ReferralSection />
         ) : activeTab === 'accounts' ? (
           <div className="space-y-6">
             {/* Add new admin form */}

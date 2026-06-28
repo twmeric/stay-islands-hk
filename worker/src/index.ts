@@ -7,6 +7,7 @@ import publicRoute from './routes/public'
 import adminRoute from './routes/admin'
 import crmRoute from './routes/crm'
 import webhooksRoute from './routes/webhooks'
+import { publicApp as referralPublicRoute, adminApp as referralAdminRoute } from './routes/referral'
 import { seedDatabase } from './lib/seed'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
@@ -58,6 +59,8 @@ app.get('/', (c) => {
 app.route('/api/public', publicRoute)
 app.route('/api/admin', adminRoute)
 app.route('/api/crm', crmRoute)
+app.route('/api/referral', referralPublicRoute)
+app.route('/api/admin/referral', referralAdminRoute)
 app.route('/api/webhooks', webhooksRoute)
 
 // 404 fallback

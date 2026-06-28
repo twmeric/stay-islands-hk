@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
 import { first, run } from '../lib/db'
-import { normalizePhone } from '../lib/cloudwapi'
+import { normalizePhone, sendCloudwapiMessage } from '../lib/cloudwapi'
+import { handleReferralWhatsAppMessage } from './referral'
 import type { Customer, WhatsappConversation, WhatsappMessage } from '../db/schema'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
@@ -94,6 +95,15 @@ app.post('/cloudwapi/incoming', async (c) => {
         now,
       ]
     )
+  }
+
+  const referral = await handleReferralWhatsAppMessage(c.env, normalizedPhone, message)
+  if (referral.handled && referral.message) {
+    try {
+      await sendCloudwapiMessage(c.env, { phone: normalizedPhone, message: referral.message })
+    } catch (err) {
+      console.error('[webhook] referral reply failed:', err)
+    }
   }
 
   return c.json({ ok: true })

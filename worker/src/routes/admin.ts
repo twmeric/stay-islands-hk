@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import bcryptjs from 'bcryptjs'
 import type { Bindings, Variables } from '../types'
 import { all, first, run } from '../lib/db'
+import { createReferralOrderAndNotify } from '../lib/referral'
 import {
   requireAdmin,
   requireRole,
@@ -1718,6 +1719,15 @@ app.patch('/bookings/:id/mark-paid', requireAdmin, async (c) => {
   )
 
   const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+
+  if (updated && updated.paymentStatus === 'paid') {
+    await createReferralOrderAndNotify(c.env, {
+      id: updated.id,
+      token: updated.token,
+      totalAmount: updated.totalAmount,
+      referralCode: updated.referralCode,
+    })
+  }
 
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
