@@ -3,6 +3,7 @@ import bcryptjs from 'bcryptjs'
 import type { Bindings, Variables } from '../types'
 import { all, first, run } from '../lib/db'
 import { createReferralOrderAndNotify, createReferralOrderForPackageBookingAndNotify } from '../lib/referral'
+import { formatPackageResponse } from '../lib/packages'
 import {
   requireAdmin,
   requireRole,
@@ -920,7 +921,7 @@ app.get('/packages', requireAdmin, async (c) => {
     [...params, limit, offset]
   )
   const countRow = await first<{ count: number }>(c.env.DB, `SELECT COUNT(*) as count FROM packages ${where}`, params)
-  return c.json({ data: packages, total: countRow?.count ?? 0 })
+  return c.json({ data: packages.map(formatPackageResponse), total: countRow?.count ?? 0 })
 })
 
 app.get('/packages/:id', requireAdmin, async (c) => {
@@ -929,7 +930,7 @@ app.get('/packages/:id', requireAdmin, async (c) => {
 
   const pkg = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ?', [id])
   if (!pkg) return c.json({ error: 'Package not found' }, 404)
-  return c.json({ data: pkg })
+  return c.json({ data: formatPackageResponse(pkg) })
 })
 
 app.post('/packages', requireAdmin, async (c) => {
@@ -978,7 +979,7 @@ app.post('/packages', requireAdmin, async (c) => {
     ip: c.req.header('CF-Connecting-IP') ?? null,
   })
 
-  return c.json({ data: pkg }, 201)
+  return c.json({ data: formatPackageResponse(pkg) }, 201)
 })
 
 app.put('/packages/:id', requireAdmin, async (c) => {
@@ -1048,7 +1049,7 @@ app.put('/packages/:id', requireAdmin, async (c) => {
     ip: c.req.header('CF-Connecting-IP') ?? null,
   })
 
-  return c.json({ data: updated })
+  return c.json({ data: formatPackageResponse(updated) })
 })
 
 app.delete('/packages/:id', requireAdmin, async (c) => {
@@ -1167,7 +1168,7 @@ app.get('/package-bookings/:id', requireAdmin, async (c) => {
     } as Customer
   }
 
-  return c.json({ data: { ...booking, package: pkg, customer } })
+  return c.json({ data: { ...booking, package: formatPackageResponse(pkg), customer } })
 })
 
 app.patch('/package-bookings/:id/status', requireAdmin, async (c) => {

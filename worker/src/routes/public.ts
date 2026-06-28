@@ -3,6 +3,7 @@ import type { Bindings, Variables } from '../types'
 import type { Booking, CmsArticle, Customer, Experience, LeadType, Package, PackageBooking, Payment, Property, RoomType } from '../db/schema'
 import { all, first, run } from '../lib/db'
 import { notifyReferrerOnLead, notifyReferrerOnBookingInquiry, notifyReferrerOnPackageBooking } from './referral'
+import { formatPackageResponse } from '../lib/packages'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -135,7 +136,7 @@ app.get('/packages', async (c) => {
     'SELECT * FROM packages WHERE status = ? ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?',
     ['active', limit, offset]
   )
-  return c.json({ data: packages })
+  return c.json({ data: packages.map(formatPackageResponse) })
 })
 
 // GET /api/public/packages/:slug
@@ -149,7 +150,7 @@ app.get('/packages/:slug', async (c) => {
   if (!pkg) {
     return c.json({ error: 'Package not found' }, 404)
   }
-  return c.json({ data: pkg })
+  return c.json({ data: formatPackageResponse(pkg) })
 })
 
 // POST /api/public/leads
@@ -479,7 +480,7 @@ app.get('/package-bookings/token/:token', async (c) => {
     } as Customer
   }
 
-  return c.json({ data: { ...booking, package: pkg, customer } })
+  return c.json({ data: { ...booking, package: formatPackageResponse(pkg), customer } })
 })
 
 export default app
