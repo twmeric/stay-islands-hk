@@ -379,6 +379,107 @@ export default function PackagesSection() {
     }
   }
 
+  async function printPackageBookingConfirmation(id: number) {
+    try {
+      const res = await client.api.fetch(`/api/admin/package-bookings/${id}`);
+      if (!res.ok) throw new Error('載入失敗');
+      const json = await res.json();
+      const b = json.data;
+      if (!b) return;
+
+      const pkg = b.package || {};
+      const customer = b.customer || {};
+      const statusMap: Record<string, string> = {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        cancelled: 'Cancelled',
+        completed: 'Completed',
+      };
+      const paymentStatusMap: Record<string, string> = {
+        unpaid: 'Unpaid',
+        partial: 'Partial',
+        paid: 'Paid',
+        refunded: 'Refunded',
+      };
+      const occupancyMap: Record<string, string> = {
+        shared: 'Twin Share',
+        single: 'Single Room',
+      };
+
+      const inclusions = Array.isArray(pkg.inclusions)
+        ? pkg.inclusions.map((inc: string) => `<li>${inc}</li>`).join('')
+        : '<li>—</li>';
+
+      const w = window.open('', '_blank');
+      if (!w) return;
+      w.document.write(`
+        <html>
+          <head>
+            <title>Package Booking Confirmation #${b.id}</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #222; line-height: 1.5; }
+              h1 { font-size: 26px; margin-bottom: 6px; }
+              h2 { font-size: 18px; margin: 28px 0 12px; border-bottom: 2px solid #0a4c6b; padding-bottom: 6px; color: #0a4c6b; }
+              .subtitle { color: #666; margin-bottom: 24px; }
+              .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 32px; }
+              .row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eee; }
+              .row span:first-child { color: #555; }
+              ul { margin: 0; padding-left: 20px; }
+              li { margin-bottom: 4px; }
+              .total { font-size: 18px; font-weight: 700; color: #0a4c6b; }
+              .footer { margin-top: 40px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 12px; }
+              @media print { body { padding: 24px; } }
+            </style>
+          </head>
+          <body>
+            <h1>HK Maldivers</h1>
+            <p class="subtitle">Package Booking Confirmation / Supplier Copy</p>
+
+            <h2>Order Reference</h2>
+            <div class="grid">
+              <div class="row"><span>Booking ID</span><span>#${b.id}</span></div>
+              <div class="row"><span>Booking Status</span><span>${statusMap[b.status] || b.status}</span></div>
+              <div class="row"><span>Payment Status</span><span>${paymentStatusMap[b.paymentStatus] || b.paymentStatus}</span></div>
+            </div>
+
+            <h2>Guest Information</h2>
+            <div class="grid">
+              <div class="row"><span>Name</span><span>${customer.name || '—'}</span></div>
+              <div class="row"><span>Email</span><span>${customer.email || '—'}</span></div>
+              <div class="row"><span>Phone</span><span>${customer.phone || '—'}</span></div>
+            </div>
+
+            <h2>Package Details</h2>
+            <div class="grid">
+              <div class="row"><span>Package</span><span>${pkg.name || '—'} ${pkg.nameZh ? `(${pkg.nameZh})` : ''}</span></div>
+              <div class="row"><span>Duration</span><span>${pkg.duration || '—'}</span></div>
+              <div class="row"><span>Location</span><span>${pkg.location || '—'}</span></div>
+              <div class="row"><span>Departure Date</span><span>${new Date(b.checkIn * 1000).toLocaleDateString('en-GB')}</span></div>
+              <div class="row"><span>Occupancy</span><span>${occupancyMap[b.occupancy] || b.occupancy}</span></div>
+              <div class="row"><span>Guests</span><span>${b.guests}</span></div>
+            </div>
+
+            <h2>Inclusions</h2>
+            <ul>${inclusions}</ul>
+
+            <h2>Payment Summary</h2>
+            <div class="grid">
+              <div class="row"><span>Total Amount</span><span class="total">${b.currency === 'HKD' ? 'HK$' : b.currency}${(Number(b.totalAmount) || 0).toLocaleString()}</span></div>
+            </div>
+
+            <div class="footer">
+              Generated on ${new Date().toLocaleString('en-GB')} · HK Maldivers · For internal and supplier use.
+            </div>
+            <script>window.print()</script>
+          </body>
+        </html>
+      `);
+      w.document.close();
+    } catch (err: any) {
+      setBookingsError(err.message || '列印時發生錯誤');
+    }
+  }
+
   const filteredPackages = packages.filter((p) => {
     const matchesSearch =
       p.nameZh.toLowerCase().includes(search.toLowerCase()) ||
@@ -904,6 +1005,12 @@ export default function PackagesSection() {
                                 標記付款
                               </button>
                             )}
+                            <button
+                              onClick={() => printPackageBookingConfirmation(b.id)}
+                              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded"
+                            >
+                              列印確認單
+                            </button>
                           </div>
                         </td>
                       </tr>

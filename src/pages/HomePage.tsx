@@ -4,23 +4,6 @@ import { motion } from 'framer-motion';
 import { client } from '../api/client';
 import { getRefCode } from '../lib/referral';
 
-const fallbackProperties = [
-  { id: 1, name: 'Stay Mikado', nameZh: '御海閣', imageUrl: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=600', pricePerNight: 4800, status: 'active' },
-  { id: 2, name: 'Private Island', nameZh: '私享島嶼', imageUrl: 'https://images.unsplash.com/photo-1688949078626-a358f500e063?w=600', pricePerNight: 12800, status: 'active' },
-  { id: 3, name: 'Stay Madivaru', nameZh: '碧海灣', imageUrl: 'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=600', pricePerNight: 3200, status: 'active' },
-];
-
-const fallbackExperiences = [
-  { id: 1, name: 'Night Fishing Trip', nameZh: '夜釣之旅', duration: '3-4 小時', description: '星空下出海，學習傳統釣魚技巧，現釣現煮的海鮮晚餐。', imageUrl: 'https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80', status: 'active' },
-  { id: 2, name: 'Sunset Cruise', nameZh: '日落巡航', duration: '2 小時', description: '搭乘遊艇追逐夕陽，香檳與海洋交織的浪漫時刻。', imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80', status: 'active' },
-  { id: 3, name: 'Whale Shark & Manta', nameZh: '鯨鯊與魔鬼魚', duration: '半日', description: '與溫柔的海洋巨人共游，感受馬爾代夫最震撼的藍。', imageUrl: 'https://images.unsplash.com/photo-1582967788606-a171f1080ca8?w=800&q=80', status: 'active' },
-];
-
-const fallbackRetreats = [
-  { id: 1, name: 'Yoga & Adventure Retreat', nameZh: '瑜伽與冒險靜修', duration: '8 天 7 晚', description: '每日晨間瑜伽與冥想，下午浮潛、無人島探險，晚上在星空下放鬆身心。', imageUrl: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80', status: 'active' },
-  { id: 2, name: 'Couple Getaway', nameZh: '浪漫雙人靜修', duration: '8 天 7 晚', description: '專為兩人設計的私密時光，包含浪漫晚餐、雙人按摩與專屬日落巡航。', imageUrl: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80', status: 'active' },
-];
-
 export default function HomePage() {
   const [properties, setProperties] = useState<any[]>([]);
   const [experiences, setExperiences] = useState<any[]>([]);
@@ -86,11 +69,7 @@ export default function HomePage() {
   const activeProperties = properties.filter((p: any) => p.status === 'active').slice(0, 3);
   const activeExperiences = experiences.filter((e: any) => e.status === 'active');
   const activeRetreats = retreats.filter((r: any) => r.status === 'active');
-  const featuredExperiences = (
-    activeExperiences.length > 0 || activeRetreats.length > 0
-      ? [...activeExperiences, ...activeRetreats]
-      : [...fallbackExperiences, ...fallbackRetreats]
-  ).slice(0, 3);
+  const featuredExperiences = [...activeExperiences, ...activeRetreats].slice(0, 3);
 
   return (
     <div>
@@ -314,9 +293,13 @@ export default function HomePage() {
             <div className="text-center py-12">
               <p className="text-gray-500">載入住宿中…</p>
             </div>
+          ) : activeProperties.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">暫無精選住宿。</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {(activeProperties.length > 0 ? activeProperties : fallbackProperties).map((item: any, i: number) => (
+              {activeProperties.map((item: any, i: number) => (
                 <motion.div
                   key={item.id || i}
                   initial={{ opacity: 0, y: 30 }}
@@ -402,6 +385,10 @@ export default function HomePage() {
           {dataLoading ? (
             <div className="text-center py-12">
               <p className="text-gray-500">載入體驗中…</p>
+            </div>
+          ) : featuredExperiences.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">暫無精選體驗。</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

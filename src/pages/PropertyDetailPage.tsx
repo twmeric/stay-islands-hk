@@ -107,7 +107,7 @@ export default function PropertyDetailPage() {
   // Experience inquiry form state
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryEmail, setInquiryEmail] = useState('');
-  const [inquiryPhone, setInquiryPhone] = useState('');
+  const [inquiryPhone, setInquiryPhone] = useState('+852 ');
   const [inquiryCheckIn, setInquiryCheckIn] = useState('');
   const [inquiryDays, setInquiryDays] = useState(3);
   const [inquiryMessage, setInquiryMessage] = useState('');
@@ -1019,19 +1019,14 @@ export default function PropertyDetailPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       電話
                     </label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                        +852
-                      </span>
-                      <input
-                        type="tel"
-                        required
-                        value={inquiryPhone}
-                        placeholder="98765432"
-                        onChange={(e) => setInquiryPhone(e.target.value)}
-                        className="flex-1 border rounded-r-lg px-3 py-2 text-sm"
-                      />
-                    </div>
+                    <input
+                      type="tel"
+                      required
+                      value={inquiryPhone}
+                      placeholder="+852 98765432"
+                      onChange={(e) => setInquiryPhone(e.target.value)}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">

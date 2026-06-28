@@ -59,7 +59,7 @@ export default function PackageDetailPage() {
   const [occupancy, setOccupancy] = useState<'shared' | 'single'>('shared');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('+852 ');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [bookingResult, setBookingResult] = useState<{ id: number; token: string } | null>(null);
@@ -400,21 +400,16 @@ export default function PackageDetailPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">電話 / WhatsApp</label>
-                      <div className="relative flex">
-                        <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-gray-500 text-sm">
-                          +852
-                        </span>
-                        <div className="relative flex-1">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                          <input
-                            required
-                            type="tel"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="w-full border border-gray-200 rounded-r-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
-                            placeholder="98765432"
-                          />
-                        </div>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          required
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
+                          placeholder="+852 98765432"
+                        />
                       </div>
                     </div>
 

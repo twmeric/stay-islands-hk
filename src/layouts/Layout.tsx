@@ -22,9 +22,9 @@ export default function Layout() {
           <div className="hidden md:flex items-center gap-6">
             <Link to="/properties" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">海島住宿</Link>
             <Link to="/packages" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">度假套餐</Link>
-            <Link to="/guide" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">旅遊指南</Link>
             <Link to="/experiences" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">海島體驗</Link>
             <Link to="/plan" className="text-black hover:text-[#0a4c6b] transition text-sm font-medium">假期諮詢</Link>
+            <Link to="/guide" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">旅遊指南</Link>
             <Link to="/plan" className="bg-[#0a4c6b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#083d56] transition">預約海島諮詢</Link>
           </div>
 
@@ -41,9 +41,9 @@ export default function Layout() {
           <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-lg px-4 py-4 space-y-3">
             <Link to="/properties" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">海島住宿</Link>
             <Link to="/packages" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">度假套餐</Link>
-            <Link to="/guide" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">旅遊指南</Link>
             <Link to="/experiences" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">海島體驗</Link>
             <Link to="/plan" onClick={() => setMobileMenu(false)} className="block text-black py-2">假期諮詢</Link>
+            <Link to="/guide" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">旅遊指南</Link>
             <Link to="/plan" onClick={() => setMobileMenu(false)} className="block bg-[#0a4c6b] text-white px-4 py-2 rounded-lg text-center">預約海島諮詢</Link>
           </div>
         )}
@@ -75,10 +75,8 @@ export default function Layout() {
             <div>
               <h4 className="font-medium mb-3">付款方式</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <p>Visa / Mastercard</p>
                 <p>PayMe / FPS 轉數快</p>
                 <p>AlipayHK / WeChat Pay HK</p>
-                <p>Apple Pay / Google Pay</p>
               </div>
             </div>
             <div>

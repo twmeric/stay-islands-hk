@@ -2502,7 +2502,7 @@ export default function AdminPage() {
   const [bookingActionLoading, setBookingActionLoading] = useState(false);
   const [editingBooking, setEditingBooking] = useState(false);
   const [editBookingForm, setEditBookingForm] = useState<{ checkIn: string; checkOut: string; roomTypeId: number; guests: number; totalAmount: number } | null>(null);
-  const [voucherPreview, setVoucherPreview] = useState(false);
+
   const [bookingLinkedExperiences, setBookingLinkedExperiences] = useState<Experience[]>([]);
   const [bookingLinkedRetreats, setBookingLinkedRetreats] = useState<Retreat[]>([]);
   const [bookingAddonsDraft, setBookingAddonsDraft] = useState<Array<{ type: 'experience' | 'retreat'; id: number; name: string; nameZh: string }>>([]);
@@ -2722,34 +2722,33 @@ export default function AdminPage() {
     finally { setBookingActionLoading(false); }
   }
 
-  async function generateVoucher(id: number) {
-    setBookingActionLoading(true);
-    try {
-      await client.api.fetch(`/api/admin/bookings/${id}/voucher`, { method: 'PATCH' });
-      await fetchBookings();
-      await refreshSelectedBooking(id);
-      setVoucherPreview(true);
-    } catch (err) { console.error(err); }
-    finally { setBookingActionLoading(false); }
-  }
-
   function exportBookingsCSV() {
-    const headers = ['編號', '狀態', '付款狀態', '供應商狀態', '客戶姓名', '客戶電郵', '客戶電話', '入住', '退房', '人數', '金額', '憑證', '建立時間'];
-    const rows = bookings.map((b) => [
-      b.id,
-      b.status,
-      b.paymentStatus,
-      b.supplierStatus,
-      b.customer?.name || '',
-      b.customer?.email || '',
-      b.customer?.phone || '',
-      new Date(b.checkIn * 1000).toLocaleDateString('zh-HK'),
-      new Date(b.checkOut * 1000).toLocaleDateString('zh-HK'),
-      b.guests,
-      b.totalAmount,
-      b.voucherCode || '',
-      new Date(b.createdAt * 1000).toLocaleString('zh-HK'),
-    ]);
+    const headers = ['編號', '狀態', '付款狀態', '供應商狀態', '住宿', '房型', '客戶姓名', '客戶電郵', '客戶電話', '入住', '退房', '人數', '金額', '加購項目', '建立時間'];
+    const rows = bookings.map((b) => {
+      const addons = (() => {
+        try {
+          const arr = JSON.parse(b.addons || '[]');
+          return Array.isArray(arr) ? arr.map((a: any) => a.nameZh || a.name).join(' | ') : '';
+        } catch { return ''; }
+      })();
+      return [
+        b.id,
+        b.status,
+        b.paymentStatus,
+        b.supplierStatus,
+        b.propertyNameZh || b.propertyName || `Property #${b.propertyId}`,
+        b.roomTypeNameZh || b.roomTypeName || `Room #${b.roomTypeId}`,
+        b.customer?.name || b.customerName || '',
+        b.customer?.email || b.customerEmail || '',
+        b.customer?.phone || b.customerPhone || '',
+        new Date(b.checkIn * 1000).toLocaleDateString('zh-HK'),
+        new Date(b.checkOut * 1000).toLocaleDateString('zh-HK'),
+        b.guests,
+        b.totalAmount,
+        addons,
+        new Date(b.createdAt * 1000).toLocaleString('zh-HK'),
+      ];
+    });
     const csv = [headers, ...rows].map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -2760,30 +2759,154 @@ export default function AdminPage() {
     URL.revokeObjectURL(url);
   }
 
-  function printBookingSummary() {
-    if (!selectedBooking) return;
-    const w = window.open('', '_blank');
-    if (!w) return;
-    w.document.write(`
-      <html><head><title>訂單 #${selectedBooking.id}</title>
-      <style>body{font-family:sans-serif;padding:40px;max-width:700px;margin:0 auto;color:#333} h1{font-size:24px} .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}</style>
-      </head><body>
-      <h1>HK Maldivers 訂單摘要</h1>
-      <h2>訂單 #${selectedBooking.id}</h2>
-      <div class="row"><span>狀態</span><span>${selectedBooking.status}</span></div>
-      <div class="row"><span>付款狀態</span><span>${selectedBooking.paymentStatus}</span></div>
-      <div class="row"><span>供應商狀態</span><span>${selectedBooking.supplierStatus}</span></div>
-      <div class="row"><span>客戶</span><span>${selectedBooking.customer?.name || '—'} (${selectedBooking.customer?.email || '—'})</span></div>
-      <div class="row"><span>電話</span><span>${selectedBooking.customer?.phone || '—'}</span></div>
-      <div class="row"><span>入住 / 退房</span><span>${new Date(selectedBooking.checkIn * 1000).toLocaleDateString('zh-HK')} → ${new Date(selectedBooking.checkOut * 1000).toLocaleDateString('zh-HK')}</span></div>
-      <div class="row"><span>人數</span><span>${selectedBooking.guests}</span></div>
-      <div class="row"><span>總金額</span><span>HK$${selectedBooking.totalAmount?.toLocaleString()}</span></div>
-      <div class="row"><span>憑證</span><span>${selectedBooking.voucherCode || '—'}</span></div>
-      <div class="row"><span>備註</span><span>${selectedBooking.adminNotes || '—'}</span></div>
-      <script>window.print()</script>
-      </body></html>
-    `);
-    w.document.close();
+  async function printBookingConfirmation(id: number) {
+    setBookingActionLoading(true);
+    try {
+      const res = await client.api.fetch(`/api/admin/bookings/${id}`);
+      if (!res.ok) throw new Error('Failed to load booking detail');
+      const json = await res.json();
+      const b = json.data;
+      if (!b) return;
+
+      const nights = Math.max(1, Math.round((b.checkOut - b.checkIn) / 86400));
+      const addons = (() => {
+        try { return JSON.parse(b.addons || '[]'); }
+        catch { return []; }
+      })();
+      const payments = Array.isArray(b.payments) ? b.payments : [];
+      const paidAmount = payments
+        .filter((p: any) => p.status === 'succeeded' || p.status === 'paid')
+        .reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+      const balance = (Number(b.totalAmount) || 0) - paidAmount;
+
+      const statusMap: Record<string, string> = {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        cancelled: 'Cancelled',
+        completed: 'Completed',
+      };
+      const paymentStatusMap: Record<string, string> = {
+        unpaid: 'Unpaid',
+        partial: 'Partial',
+        paid: 'Paid',
+        refunded: 'Refunded',
+      };
+      const supplierStatusMap: Record<string, string> = {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        rejected: 'Rejected',
+      };
+      const paymentMethodMap: Record<string, string> = {
+        payme: 'PayMe',
+        fps: 'FPS',
+        bank_transfer: 'Bank Transfer',
+      };
+
+      const addonRows = addons.length
+        ? addons.map((a: any) => `<tr><td>${a.name || a.nameZh || 'Add-on'}</td><td>${a.type === 'retreat' ? 'Retreat' : 'Experience'}</td></tr>`).join('')
+        : '<tr><td colspan="2">None</td></tr>';
+
+      const paymentRows = payments.length
+        ? payments.map((p: any) => `
+            <tr>
+              <td>${new Date((p.createdAt || p.created_at) * 1000).toLocaleString('en-GB')}</td>
+              <td>${paymentMethodMap[p.gateway] || p.gateway || '—'}</td>
+              <td>${p.gatewayTransactionId || '—'}</td>
+              <td>HK$${(Number(p.amount) || 0).toLocaleString()}</td>
+              <td>${p.status}</td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="5">No payment record</td></tr>';
+
+      const w = window.open('', '_blank');
+      if (!w) return;
+      w.document.write(`
+        <html>
+          <head>
+            <title>Booking Confirmation #${b.id}</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #222; line-height: 1.5; }
+              h1 { font-size: 26px; margin-bottom: 6px; }
+              h2 { font-size: 18px; margin: 28px 0 12px; border-bottom: 2px solid #0a4c6b; padding-bottom: 6px; color: #0a4c6b; }
+              .subtitle { color: #666; margin-bottom: 24px; }
+              .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 32px; }
+              .row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eee; }
+              .row span:first-child { color: #555; }
+              table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+              th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+              th { background: #f5f7f8; font-weight: 600; }
+              .total { font-size: 18px; font-weight: 700; color: #0a4c6b; }
+              .footer { margin-top: 40px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 12px; }
+              @media print { body { padding: 24px; } }
+            </style>
+          </head>
+          <body>
+            <h1>HK Maldivers</h1>
+            <p class="subtitle">Booking Confirmation / Supplier Copy</p>
+
+            <h2>Order Reference</h2>
+            <div class="grid">
+              <div class="row"><span>Booking ID</span><span>#${b.id}</span></div>
+              <div class="row"><span>Booking Status</span><span>${statusMap[b.status] || b.status}</span></div>
+              <div class="row"><span>Payment Status</span><span>${paymentStatusMap[b.paymentStatus] || b.paymentStatus}</span></div>
+              <div class="row"><span>Supplier Status</span><span>${supplierStatusMap[b.supplierStatus] || b.supplierStatus}</span></div>
+              ${b.referralCode ? `<div class="row"><span>Referral Code</span><span>${b.referralCode}</span></div>` : ''}
+            </div>
+
+            <h2>Guest Information</h2>
+            <div class="grid">
+              <div class="row"><span>Name</span><span>${b.customer?.name || '—'}</span></div>
+              <div class="row"><span>Email</span><span>${b.customer?.email || '—'}</span></div>
+              <div class="row"><span>Phone</span><span>${b.customer?.phone || '—'}</span></div>
+            </div>
+
+            <h2>Accommodation</h2>
+            <div class="grid">
+              <div class="row"><span>Property</span><span>${b.property?.name || '—'} ${b.property?.nameZh ? `(${b.property.nameZh})` : ''}</span></div>
+              <div class="row"><span>Room Type</span><span>${b.roomType?.name || '—'} ${b.roomType?.nameZh ? `(${b.roomType.nameZh})` : ''}</span></div>
+              <div class="row"><span>Check-in</span><span>${new Date(b.checkIn * 1000).toLocaleDateString('en-GB')}</span></div>
+              <div class="row"><span>Check-out</span><span>${new Date(b.checkOut * 1000).toLocaleDateString('en-GB')}</span></div>
+              <div class="row"><span>Nights / Guests</span><span>${nights} nights · ${b.guests} guest(s)</span></div>
+            </div>
+
+            <h2>Add-ons</h2>
+            <table>
+              <thead><tr><th>Item</th><th>Type</th></tr></thead>
+              <tbody>${addonRows}</tbody>
+            </table>
+
+            <h2>Payment Summary</h2>
+            <div class="grid">
+              <div class="row"><span>Total Amount</span><span class="total">HK$${(Number(b.totalAmount) || 0).toLocaleString()}</span></div>
+              <div class="row"><span>Paid Amount</span><span>HK$${paidAmount.toLocaleString()}</span></div>
+              <div class="row"><span>Balance Due</span><span>HK$${Math.max(0, balance).toLocaleString()}</span></div>
+              ${b.paymentMethod ? `<div class="row"><span>Payment Method</span><span>${paymentMethodMap[b.paymentMethod] || b.paymentMethod}</span></div>` : ''}
+              ${b.paymentReference ? `<div class="row"><span>Payment Reference</span><span>${b.paymentReference}</span></div>` : ''}
+            </div>
+
+            <h2>Payment Records</h2>
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Method</th><th>Reference</th><th>Amount</th><th>Status</th></tr>
+              </thead>
+              <tbody>${paymentRows}</tbody>
+            </table>
+
+            ${b.adminNotes ? `
+              <h2>Internal Notes</h2>
+              <p style="white-space:pre-wrap;background:#f5f7f8;padding:12px;border-radius:6px;">${b.adminNotes}</p>
+            ` : ''}
+
+            <div class="footer">
+              Generated on ${new Date().toLocaleString('en-GB')} · HK Maldivers · For internal and supplier use.
+            </div>
+            <script>window.print()</script>
+          </body>
+        </html>
+      `);
+      w.document.close();
+    } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
   }
 
   async function ensureAndCopyOrderLink() {
@@ -3163,20 +3286,9 @@ export default function AdminPage() {
                         className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition disabled:opacity-60"
                       >編輯訂單</button>
                       <button
-                        onClick={() => generateVoucher(selectedBooking.id)}
-                        disabled={bookingActionLoading || !!selectedBooking.voucherCode}
-                        className="text-xs bg-[#B8902F]/10 hover:bg-[#B8902F]/20 text-[#B8902F] px-3 py-2 rounded-lg transition disabled:opacity-60"
-                      >{selectedBooking.voucherCode ? '已產生憑證' : '產生電子憑證'}</button>
-                      {selectedBooking.voucherCode && (
-                        <button
-                          onClick={() => setVoucherPreview(true)}
-                          className="text-xs bg-[#0a4c6b]/10 hover:bg-[#0a4c6b]/20 text-[#0a4c6b] px-3 py-2 rounded-lg transition"
-                        >預覽憑證</button>
-                      )}
-                      <button
-                        onClick={printBookingSummary}
+                        onClick={() => printBookingConfirmation(selectedBooking.id)}
                         className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition"
-                      >列印摘要</button>
+                      >列印確認單</button>
                       <button
                         onClick={ensureAndCopyOrderLink}
                         className="text-xs bg-[#0a4c6b]/10 hover:bg-[#0a4c6b]/20 text-[#0a4c6b] px-3 py-2 rounded-lg transition"
@@ -3193,6 +3305,21 @@ export default function AdminPage() {
                           <option value="confirmed">已確認</option>
                           <option value="rejected">已拒絕</option>
                         </select>
+                      </div>
+                    </div>
+
+                    {/* Property & room info */}
+                    <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                      <h4 className="font-semibold text-[#0d1b2a]">住宿與房型</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">住宿</p>
+                          <p className="font-medium">{selectedBooking.propertyNameZh || selectedBooking.propertyName || `住宿 #${selectedBooking.propertyId}`}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">房型</p>
+                          <p className="font-medium">{selectedBooking.roomTypeNameZh || selectedBooking.roomTypeName || `房型 #${selectedBooking.roomTypeId}`}</p>
+                        </div>
                       </div>
                     </div>
 
@@ -3560,28 +3687,7 @@ export default function AdminPage() {
                       </div>
                     )}
 
-                    {/* Voucher preview modal */}
-                    {voucherPreview && selectedBooking.voucherCode && (
-                      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
-                        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center space-y-4">
-                          <h4 className="font-bold text-[#0d1b2a]">電子憑證預覽</h4>
-                          <div className="bg-gradient-to-r from-[#0a4c6b] to-[#2ec4b6] rounded-2xl p-6 text-white">
-                            <p className="text-white/70 text-sm">HK Maldivers Voucher</p>
-                            <p className="text-3xl font-mono font-bold mt-2">{selectedBooking.voucherCode}</p>
-                            <p className="text-white/90 text-sm mt-4">
-                              {new Date(selectedBooking.checkIn * 1000).toLocaleDateString('zh-HK')} - {new Date(selectedBooking.checkOut * 1000).toLocaleDateString('zh-HK')}
-                            </p>
-                            <p className="text-white/90 text-sm">{selectedBooking.customer?.name || 'Guest'}</p>
-                            <p className="text-2xl font-bold mt-3">HK${selectedBooking.totalAmount?.toLocaleString()}</p>
-                            <p className="text-white/70 text-xs mt-1">預訂 #{selectedBooking.id}</p>
-                          </div>
-                          <button
-                            onClick={() => setVoucherPreview(false)}
-                            className="text-sm text-gray-500 px-4 py-2"
-                          >關閉</button>
-                        </div>
-                      </div>
-                    )}
+
                   </div>
                 </div>
               </div>

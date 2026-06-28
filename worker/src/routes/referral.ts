@@ -441,7 +441,7 @@ export function buildLeadNotificationMessage(
   lead: { name: string | null; email: string; phone: string | null }
 ): string {
   const link = buildReferralLink(env, referrer.referralCode)
-  return `🎉 好消息！你推薦的朋友已經留下聯絡資料，我們正在跟進中。\n\n聯絡電話尾數：${maskPhoneLast4(lead.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
+  return `🎉 好消息！你推薦的朋友已經留下聯絡資料，我們正在跟進中。\n\n朋友聯絡電話尾數：${maskPhoneLast4(lead.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
 }
 
 export async function notifyReferrerOnLead(
@@ -477,7 +477,7 @@ export function buildBookingInquiryNotificationMessage(
   booking: { id: number; phone: string | null; token: string | null }
 ): string {
   const link = buildReferralLink(env, referrer.referralCode)
-  return `🎉 好消息！你推薦的朋友已經提交了一個住宿查詢，我們正在跟進中。\n\n查詢編號：#${booking.id}\n聯絡電話尾數：${maskPhoneLast4(booking.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
+  return `🎉 好消息！你推薦的朋友已經提交了一個住宿查詢，我們正在跟進中。\n\n朋友聯絡電話尾數：${maskPhoneLast4(booking.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
 }
 
 export async function notifyReferrerOnBookingInquiry(
@@ -513,7 +513,7 @@ export function buildPackageBookingNotificationMessage(
   booking: { packageName: string; phone: string | null }
 ): string {
   const link = buildReferralLink(env, referrer.referralCode)
-  return `🎉 好消息！你推薦的朋友已經提交了一個度假套餐查詢，我們正在跟進中。\n\n套餐：${booking.packageName}\n聯絡電話尾數：${maskPhoneLast4(booking.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
+  return `🎉 好消息！你推薦的朋友已經提交了一個度假套餐查詢，我們正在跟進中。\n\n套餐：${booking.packageName}\n朋友聯絡電話尾數：${maskPhoneLast4(booking.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
 }
 
 export async function notifyReferrerOnPackageBooking(

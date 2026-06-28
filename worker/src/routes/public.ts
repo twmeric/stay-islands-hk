@@ -126,6 +126,13 @@ app.get('/experiences/:slug', async (c) => {
   return c.json({ data: experience })
 })
 
+// GET /api/public/retreats
+// Retreats are not currently implemented in the CMS; kept for the frontend
+// ExperiencesPage which expects this endpoint to exist.
+app.get('/retreats', async (c) => {
+  return c.json({ data: [] })
+})
+
 // GET /api/public/packages
 app.get('/packages', async (c) => {
   const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 200)
@@ -310,7 +317,6 @@ app.post('/bookings', async (c) => {
   const guests = Number(body.guests) || 1
   const totalAmount = Number(body.total_amount) || 0
   const currency = typeof body.currency === 'string' ? body.currency.toUpperCase() : 'HKD'
-  const voucherCode = typeof body.voucher_code === 'string' ? body.voucher_code.trim() || null : null
   const addons = Array.isArray(body.addons) ? JSON.stringify(body.addons) : '[]'
   const referralCode = typeof body.referral_code === 'string' ? body.referral_code.trim().toUpperCase() || null : null
   const checkIn = toUnixEpoch(body.check_in)
@@ -330,9 +336,9 @@ app.post('/bookings', async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, referral_code, customer_name, customer_email, customer_phone, supplier_status, payment_deadline, token, created_at, updated_at)
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, addons, referral_code, customer_name, customer_email, customer_phone, supplier_status, payment_deadline, token, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, ?, ?, ?, ?, 'pending', ?, ?, unixepoch(), unixepoch())`,
-    [null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons, referralCode, name, email, phone, paymentDeadline, token]
+    [null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, addons, referralCode, name, email, phone, paymentDeadline, token]
   )
 
   const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [

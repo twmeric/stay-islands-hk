@@ -1501,7 +1501,6 @@ function parseBookingBody(body: Record<string, unknown>): {
   totalAmount: number
   currency: string
   status: BookingStatus
-  voucherCode: string | null
   addons: string
   paymentMethod: string | null
   paymentReference: string | null
@@ -1534,7 +1533,6 @@ function parseBookingBody(body: Record<string, unknown>): {
     totalAmount: Number(body.totalAmount) || 0,
     currency: typeof body.currency === 'string' ? body.currency.toUpperCase() : 'HKD',
     status,
-    voucherCode: typeof body.voucherCode === 'string' ? body.voucherCode.trim() || null : null,
     addons: Array.isArray(body.addons) ? JSON.stringify(body.addons) : '[]',
     paymentMethod: typeof body.paymentMethod === 'string' ? body.paymentMethod.trim() || null : null,
     paymentReference: typeof body.paymentReference === 'string' ? body.paymentReference.trim() || null : null,
@@ -1640,9 +1638,15 @@ app.get('/bookings', requireAdmin, async (c) => {
     `SELECT b.*,
        COALESCE(c.name, b.customer_name) as customer_name,
        COALESCE(c.email, b.customer_email) as customer_email,
-       COALESCE(c.phone, b.customer_phone) as customer_phone
+       COALESCE(c.phone, b.customer_phone) as customer_phone,
+       p.name as property_name,
+       p.name_zh as property_name_zh,
+       r.name as room_type_name,
+       r.name_zh as room_type_name_zh
      FROM bookings b
      LEFT JOIN customers c ON c.id = b.customer_id
+     LEFT JOIN properties p ON p.id = b.property_id
+     LEFT JOIN room_types r ON r.id = b.room_type_id
      ${where}
      ORDER BY b.created_at DESC LIMIT ? OFFSET ?`,
     [...params, limit, offset]
@@ -1696,8 +1700,8 @@ app.post('/bookings', requireAdmin, async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, payment_method, payment_reference, payment_deadline, supplier_status, token, admin_notes, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, addons, payment_method, payment_reference, payment_deadline, supplier_status, token, admin_notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       parsed.customerId,
       parsed.propertyId,
@@ -1709,7 +1713,6 @@ app.post('/bookings', requireAdmin, async (c) => {
       parsed.currency,
       parsed.status,
       'unpaid',
-      parsed.voucherCode,
       parsed.addons,
       parsed.paymentMethod,
       parsed.paymentReference,
@@ -1793,10 +1796,6 @@ app.put('/bookings/:id', requireAdmin, async (c) => {
   if (body.paymentStatus !== undefined) {
     fields.push('payment_status = ?')
     values.push(String(body.paymentStatus))
-  }
-  if (body.voucherCode !== undefined) {
-    fields.push('voucher_code = ?')
-    values.push(typeof body.voucherCode === 'string' ? body.voucherCode.trim() || null : null)
   }
   if (body.addons !== undefined) {
     fields.push('addons = ?')
@@ -2024,59 +2023,6 @@ app.patch('/bookings/:id/supplier-status', requireAdmin, async (c) => {
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
     action: 'update_supplier_status',
-    targetTable: 'bookings',
-    targetId: id,
-    before: existing as unknown as Record<string, unknown>,
-    after: updated as unknown as Record<string, unknown>,
-    ip: c.req.header('CF-Connecting-IP') ?? null,
-  })
-
-  return c.json({ data: updated })
-})
-
-// PATCH /api/admin/bookings/:id/voucher - generate and assign a voucher code
-app.patch('/bookings/:id/voucher', requireAdmin, async (c) => {
-  const id = Number(c.req.param('id'))
-  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
-
-  const existing = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
-  if (!existing) return c.json({ error: 'Booking not found' }, 404)
-
-  function generateVoucherCode(): string {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-    let code = 'HKI-'
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    return code
-  }
-
-  let voucherCode = existing.voucherCode
-  if (!voucherCode) {
-    let attempts = 0
-    do {
-      voucherCode = generateVoucherCode()
-      const dup = await first<{ count: number }>(
-        c.env.DB,
-        'SELECT COUNT(*) as count FROM bookings WHERE voucher_code = ? AND id != ?',
-        [voucherCode, id]
-      )
-      if ((dup?.count ?? 0) === 0) break
-      attempts++
-    } while (attempts < 10)
-  }
-
-  await run(
-    c.env.DB,
-    `UPDATE bookings SET voucher_code = ?, updated_at = unixepoch() WHERE id = ?`,
-    [voucherCode, id]
-  )
-
-  const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
-
-  await logAudit(c.env.DB, {
-    adminId: c.get('adminId') ?? null,
-    action: 'generate_voucher',
     targetTable: 'bookings',
     targetId: id,
     before: existing as unknown as Record<string, unknown>,

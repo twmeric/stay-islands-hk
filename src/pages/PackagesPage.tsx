@@ -31,30 +31,7 @@ interface Package {
   status: 'active' | 'inactive';
 }
 
-const fallbackPackages: Package[] = [
-  {
-    id: 1,
-    name: 'Maldives Island Escape',
-    nameZh: '馬爾代夫海島假期',
-    slug: 'maldives-island-escape',
-    description: '精選住宿、每日早餐、機場接送，享受無憂海島假期。',
-    descriptionZh: '精選住宿、每日早餐、機場接送，享受無憂海島假期。',
-    duration: '5 天 4 晚',
-    location: 'North Malé Atoll',
-    audience: '情侶、家庭、朋友出遊',
-    inclusions: ['精選住宿', '每日早餐', '機場接送', '24 小時管家支援'],
-    itinerary: [],
-    pricingOptions: [
-      { type: 'shared', label: '二人同房', price: 12800, currency: 'HKD' },
-      { type: 'single', label: '單人房', price: 16800, currency: 'HKD' },
-    ],
-    terms: '價格以港幣計算，視乎航班與住宿供應情況調整。',
-    imageUrl: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80',
-    gallery: [],
-    sortOrder: 0,
-    status: 'active',
-  },
-];
+const placeholderImage = 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80';
 
 function getDisplayPrice(options: PricingOption[]): string {
   if (!options || options.length === 0) return '按行程報價';
@@ -89,7 +66,7 @@ export default function PackagesPage() {
     return () => { mounted = false; };
   }, []);
 
-  const displayPackages = packages.length > 0 ? packages : fallbackPackages;
+  const displayPackages = packages;
 
   return (
     <div className="pt-20 pb-16">
@@ -155,10 +132,14 @@ export default function PackagesPage() {
               <Loader2 className="w-10 h-10 text-[#0a4c6b] animate-spin mb-4" />
               <p className="text-gray-500">載入度假套餐中…</p>
             </div>
-          ) : error && packages.length === 0 ? (
+          ) : error ? (
             <div className="text-center py-20 text-gray-500">
               <p>暫時無法載入套餐，請稍後再試。</p>
               <p className="text-xs mt-2 text-gray-400">{error}</p>
+            </div>
+          ) : displayPackages.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-600">暫無度假套餐。</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -173,7 +154,7 @@ export default function PackagesPage() {
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img
-                      src={pkg.imageUrl || fallbackPackages[0].imageUrl || ''}
+                      src={pkg.imageUrl || placeholderImage}
                       alt={pkg.nameZh}
                       className="w-full h-full object-cover hover:scale-105 transition duration-700"
                     />

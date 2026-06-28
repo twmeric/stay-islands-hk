@@ -23,7 +23,7 @@ interface OrderData {
   status: string;
   paymentStatus: string;
   supplierStatus: string;
-  voucherCode: string | null;
+
   paymentMethod: string | null;
   paymentReference: string | null;
   paidAt: number | null;
@@ -271,12 +271,7 @@ export default function OrderPage() {
                 ))}
               </div>
             )}
-            {order.voucherCode && (
-              <div className="mt-4 p-4 bg-gradient-to-r from-[#0a4c6b] to-[#2ec4b6] rounded-xl text-white text-center">
-                <p className="text-white/80 text-sm">電子憑證</p>
-                <p className="text-2xl font-mono font-bold mt-1">{order.voucherCode}</p>
-              </div>
-            )}
+
           </div>
         </motion.div>
 

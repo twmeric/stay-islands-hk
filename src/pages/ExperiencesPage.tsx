@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Check, Clock, Users, Fish, Waves, Ship, Sunset, MapPin, Anchor, Heart, Sparkles, Leaf, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Clock, Users, Fish, Waves, Ship, Sunset, MapPin, Anchor, Heart, Sparkles, Leaf, Loader2, Sun, Umbrella, Tent, Flame, Camera, X } from 'lucide-react';
 import { client } from '../api/client';
 
 interface Experience {
@@ -15,7 +15,7 @@ interface Experience {
   priceNote: string;
   image: string;
   icon: React.ReactNode;
-  category: 'experience' | 'retreat';
+  category: string;
 }
 
 interface ApiExperience {
@@ -54,87 +54,6 @@ interface ApiRetreat {
   status: string;
 }
 
-const fallbackExperiences: Experience[] = [
-  {
-    id: 'night-fishing',
-    name: 'Night Fishing Trip',
-    nameZh: '夜釣之旅',
-    duration: '3-4 小時',
-    groupSize: '2-8 人',
-    includes: ['專業漁夫', '釣具', '船上晚餐', '飲料'],
-    description: '在星空下出海，學習傳統釣魚技巧，現釣現煮的海鮮晚餐是最大回報。',
-    priceNote: '按行程報價',
-    image: 'https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80',
-    icon: <Fish className="w-5 h-5" />,
-    category: 'experience',
-  },
-  {
-    id: 'snorkeling-diving',
-    name: 'Snorkeling & Diving',
-    nameZh: '浮潛與潛水',
-    duration: '半日或全日',
-    groupSize: '2-6 人',
-    includes: ['裝備', '專業教練', '船程', '午餐'],
-    description: '探索環礁珊瑚花園，與海龜、熱帶魚共游，從初學者到持證潛水員都能找到適合路線。',
-    priceNote: '按行程報價',
-    image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=800&q=80',
-    icon: <Waves className="w-5 h-5" />,
-    category: 'experience',
-  },
-  {
-    id: 'sunset-cruise',
-    name: 'Sunset Cruise',
-    nameZh: '日落巡航',
-    duration: '2 小時',
-    groupSize: '2-12 人',
-    includes: ['香檳／飲料', '小點', '船上音樂'],
-    description: '在金色夕陽中出海，看海豚躍出水面，為一天畫下完美句點。',
-    priceNote: '按行程報價',
-    image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80',
-    icon: <Sunset className="w-5 h-5" />,
-    category: 'experience',
-  },
-  {
-    id: 'island-hopping',
-    name: 'Island Hopping',
-    nameZh: '跳島探索',
-    duration: '全日',
-    groupSize: '4-10 人',
-    includes: ['船程', '導覽', '沙洲午餐', '浮潛'],
-    description: '一天穿梭多座無人島與本地島嶼，感受馬爾代夫的多元面貌。',
-    priceNote: '按行程報價',
-    image: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800&q=80',
-    icon: <Ship className="w-5 h-5" />,
-    category: 'experience',
-  },
-  {
-    id: 'whale-shark-manta',
-    name: 'Whale Shark & Manta Encounter',
-    nameZh: '鯨鯊與魔鬼魚共游',
-    duration: '半日',
-    groupSize: '2-6 人',
-    includes: ['專業船長', '浮潛裝備', '海洋生物解說'],
-    description: '在 South Ari 環礁與溫柔的鯨鯊和魔鬼魚同游，一生難忘的海洋奇遇。',
-    priceNote: '按行程報價',
-    image: 'https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=800&q=80',
-    icon: <Sparkles className="w-5 h-5" />,
-    category: 'experience',
-  },
-  {
-    id: 'local-island',
-    name: 'Local Island Visit',
-    nameZh: '本地島嶼文化體驗',
-    duration: '半日',
-    groupSize: '2-8 人',
-    includes: ['當地導遊', '文化導覽', '傳統小點'],
-    description: '走進馬爾代夫本地社區，了解傳統工藝、漁村生活與島嶼故事。',
-    priceNote: '按行程報價',
-    image: 'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=800&q=80',
-    icon: <MapPin className="w-5 h-5" />,
-    category: 'experience',
-  },
-];
-
 function safeJsonParse<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
   try {
@@ -154,6 +73,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Anchor,
   Heart,
   Leaf,
+  Sun,
+  Umbrella,
+  Tent,
+  Flame,
+  Camera,
 };
 
 function getIconByName(name: string | null): React.ReactNode {
@@ -162,6 +86,56 @@ function getIconByName(name: string | null): React.ReactNode {
   if (!Icon) return <Sparkles className="w-5 h-5" />;
   return <Icon className="w-5 h-5" />;
 }
+
+const categoryMap: Record<string, string> = {
+  'coral-garden-snorkeling': '浮潛與潛水',
+  'two-spot-snorkeling': '浮潛與潛水',
+  'shipwreck-manta-snorkeling': '浮潛與潛水',
+  'turtle-snorkeling': '浮潛與潛水',
+  'scuba-diving-experience': '浮潛與潛水',
+  'whale-shark-manta': '浮潛與潛水',
+  'traditional-night-fishing': '海釣體驗',
+  'deep-sea-big-game-fishing': '海釣體驗',
+  'half-day-sea-fishing': '海釣體驗',
+  'full-day-sea-fishing': '海釣體驗',
+  'sea-fishing': '海釣體驗',
+  'guided-surf-trip': '衝浪與瑜伽',
+  'surf-lesson': '衝浪與瑜伽',
+  'group-yoga-class': '衝浪與瑜伽',
+  'private-yoga-session': '衝浪與瑜伽',
+  'local-island-culture-tour': '島嶼探索',
+  'uninhabited-island-half-day': '島嶼探索',
+  'uninhabited-island-full-day': '島嶼探索',
+  'uninhabited-island': '島嶼探索',
+  'sunset-cruise': '島嶼探索',
+  'private-island-picnic-half-day': '私人島嶼與浪漫',
+  'private-island-picnic-full-day': '私人島嶼與浪漫',
+  'private-island-picnic': '私人島嶼與浪漫',
+  'private-island-overnight-camping': '私人島嶼與浪漫',
+  'private-island-bbq-dinner': '私人島嶼與浪漫',
+  'couples-romantic-beach-dinner': '私人島嶼與浪漫',
+  'drone-aerial-photography': '航拍與特色',
+};
+
+const categoryOrder = [
+  '浮潛與潛水',
+  '海釣體驗',
+  '衝浪與瑜伽',
+  '島嶼探索',
+  '私人島嶼與浪漫',
+  '航拍與特色',
+];
+
+const categoryMeta: Record<string, { image: string; iconName: string }> = {
+  '全部': { image: 'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=800&q=80', iconName: 'Sparkles' },
+  '浮潛與潛水': { image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=800&q=80', iconName: 'Waves' },
+  '海釣體驗': { image: 'https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80', iconName: 'Fish' },
+  '衝浪與瑜伽': { image: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=800&q=80', iconName: 'Sun' },
+  '島嶼探索': { image: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800&q=80', iconName: 'Ship' },
+  '私人島嶼與浪漫': { image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80', iconName: 'Heart' },
+  '航拍與特色': { image: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80', iconName: 'Camera' },
+  '主題靜修': { image: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80', iconName: 'Leaf' },
+};
 
 function mapApiExperience(item: ApiExperience): Experience {
   return {
@@ -176,7 +150,7 @@ function mapApiExperience(item: ApiExperience): Experience {
     priceNote: item.priceNote,
     image: item.imageUrl,
     icon: getIconByName(item.iconName),
-    category: 'experience',
+    category: categoryMap[item.slug] || '其他',
   };
 }
 
@@ -195,7 +169,7 @@ function mapApiRetreat(item: ApiRetreat): Experience {
     priceNote: item.priceNote,
     image: item.imageUrl,
     icon: getIconByName(item.iconName),
-    category: 'retreat',
+    category: '主題靜修',
   };
 }
 
@@ -204,7 +178,8 @@ export default function ExperiencesPage() {
   const [apiRetreats, setApiRetreats] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'experience' | 'retreat'>('all');
+  const [activeCategory, setActiveCategory] = useState<string>(categoryOrder[0]);
+  const [selectedExperience, setSelectedExperience] = useState<Experience | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -218,13 +193,17 @@ export default function ExperiencesPage() {
         if (!expRes.ok) {
           throw new Error(`Experiences API error ${expRes.status}`);
         }
-        if (!retRes.ok) {
-          throw new Error(`Retreats API error ${retRes.status}`);
-        }
         const expJson = (await expRes.json()) as { data?: ApiExperience[] };
-        const retJson = (await retRes.json()) as { data?: ApiRetreat[] };
         const expList = Array.isArray(expJson?.data) ? expJson.data.map(mapApiExperience) : [];
-        const retList = Array.isArray(retJson?.data) ? retJson.data.map(mapApiRetreat) : [];
+
+        let retList: Experience[] = [];
+        if (retRes.ok) {
+          const retJson = (await retRes.json()) as { data?: ApiRetreat[] };
+          retList = Array.isArray(retJson?.data) ? retJson.data.map(mapApiRetreat) : [];
+        } else {
+          console.warn('Retreats API error:', retRes.status);
+        }
+
         if (mounted) {
           setApiExperiences(expList);
           setApiRetreats(retList);
@@ -247,13 +226,19 @@ export default function ExperiencesPage() {
     };
   }, []);
 
-  const combinedItems = apiExperiences.length > 0 || apiRetreats.length > 0
-    ? [...apiExperiences, ...apiRetreats]
-    : [...fallbackExperiences];
+  const combinedItems = [...apiExperiences, ...apiRetreats];
 
-  const filteredItems = filter === 'all'
-    ? combinedItems
-    : combinedItems.filter((item) => item.category === filter);
+  const filteredItems = combinedItems.filter((item) => item.category === activeCategory);
+
+  const categoryCounts = combinedItems.reduce<Record<string, number>>((acc, item) => {
+    acc[item.category] = (acc[item.category] || 0) + 1;
+    return acc;
+  }, {});
+
+  const categoryCards = [
+    ...categoryOrder.map((c) => ({ key: c, label: c })),
+    ...(apiRetreats.length > 0 ? [{ key: '主題靜修', label: '主題靜修' }] : []),
+  ];
 
   return (
     <div className="pt-20 pb-16">
@@ -269,7 +254,7 @@ export default function ExperiencesPage() {
           <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">Explore the Islands</p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">海島體驗</h1>
           <p className="text-xl md:text-2xl text-white/90 mb-3">不只是住宿，而是深入海洋與島嶼文化的旅程。</p>
-          <p className="text-white/70 max-w-2xl mx-auto">從夜釣到鯨鯊共游，每一項體驗都由當地團隊客製安排。</p>
+          <p className="text-white/70 max-w-2xl mx-auto">從浮潛到私人島嶼晚餐，按你的興趣快速篩選，每一項都由當地團隊客製安排。</p>
         </div>
       </div>
 
@@ -288,7 +273,7 @@ export default function ExperiencesPage() {
             <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">Explore the Islands</p>
             <h1 className="text-4xl font-bold mb-4">海島體驗</h1>
             <p className="text-lg text-white/90 mb-3">不只是住宿，而是深入海洋與島嶼文化的旅程。</p>
-            <p className="text-white/70">從夜釣到鯨鯊共游，每一項體驗都由當地團隊客製安排。</p>
+            <p className="text-white/70">從浮潛到私人島嶼晚餐，按你的興趣快速篩選，每一項都由當地團隊客製安排。</p>
           </div>
         </div>
       </section>
@@ -314,30 +299,56 @@ export default function ExperiencesPage() {
       {/* Activities Grid */}
       <section className="py-16 px-4 bg-[#f8fafb]">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
-            {[
-              { key: 'all', label: '全部' },
-              { key: 'experience', label: '單日體驗' },
-              { key: 'retreat', label: '主題靜修' },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setFilter(tab.key as typeof filter)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition ${
-                  filter === tab.key
-                    ? 'bg-[#0a4c6b] text-white'
-                    : 'bg-white text-[#0a4c6b] border border-[#0a4c6b]/20 hover:border-[#0a4c6b]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {categoryCards.map((cat, i) => {
+              const meta = categoryMeta[cat.key] || categoryMeta['全部'];
+              const count = cat.key === '全部' ? combinedItems.length : (categoryCounts[cat.key] || 0);
+              const Icon = iconMap[meta.iconName] || Sparkles;
+              return (
+                <motion.button
+                  key={cat.key}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                  onClick={() => setActiveCategory(cat.key)}
+                  className={`relative overflow-hidden rounded-2xl text-left h-40 transition focus:outline-none ${
+                    activeCategory === cat.key
+                      ? 'ring-4 ring-[#B8902F] shadow-xl'
+                      : 'hover:shadow-lg'
+                  }`}
+                >
+                  <img
+                    src={meta.image}
+                    alt={cat.label}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a4c6b]/90 via-[#0a4c6b]/40 to-transparent" />
+                  <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Icon className="w-5 h-5 text-[#B8902F]" />
+                      <span className="text-sm font-medium text-white/80">{count} 項體驗</span>
+                    </div>
+                    <h3 className="text-xl font-bold">{cat.label}</h3>
+                  </div>
+                </motion.button>
+              );
+            })}
           </div>
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="w-10 h-10 text-[#0a4c6b] animate-spin mb-4" />
               <p className="text-gray-500">載入體驗中…</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <p className="text-red-600 mb-2">載入失敗，請重新整理頁面再試。</p>
+              <p className="text-sm text-gray-500">{error}</p>
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-600">此分類暫無體驗。</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -361,12 +372,15 @@ export default function ExperiencesPage() {
                       {exp.icon}
                       <span>{exp.nameZh || exp.name}</span>
                     </div>
-                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
-                      {exp.price != null ? `HK$${exp.price.toLocaleString()}` : exp.priceNote}
-                    </div>
+
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-[#0d1b2a] mb-2">{exp.nameZh || exp.name}</h3>
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <h3 className="text-xl font-bold text-[#0d1b2a]">{exp.nameZh || exp.name}</h3>
+                      <span className="shrink-0 inline-block bg-[#0a4c6b]/10 text-[#0a4c6b] text-xs font-medium px-2.5 py-1 rounded-full">
+                        {exp.category}
+                      </span>
+                    </div>
                     {exp.nameZh && exp.nameZh !== exp.name && <p className="text-sm text-gray-500 mb-1">{exp.name}</p>}
                     <p className="text-gray-600 text-sm mt-3 leading-relaxed">{exp.description}</p>
 
@@ -384,7 +398,7 @@ export default function ExperiencesPage() {
                     <div className="mt-4">
                       <p className="text-xs text-gray-500 mb-2">包含：</p>
                       <div className="flex flex-wrap gap-2">
-                        {exp.includes.map((item, idx) => (
+                        {exp.includes.slice(0, 4).map((item, idx) => (
                           <span
                             key={idx}
                             className="text-xs bg-[#f0f9f7] text-[#0a4c6b] px-2 py-1 rounded-full flex items-center gap-1"
@@ -393,7 +407,19 @@ export default function ExperiencesPage() {
                             {item}
                           </span>
                         ))}
+                        {exp.includes.length > 4 && (
+                          <span className="text-xs text-gray-400 px-2 py-1">+{exp.includes.length - 4}</span>
+                        )}
                       </div>
+                    </div>
+
+                    <div className="mt-5 pt-4 border-t border-gray-100">
+                      <button
+                        onClick={() => setSelectedExperience(exp)}
+                        className="w-full bg-[#0a4c6b] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#083d56] transition"
+                      >
+                        了解更多
+                      </button>
                     </div>
 
                   </div>
@@ -403,6 +429,96 @@ export default function ExperiencesPage() {
           )}
         </div>
       </section>
+
+      {/* Experience Detail Modal */}
+      <AnimatePresence>
+        {selectedExperience && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+            onClick={() => setSelectedExperience(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="relative aspect-video">
+                <img
+                  src={selectedExperience.image}
+                  alt={selectedExperience.nameZh}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <button
+                  onClick={() => setSelectedExperience(null)}
+                  className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-700 rounded-full p-2 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <span className="inline-block bg-[#B8902F] text-xs font-medium px-3 py-1 rounded-full mb-2">
+                    {selectedExperience.category}
+                  </span>
+                  <h3 className="text-2xl font-bold">{selectedExperience.nameZh || selectedExperience.name}</h3>
+                </div>
+              </div>
+              <div className="p-6 sm:p-8 space-y-6">
+                {selectedExperience.nameZh && selectedExperience.nameZh !== selectedExperience.name && (
+                  <p className="text-sm text-gray-500">{selectedExperience.name}</p>
+                )}
+                <p className="text-gray-600 leading-relaxed">{selectedExperience.description}</p>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3 bg-[#f8fafb] rounded-xl p-4">
+                    <Clock className="w-5 h-5 text-[#2ec4b6]" />
+                    <div>
+                      <p className="text-xs text-gray-500">Duration</p>
+                      <p className="font-medium text-[#0d1b2a]">{selectedExperience.duration}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-[#f8fafb] rounded-xl p-4">
+                    <Users className="w-5 h-5 text-[#2ec4b6]" />
+                    <div>
+                      <p className="text-xs text-gray-500">Group Size</p>
+                      <p className="font-medium text-[#0d1b2a]">{selectedExperience.groupSize}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-[#0d1b2a] mb-3">包含項目</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedExperience.includes.map((item, idx) => (
+                      <span
+                        key={idx}
+                        className="text-sm bg-[#f0f9f7] text-[#0a4c6b] px-3 py-1.5 rounded-full flex items-center gap-1"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <p className="text-sm text-gray-500">{selectedExperience.priceNote}</p>
+                  <a
+                    href="/plan"
+                    className="bg-[#B8902F] text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#9a7a28] transition"
+                  >
+                    預約諮詢
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Trust / CTA */}
       <section className="py-16 px-4 bg-[#0a4c6b]">

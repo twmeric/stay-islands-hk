@@ -183,7 +183,6 @@ CREATE TABLE IF NOT EXISTS bookings (
   currency TEXT NOT NULL DEFAULT 'HKD',
   status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'confirmed', 'cancelled', 'completed')),
   payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK(payment_status IN ('unpaid', 'partial', 'paid', 'refunded')),
-  voucher_code TEXT,
   addons TEXT DEFAULT '[]',
   payment_method TEXT,
   payment_reference TEXT,

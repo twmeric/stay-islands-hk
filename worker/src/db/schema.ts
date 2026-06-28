@@ -210,7 +210,6 @@ export interface Booking {
   currency: string
   status: BookingStatus
   paymentStatus: PaymentStatus
-  voucherCode: string | null
   addons: string | null
   paymentMethod: string | null
   paymentReference: string | null
