@@ -866,17 +866,15 @@ export default function PropertyDetailPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                   <div>
                     <h2 className="text-2xl font-bold text-[#0d1b2a] mb-2 font-serif">
-                      可加購的體驗與靜修
+                      可加購的體驗
                     </h2>
                     <p className="text-gray-600">
                       點選有興趣的項目，會一併加入你的預約諮詢，專員會為你安排。
                     </p>
                   </div>
-                  {selectedActivities.length > 0 && (
-                    <span className="inline-flex items-center justify-center px-4 py-2 bg-[#0a4c6b] text-white rounded-full text-sm font-medium">
-                      已選 {selectedActivities.length} 項
-                    </span>
-                  )}
+                  <span className="inline-flex items-center justify-center px-4 py-2 bg-[#0a4c6b] text-white rounded-full text-sm font-medium">
+                    已選 {selectedActivities.length} 項
+                  </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {availableItems.map((a) => {
