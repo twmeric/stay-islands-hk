@@ -22,9 +22,9 @@ interface DashboardData {
 }
 
 const statusMap: Record<string, string> = {
-  pending: '待核准',
+  pending: '待結算',
   approved: '已核准',
-  paid: '已付款',
+  paid: '已發放',
   cancelled: '已取消',
 };
 
@@ -90,7 +90,7 @@ export default function ReferralDashboardPage() {
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-[#0a4c6b] text-white p-6 md:p-8">
             <h1 className="text-2xl md:text-3xl font-bold mb-1">HK Maldivers 分享夥伴</h1>
-            <p className="text-white/80">{data.name}，歡迎回來查看你的業績。</p>
+            <p className="text-white/80">{data.name}，歡迎回來查看你的轉介結果。</p>
           </div>
 
           <div className="p-6 md:p-8 border-b border-gray-100">
@@ -108,7 +108,7 @@ export default function ReferralDashboardPage() {
                 {copied ? '已複製' : '複製'}
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">朋友透過此連結預約並付款後，你即可獲得回饋。</p>
+            <p className="text-xs text-gray-500 mt-2">朋友透過此連結預約並付款後，你即可獲得回贈。</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 md:p-8 border-b border-gray-100">
@@ -119,17 +119,17 @@ export default function ReferralDashboardPage() {
             </div>
             <div className="bg-[#f0f9f7] rounded-xl p-4 text-center">
               <CreditCard className="w-5 h-5 text-[#2ec4b6] mx-auto mb-2" />
-              <p className="text-xs text-gray-500">待核准回饋</p>
+              <p className="text-xs text-gray-500">待結算回贈</p>
               <p className="text-xl font-bold text-[#0a4c6b]">HK${data.pendingCommission.toLocaleString()}</p>
             </div>
             <div className="bg-[#f0f9f7] rounded-xl p-4 text-center">
               <CreditCard className="w-5 h-5 text-[#2ec4b6] mx-auto mb-2" />
-              <p className="text-xs text-gray-500">已核准回饋</p>
+              <p className="text-xs text-gray-500">已核准回贈</p>
               <p className="text-xl font-bold text-[#0a4c6b]">HK${data.approvedCommission.toLocaleString()}</p>
             </div>
             <div className="bg-[#f0f9f7] rounded-xl p-4 text-center">
               <CreditCard className="w-5 h-5 text-[#2ec4b6] mx-auto mb-2" />
-              <p className="text-xs text-gray-500">已發放回饋</p>
+              <p className="text-xs text-gray-500">已發放回贈</p>
               <p className="text-xl font-bold text-[#0a4c6b]">HK${data.paidCommission.toLocaleString()}</p>
             </div>
           </div>

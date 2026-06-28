@@ -50,7 +50,7 @@ export function buildQrCodeUrl(deeplink: string): string {
 
 export function buildWelcomeMessage(env: Bindings, referrer: Referrer): string {
   const dashboard = buildDashboardLink(env, referrer.token)
-  return `歡迎成為 HK Maldivers 分享夥伴！\n\n隨時查看轉介結果：\n${dashboard}\n\n只需朋友透過你的專屬連結預約並付款後，你即可獲得回饋。`
+  return `歡迎成為 HK Maldivers 分享夥伴！\n\n隨時查看轉介結果：\n${dashboard}\n\n只需朋友透過你的專屬連結預約並付款後，你即可獲得回贈。`
 }
 
 export function buildReferralPromoMessage(env: Bindings, referrer: Referrer): string {
@@ -66,7 +66,7 @@ export function buildCommissionNotificationMessage(
   commission: number
 ): string {
   const dashboard = buildDashboardLink(env, referrer.token)
-  return `🎉 喜報！你推薦的客人已完成付款。\n\n訂單編號：#${bookingToken || '未知'}\n訂單金額：HK$${orderAmount.toLocaleString()}\n預計回饋：HK$${commission.toLocaleString()}\n\n查看業績：\n${dashboard}`
+  return `🎉 喜報！你推薦的客人已完成付款。\n\n訂單編號：#${bookingToken || '未知'}\n訂單金額：HK$${orderAmount.toLocaleString()}\n預計回贈：HK$${commission.toLocaleString()}\n\n查看轉介結果：\n${dashboard}`
 }
 
 export async function getReferralSettings(db: D1Database): Promise<ReferralRules> {
