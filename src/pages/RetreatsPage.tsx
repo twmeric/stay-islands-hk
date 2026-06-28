@@ -195,17 +195,21 @@ function InquiryForm({
     setSubmitting(true);
 
     try {
-      const res = await client.api.fetch('/api/public/inquiries', {
+      const res = await client.api.fetch('/api/public/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          property_id: null,
           name: form.name,
           email: form.email,
           phone: form.phone,
-          message: `對 ${form.retreat} 有興趣，預計 ${form.checkIn || '未定'} 出發，${form.guests} 人。${form.notes ? `備註：${form.notes}` : ''}`,
-          check_in: form.checkIn || null,
-          guests: form.guests,
+          lead_type: 'experience_inquiry',
+          source: 'retreats_page',
+          metadata: {
+            retreat: form.retreat,
+            check_in: form.checkIn || null,
+            guests: form.guests,
+            notes: form.notes,
+          },
         }),
       });
 

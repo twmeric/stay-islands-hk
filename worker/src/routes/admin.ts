@@ -21,9 +21,6 @@ import type {
   CouponDiscountType,
   Customer,
   Experience,
-  Inquiry,
-  InquiryPriority,
-  InquiryStatus,
   Lead,
   LeadStatus,
   LeadType,
@@ -64,6 +61,12 @@ function toUnixEpoch(value: unknown): number | null {
     if (!Number.isNaN(d.getTime())) return Math.floor(d.getTime() / 1000)
   }
   return null
+}
+
+function generateToken(length = 16): string {
+  const bytes = new Uint8Array(length)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
 async function logAudit(
@@ -210,20 +213,18 @@ app.get('/check', requireAdmin, async (c) => {
 app.get('/dashboard', requireAdmin, async (c) => {
   const db = c.env.DB
   const [
-    totalInquiries,
     totalLeads,
+    newLeads,
     totalBookings,
     totalCustomers,
     totalRevenue,
-    pendingInquiries,
     upcomingCheckIns,
   ] = await Promise.all([
-    first<{ count: number }>(db, 'SELECT COUNT(*) as count FROM inquiries'),
     first<{ count: number }>(db, 'SELECT COUNT(*) as count FROM leads'),
+    first<{ count: number }>(db, "SELECT COUNT(*) as count FROM leads WHERE status = 'new'"),
     first<{ count: number }>(db, 'SELECT COUNT(*) as count FROM bookings'),
     first<{ count: number }>(db, 'SELECT COUNT(*) as count FROM customers'),
     first<{ total: number }>(db, "SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'succeeded'"),
-    first<{ count: number }>(db, "SELECT COUNT(*) as count FROM inquiries WHERE status = 'new'"),
     first<{ count: number }>(
       db,
       'SELECT COUNT(*) as count FROM bookings WHERE check_in >= unixepoch() AND status != ?',
@@ -242,12 +243,11 @@ app.get('/dashboard', requireAdmin, async (c) => {
 
   return c.json({
     data: {
-      totalInquiries: totalInquiries?.count ?? 0,
       totalLeads: totalLeads?.count ?? 0,
+      newLeads: newLeads?.count ?? 0,
       totalBookings: totalBookings?.count ?? 0,
       totalCustomers: totalCustomers?.count ?? 0,
       totalRevenue: totalRevenue?.total ?? 0,
-      pendingInquiries: pendingInquiries?.count ?? 0,
       upcomingCheckIns: upcomingCheckIns?.count ?? 0,
       recentActivities,
     },
@@ -1017,122 +1017,6 @@ app.delete('/retreats/:id', requireAdmin, async (c) => {
 
 
 // ============================================================================
-// Inquiries
-// ============================================================================
-
-const validInquiryStatuses: InquiryStatus[] = ['new', 'contacted', 'qualified', 'closed', 'spam']
-const validInquiryPriorities: InquiryPriority[] = ['low', 'medium', 'high', 'urgent']
-
-app.get('/inquiries', requireAdmin, async (c) => {
-  const status = c.req.query('status')
-  const priority = c.req.query('priority')
-  const assignedAdminId = c.req.query('assigned_admin_id')
-  const limit = Math.min(parseIntParam(c.req.query('limit'), 20), 100)
-  const offset = Math.max(parseIntParam(c.req.query('offset'), 0), 0)
-
-  const params: unknown[] = []
-  let where = 'WHERE 1=1'
-  if (status) {
-    where += ' AND status = ?'
-    params.push(status)
-  }
-  if (priority) {
-    where += ' AND priority = ?'
-    params.push(priority)
-  }
-  if (assignedAdminId) {
-    where += ' AND assigned_admin_id = ?'
-    params.push(Number(assignedAdminId))
-  }
-
-  const inquiries = await all<Inquiry>(
-    c.env.DB,
-    `SELECT * FROM inquiries ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-    [...params, limit, offset]
-  )
-  const countRow = await first<{ count: number }>(
-    c.env.DB,
-    `SELECT COUNT(*) as count FROM inquiries ${where}`,
-    params
-  )
-  return c.json({ data: inquiries, total: countRow?.count ?? 0 })
-})
-
-app.get('/inquiries/:id', requireAdmin, async (c) => {
-  const id = Number(c.req.param('id'))
-  if (!Number.isFinite(id)) return c.json({ error: 'Invalid inquiry id' }, 400)
-
-  const inquiry = await first<Inquiry>(c.env.DB, 'SELECT * FROM inquiries WHERE id = ?', [id])
-  if (!inquiry) return c.json({ error: 'Inquiry not found' }, 404)
-  return c.json({ data: inquiry })
-})
-
-app.patch('/inquiries/:id/status', requireAdmin, async (c) => {
-  const id = Number(c.req.param('id'))
-  if (!Number.isFinite(id)) return c.json({ error: 'Invalid inquiry id' }, 400)
-
-  const body = await c.req.json<{ status?: unknown }>()
-  const status = typeof body.status === 'string' ? body.status : ''
-  if (!validInquiryStatuses.includes(status as InquiryStatus)) {
-    return c.json({ error: 'Invalid status' }, 400)
-  }
-
-  const existing = await first<Inquiry>(c.env.DB, 'SELECT * FROM inquiries WHERE id = ?', [id])
-  if (!existing) return c.json({ error: 'Inquiry not found' }, 404)
-
-  await run(c.env.DB, 'UPDATE inquiries SET status = ?, updated_at = unixepoch() WHERE id = ?', [
-    status,
-    id,
-  ])
-  const updated = await first<Inquiry>(c.env.DB, 'SELECT * FROM inquiries WHERE id = ?', [id])
-
-  await logAudit(c.env.DB, {
-    adminId: c.get('adminId') ?? null,
-    action: 'update_status',
-    targetTable: 'inquiries',
-    targetId: id,
-    before: { status: existing.status },
-    after: { status: updated?.status },
-    ip: c.req.header('CF-Connecting-IP') ?? null,
-  })
-
-  return c.json({ data: updated })
-})
-
-app.patch('/inquiries/:id/assign', requireAdmin, async (c) => {
-  const id = Number(c.req.param('id'))
-  if (!Number.isFinite(id)) return c.json({ error: 'Invalid inquiry id' }, 400)
-
-  const body = await c.req.json<{ assigned_admin_id?: unknown }>()
-  const assignedAdminId =
-    body.assigned_admin_id != null ? Number(body.assigned_admin_id) : null
-  if (assignedAdminId != null && !Number.isFinite(assignedAdminId)) {
-    return c.json({ error: 'Invalid assigned_admin_id' }, 400)
-  }
-
-  const existing = await first<Inquiry>(c.env.DB, 'SELECT * FROM inquiries WHERE id = ?', [id])
-  if (!existing) return c.json({ error: 'Inquiry not found' }, 404)
-
-  await run(c.env.DB, 'UPDATE inquiries SET assigned_admin_id = ?, updated_at = unixepoch() WHERE id = ?', [
-    assignedAdminId,
-    id,
-  ])
-  const updated = await first<Inquiry>(c.env.DB, 'SELECT * FROM inquiries WHERE id = ?', [id])
-
-  await logAudit(c.env.DB, {
-    adminId: c.get('adminId') ?? null,
-    action: 'assign',
-    targetTable: 'inquiries',
-    targetId: id,
-    before: { assignedAdminId: existing.assignedAdminId },
-    after: { assignedAdminId: updated?.assignedAdminId },
-    ip: c.req.header('CF-Connecting-IP') ?? null,
-  })
-
-  return c.json({ data: updated })
-})
-
-// ============================================================================
 // Leads
 // ============================================================================
 
@@ -1281,6 +1165,41 @@ app.patch('/leads/:id/notes', requireAdmin, async (c) => {
   })
 
   return c.json({ data: updated })
+})
+
+// POST /api/admin/leads/:id/convert — create customer from lead and mark lead converted
+app.post('/leads/:id/convert', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid lead id' }, 400)
+
+  const lead = await first<Lead>(c.env.DB, 'SELECT * FROM leads WHERE id = ?', [id])
+  if (!lead) return c.json({ error: 'Lead not found' }, 404)
+  if (!lead.email) return c.json({ error: 'Lead has no email' }, 400)
+
+  let customer = await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE email = ?', [lead.email])
+  if (!customer) {
+    const result = await run(
+      c.env.DB,
+      'INSERT INTO customers (name, email, phone, created_at, updated_at) VALUES (?, ?, ?, unixepoch(), unixepoch())',
+      [lead.name ?? null, lead.email, lead.phone ?? null]
+    )
+    customer = await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE id = ?', [result.meta.last_row_id])
+  }
+
+  await run(c.env.DB, 'UPDATE leads SET status = ?, updated_at = unixepoch() WHERE id = ?', ['converted', id])
+  const updatedLead = await first<Lead>(c.env.DB, 'SELECT * FROM leads WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'convert',
+    targetTable: 'leads',
+    targetId: id,
+    before: { status: lead.status },
+    after: { status: updatedLead?.status, customerId: customer?.id },
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: { lead: updatedLead, customer } })
 })
 
 
@@ -1436,7 +1355,11 @@ app.get('/bookings', requireAdmin, async (c) => {
 
   const bookings = await all<Booking>(
     c.env.DB,
-    `SELECT b.* FROM bookings b ${where} ORDER BY b.created_at DESC LIMIT ? OFFSET ?`,
+    `SELECT b.*, c.name as customer_name, c.email as customer_email, c.phone as customer_phone
+     FROM bookings b
+     LEFT JOIN customers c ON c.id = b.customer_id
+     ${where}
+     ORDER BY b.created_at DESC LIMIT ? OFFSET ?`,
     [...params, limit, offset]
   )
   const countRow = await first<{ count: number }>(
@@ -1475,11 +1398,12 @@ app.post('/bookings', requireAdmin, async (c) => {
     return c.json({ error: err instanceof Error ? err.message : 'Invalid booking data' }, 400)
   }
 
+  const token = generateToken()
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, payment_method, payment_reference, payment_deadline, supplier_status, admin_notes, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, payment_method, payment_reference, payment_deadline, supplier_status, token, admin_notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       parsed.customerId,
       parsed.propertyId,
@@ -1497,6 +1421,7 @@ app.post('/bookings', requireAdmin, async (c) => {
       parsed.paymentReference,
       parsed.paymentDeadline,
       parsed.supplierStatus,
+      token,
       parsed.adminNotes,
     ]
   )
@@ -1833,6 +1758,48 @@ app.patch('/bookings/:id/voucher', requireAdmin, async (c) => {
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
     action: 'generate_voucher',
+    targetTable: 'bookings',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+// PATCH /api/admin/bookings/:id/token — generate or regenerate guest order token
+app.patch('/bookings/:id/token', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid booking id' }, 400)
+
+  const existing = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Booking not found' }, 404)
+
+  let token = generateToken()
+  let attempts = 0
+  do {
+    const dup = await first<{ count: number }>(
+      c.env.DB,
+      'SELECT COUNT(*) as count FROM bookings WHERE token = ? AND id != ?',
+      [token, id]
+    )
+    if ((dup?.count ?? 0) === 0) break
+    token = generateToken()
+    attempts++
+  } while (attempts < 10)
+
+  await run(
+    c.env.DB,
+    `UPDATE bookings SET token = ?, updated_at = unixepoch() WHERE id = ?`,
+    [token, id]
+  )
+
+  const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'generate_token',
     targetTable: 'bookings',
     targetId: id,
     before: existing as unknown as Record<string, unknown>,

@@ -1,4 +1,4 @@
-# HK Islanders Worker
+# HK Maldivers Worker
 
 Cloudflare Worker 後端專案，採用 [Hono](https://hono.dev/) + D1 + R2 + KV 架構，為前端 `https://stay-islands-hk.pages.dev` 提供 API 服務。
 

@@ -200,7 +200,7 @@ export default function PropertyDetailPage() {
       story: JSON.stringify({
         title: '御海閣的故事',
         content:
-          '御海閣誕生於一片被保育完好的潟湖之上，每一棟別墅都以馬爾代夫傳統工藝與現代極簡設計融合。島主希望每位客人不是「入住」一座度假村，而是回歸一片屬於自己的海洋。從日出時管家送來的咖啡，到深夜玻璃地板下緩緩游過的海龜，御海閣相信：真正的奢華，是讓時間慢下來。',
+          '御海閣誕生於一片被保育完好的潟湖之上，每一棟別墅都以馬爾代夫傳統工藝與現代極簡設計融合。創辦團隊希望每位客人不是「入住」一座度假村，而是回歸一片專屬於此刻的海洋。從日出時管家送來的咖啡，到深夜玻璃地板下緩緩游過的海龜，御海閣相信：真正的奢華，是讓時間慢下來。',
       }),
       roomTypes: [
         {
@@ -255,7 +255,7 @@ export default function PropertyDetailPage() {
       nameZh: '私享島嶼',
       description: 'An exclusive private island retreat for the ultimate privacy.',
       descriptionZh:
-        '整座島嶼只為你與你的摯愛開放。私享島嶼擁有頂級私人管家、米其林主廚團隊與獨立高爾夫球場，是家族團聚、高端慶典與私密靜修的理想之地。',
+        '整座島嶼只為你與你的摯愛開放。這裡配備頂級私人管家、米其林主廚團隊與獨立高爾夫球場，是家族團聚、高端慶典與私密靜修的理想之地。',
       location: 'Noonu Atoll, Maldives',
       pricePerNight: 12800,
       maxGuests: 12,
@@ -339,7 +339,7 @@ export default function PropertyDetailPage() {
       story: JSON.stringify({
         title: '私享島嶼的故事',
         content:
-          '這座島嶼的名字源於當地語言中的「海龜」。數十年來，這裡一直是綠蠵龜與玳瑁上岸產卵的秘境。現任島主買下島嶼後，堅持只開放給極少數客人，並將大部分海岸線留給自然與保育。在私享島嶼，沒有「其他住客」，只有你的家人、朋友、管家，以及偶爾上岸產卵的海龜。',
+          '這座島嶼的名字源於當地語言中的「海龜」。數十年來，這裡一直是綠蠵龜與玳瑁上岸產卵的秘境。經營團隊堅持只開放給極少數客人，並將大部分海岸線留給自然與保育。在私享島嶼，沒有「其他住客」，只有你的家人、朋友、管家，以及偶爾上岸產卵的海龜。',
       }),
       roomTypes: [
         {
@@ -394,7 +394,7 @@ export default function PropertyDetailPage() {
       nameZh: '碧海灣',
       description: 'Beachfront villas with direct reef access.',
       descriptionZh:
-        '碧海灣是家庭與團體旅客的理想海濱別墅，擁有私人海灘、共用泳池與完整廚房設備。這裡氛圍輕鬆自在，讓你像當地人一樣生活，同時享受馬爾代夫的絕美海景。',
+        '碧海灣是家庭與團體旅客的理想海濱別墅，設有私人海灘、共用泳池與完整廚房設備。這裡氛圍輕鬆自在，讓你像當地人一樣生活，同時享受馬爾代夫的絕美海景。',
       location: 'South Ari Atoll, Maldives',
       pricePerNight: 3200,
       maxGuests: 3,
@@ -477,7 +477,7 @@ export default function PropertyDetailPage() {
       story: JSON.stringify({
         title: '碧海灣的故事',
         content:
-          '碧海灣原為當地漁村家族世代守護的海岸。島主從小在這片海灘長大，熟悉每一處珊瑚礁與每一群魚的出沒時間。他將家族土地改建為別墅時，堅持保留原有的椰林、沙灘與礁石，並聘請當地漁民擔任嚮導。來到碧海灣，你會發現這裡不只有美景，還有與海洋共處數代人的溫度。',
+          '碧海灣原為當地漁村家族世代守護的海岸。創辦人從小在這片海灘長大，熟悉每一處珊瑚礁與每一群魚的出沒時間。在改建別墅時，堅持保留原有的椰林、沙灘與礁石，並聘請當地漁民擔任嚮導。來到碧海灣，你會發現這裡不只有美景，還有與海洋共處數代人的溫度。',
       }),
       roomTypes: [
         {
@@ -602,7 +602,7 @@ export default function PropertyDetailPage() {
     );
   if (!property)
     return (
-      <div className="pt-24 text-center text-gray-500">找不到此物業</div>
+      <div className="pt-24 text-center text-gray-500">找不到此住宿</div>
     );
 
   const amenities = property.amenities ? JSON.parse(property.amenities) : [];

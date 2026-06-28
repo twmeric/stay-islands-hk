@@ -1,5 +1,5 @@
 -- =============================================================================
--- HK Islanders — D1 SQLite Schema
+-- HK Maldivers — D1 SQLite Schema
 -- =============================================================================
 -- Target: Cloudflare D1 (SQLite)
 -- Usage: wrangler d1 execute stay-islands-hk-db --local --file=./schema.sql
@@ -114,24 +114,8 @@ CREATE TABLE IF NOT EXISTS cms_articles (
 );
 
 -- -----------------------------------------------------------------------------
--- 3. Inquiries & Leads
+-- 3. Leads
 -- -----------------------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS inquiries (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  phone TEXT,
-  subject TEXT NOT NULL,
-  message TEXT NOT NULL,
-  property_id INTEGER REFERENCES properties(id) ON DELETE SET NULL,
-  room_type_id INTEGER REFERENCES room_types(id) ON DELETE SET NULL,
-  status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new', 'contacted', 'qualified', 'closed', 'spam')),
-  assigned_admin_id INTEGER REFERENCES admins(id) ON DELETE SET NULL,
-  priority TEXT NOT NULL DEFAULT 'medium' CHECK(priority IN ('low', 'medium', 'high', 'urgent')),
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch())
-);
 
 CREATE TABLE IF NOT EXISTS leads (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -171,6 +155,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   payment_deadline INTEGER,
   paid_at INTEGER,
   supplier_status TEXT DEFAULT 'pending' CHECK(supplier_status IN ('pending', 'confirmed', 'rejected')),
+  token TEXT,
   admin_notes TEXT,
   cancellation_reason TEXT,
   refund_amount INTEGER DEFAULT 0,
@@ -179,6 +164,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_token ON bookings(token) WHERE token IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS payments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -353,16 +340,6 @@ CREATE INDEX IF NOT EXISTS idx_room_types_price ON room_types(price_per_night);
 CREATE INDEX IF NOT EXISTS idx_cms_articles_status ON cms_articles(status);
 CREATE INDEX IF NOT EXISTS idx_cms_articles_category ON cms_articles(category);
 CREATE INDEX IF NOT EXISTS idx_cms_articles_published_at ON cms_articles(published_at);
-
--- inquiries
-CREATE INDEX IF NOT EXISTS idx_inquiries_email ON inquiries(email);
-CREATE INDEX IF NOT EXISTS idx_inquiries_phone ON inquiries(phone);
-CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status);
-CREATE INDEX IF NOT EXISTS idx_inquiries_priority ON inquiries(priority);
-CREATE INDEX IF NOT EXISTS idx_inquiries_assigned_admin_id ON inquiries(assigned_admin_id);
-CREATE INDEX IF NOT EXISTS idx_inquiries_property_id ON inquiries(property_id);
-CREATE INDEX IF NOT EXISTS idx_inquiries_room_type_id ON inquiries(room_type_id);
-CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at);
 
 -- leads
 CREATE INDEX IF NOT EXISTS idx_leads_email ON leads(email);

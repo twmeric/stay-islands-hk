@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { client } from '../../api/client';
 
 interface DashboardData {
-  totalInquiries: number;
   totalLeads: number;
+  newLeads: number;
   totalBookings: number;
   totalCustomers: number;
   totalRevenue: number;
-  pendingInquiries: number;
   upcomingCheckIns: number;
   recentActivities: {
     id: number;
@@ -56,10 +55,9 @@ export default function DashboardSection() {
   const stats = [
     { label: '總訂單', value: data.totalBookings, color: 'text-[#0a4c6b]' },
     { label: '總客戶', value: data.totalCustomers, color: 'text-[#2ec4b6]' },
-    { label: '總諮詢', value: data.totalInquiries, color: 'text-[#B8902F]' },
     { label: '總潛在客', value: data.totalLeads, color: 'text-purple-600' },
+    { label: '新潛在客', value: data.newLeads, color: 'text-[#B8902F]' },
     { label: '累積營業額', value: `HK$${data.totalRevenue.toLocaleString()}`, color: 'text-green-600' },
-    { label: '待處理諮詢', value: data.pendingInquiries, color: 'text-red-500' },
     { label: '即將入住', value: data.upcomingCheckIns, color: 'text-blue-500' },
   ];
 

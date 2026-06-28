@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Users, Fish, Waves, Ship, Sunset, MapPin, Anchor, Heart, Sparkles, Leaf, Loader2 } from 'lucide-react';
+import { Check, Clock, Users, Fish, Waves, Ship, Sunset, MapPin, Anchor, Heart, Sparkles, Leaf, Loader2 } from 'lucide-react';
 import { client } from '../api/client';
 
 interface Experience {
@@ -356,15 +356,15 @@ export default function ExperiencesPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                     <div className="absolute top-4 left-4 bg-[#B8902F] text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
                       {exp.icon}
-                      <span>{exp.name}</span>
+                      <span>{exp.nameZh || exp.name}</span>
                     </div>
                     <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
                       {exp.priceNote}
                     </div>
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-[#0d1b2a] mb-2">{exp.nameZh}</h3>
-                    <p className="text-sm text-gray-500 mb-1">{exp.name}</p>
+                    <h3 className="text-xl font-bold text-[#0d1b2a] mb-2">{exp.nameZh || exp.name}</h3>
+                    {exp.nameZh && exp.nameZh !== exp.name && <p className="text-sm text-gray-500 mb-1">{exp.name}</p>}
                     <p className="text-gray-600 text-sm mt-3 leading-relaxed">{exp.description}</p>
 
                     <div className="mt-4 space-y-2">

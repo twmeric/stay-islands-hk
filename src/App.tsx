@@ -9,7 +9,8 @@ import ExperiencesPage from './pages/ExperiencesPage';
 import RetreatsPage from './pages/RetreatsPage';
 import TripPlannerPage from './pages/TripPlannerPage';
 import GuidePage from './pages/GuidePage';
-import InvestPage from './pages/InvestPage';
+import PlanPage from './pages/PlanPage';
+import OrderPage from './pages/OrderPage';
 import AuthPage from './pages/AuthPage';
 
 import AdminPage from './pages/AdminPage';
@@ -67,8 +68,10 @@ export default function App() {
           <Route path="/experiences" element={<ExperiencesPage />} />
           <Route path="/retreats" element={<RetreatsPage />} />
           <Route path="/guide" element={<GuidePage />} />
-          <Route path="/invest" element={<InvestPage />} />
+          <Route path="/plan" element={<PlanPage />} />
+          <Route path="/invest" element={<Navigate to="/plan" replace />} />
           <Route path="/trip-planner" element={<TripPlannerPage />} />
+          <Route path="/order/:token" element={<OrderPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Route>

@@ -1,5 +1,5 @@
 /**
- * HK Islanders — D1 Schema TypeScript Types
+ * HK Maldivers — D1 Schema TypeScript Types
  *
  * Mirrors `worker/schema.sql`. All interfaces use camelCase property names.
  * Use `mapRow<T>()` or `mapRows<T>()` to convert D1 result rows from
@@ -13,8 +13,6 @@
 export type PropertyStatus = 'active' | 'inactive' | 'draft'
 export type RoomTypeStatus = 'available' | 'unavailable' | 'hidden'
 export type ArticleStatus = 'draft' | 'published' | 'archived'
-export type InquiryStatus = 'new' | 'contacted' | 'qualified' | 'closed' | 'spam'
-export type InquiryPriority = 'low' | 'medium' | 'high' | 'urgent'
 export type LeadType = 'experience_inquiry' | 'island_owner_talk' | 'inspiration_guide'
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'archived'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed'
@@ -153,24 +151,8 @@ export interface CmsArticle {
 }
 
 // =============================================================================
-// 3. Inquiries & Leads
+// 3. Leads
 // =============================================================================
-
-export interface Inquiry {
-  id: number
-  name: string
-  email: string
-  phone: string | null
-  subject: string
-  message: string
-  propertyId: number | null
-  roomTypeId: number | null
-  status: InquiryStatus
-  assignedAdminId: number | null
-  priority: InquiryPriority
-  createdAt: number
-  updatedAt: number
-}
 
 export interface Lead {
   id: number
@@ -210,6 +192,7 @@ export interface Booking {
   paymentDeadline: number | null
   paidAt: number | null
   supplierStatus: string | null
+  token: string | null
   adminNotes: string | null
   cancellationReason: string | null
   refundAmount: number

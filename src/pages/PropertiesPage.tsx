@@ -48,9 +48,9 @@ export default function PropertiesPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a4c6b]/95 via-[#0a4c6b]/40 to-[#0a4c6b]/10" />
         <div className="relative z-10 text-center text-white px-4">
-          <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的海島之家</p>
+          <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的海島假期</p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">先住進來，感受這裡</h1>
-          <p className="text-white/80 max-w-2xl mx-auto">每一座海島之家都在等待它的海島業主。先來體驗，讓感覺帶領你。</p>
+          <p className="text-white/80 max-w-2xl mx-auto">每一間精選住宿，都是為香港旅客設計的海島假期起點。先來體驗，讓感覺帶領你。</p>
         </div>
       </div>
 
@@ -66,9 +66,9 @@ export default function PropertiesPage() {
         </div>
         <div className="flex-1 flex items-center justify-center px-6 py-10 text-center text-white">
           <div className="max-w-xl">
-            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的海島之家</p>
+            <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">選擇你的海島假期</p>
             <h1 className="text-4xl font-bold mb-4">先住進來，感受這裡</h1>
-            <p className="text-lg text-white/90">每一座海島之家都在等待它的海島業主。先來體驗，讓感覺帶領你。</p>
+            <p className="text-lg text-white/90">每一間精選住宿，都是為香港旅客設計的海島假期起點。先來體驗，讓感覺帶領你。</p>
           </div>
         </div>
       </section>

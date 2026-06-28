@@ -193,7 +193,7 @@ export default function HomePage() {
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">開始規劃你的海島假期</h2>
             <p className="text-white/70 mb-6">告訴我們你想怎麼度過這趟旅程，我們的管家會為你設計專屬行程。</p>
             <Link
-              to="/invest"
+              to="/plan"
               className="inline-block bg-[#B8902F] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9a7a28] transition"
             >
               聯繫管家
@@ -232,10 +232,10 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <p className="text-[#2ec4b6] font-medium mb-2">歡迎來到海島生活</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-6">HK Islanders - 香港人的馬爾代夫假期管家</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0d1b2a] mb-6">HK Maldivers - 香港人的馬爾代夫假期管家</h2>
             <p className="text-gray-600 max-w-3xl mx-auto text-lg">
               我們相信，最好的假期不是去過多少地方，而是找到一個讓你願意一再回來的地方。
-              HK Islanders 為你預留每一次值得回來的假期。
+              HK Maldivers 為你預留每一次值得回來的假期。
             </p>
           </motion.div>
 
@@ -272,14 +272,14 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <p className="text-[#B8902F] font-medium mb-2">你的海島業主團隊</p>
+            <p className="text-[#B8902F] font-medium mb-2">你的海島假期團隊</p>
             <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a]">從你出發那一刻起，就有人照顧你</h2>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { title: '馬爾代夫島嶼管家', desc: '超過 15 年當地度假村管理經驗，記得你喜歡的咖啡與枕頭' },
               { title: '香港旅程顧問', desc: '從航班、水上飛機到私人接駁，為你安排好每一程' },
-              { title: '物業關係經理', desc: '一對一陪伴你，從第一次體驗到決定是否成為業主' },
+              { title: '專屬假期顧問', desc: '一對一陪伴你，從第一次諮詢到每一次出發，讓每趟旅程都順心' },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -362,7 +362,7 @@ export default function HomePage() {
               <p className="text-[#B8902F] font-medium mb-2 tracking-widest uppercase text-sm">免費專屬資源</p>
               <h2 className="text-3xl md:text-4xl font-bold mb-4">《馬爾代夫假期靈感指南》</h2>
               <p className="text-white/80 max-w-2xl mx-auto mb-8">
-                不是旅遊攻略，而是一本關於「如果這裡成為你每年回來的地方」的靈感集。
+                不是旅遊攻略，而是一本幫你找到理想海島假期的靈感集。
                 無需任何費用，寄送到你的電郵。
               </p>
               {leadSubmitted ? (
@@ -416,13 +416,13 @@ export default function HomePage() {
                     <img src={item.imageUrl} alt={item.nameZh} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-4 left-4 text-white">
-                      <p className="text-sm text-white/80">{item.name}</p>
-                      <h3 className="text-xl font-bold">{item.nameZh}</h3>
+                      <p className="text-sm text-white/80">{item.nameZh || item.name}</p>
+                      <h3 className="text-xl font-bold">{item.nameZh || item.name}</h3>
                     </div>
                   </div>
                   <div className="px-2">
                     <p className="text-sm text-[#B8902F] font-medium mb-1">{item.duration}</p>
-                    <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+                    <p className="text-gray-600 text-sm leading-relaxed">{item.descriptionZh || item.description}</p>
                   </div>
                 </motion.div>
               ))}
@@ -480,30 +480,30 @@ export default function HomePage() {
             className="text-center mb-12"
           >
             <p className="text-[#B8902F] font-medium mb-2">旅客真實故事</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a]">他們本來只想度假，後來決定每年回來</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0d1b2a]">他們本來只想度假，後來一再回來</h2>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                quote: '第三天早上，我坐在露台上，看著海龜從下面游過。那一刻我問自己：為什麼不能每年回來？',
+                quote: '第三天早上，我坐在露台上，看著海龜從下面游過。那一刻我知道，我一定會再回來。',
                 name: '陳先生',
                 title: '45 歲，中環基金經理',
                 unit: '御海閣常客',
-                returnRate: '每年回來 4 次',
+                returnRate: '已回訪 4 次',
               },
               {
                 quote: '我本來只打算度假。但當管家記得我女兒不吃芒果時，我感覺這裡已經像是我的家了。',
                 name: '林女士',
                 title: '52 歲，家族辦公室成員',
                 unit: '私享島嶼常客',
-                returnRate: '每年回來 6 次',
+                returnRate: '已回訪 6 次',
               },
               {
-                quote: '整個過程沒有壓力，像禮賓服務一樣自然。到最後，是我自己開口問：我可以擁有這裡嗎？',
+                quote: '整個過程沒有壓力，像禮賓服務一樣自然。到最後，我問的是：我什麼時候可以再回來？',
                 name: '張先生',
                 title: '38 歲，科技創業家',
                 unit: '碧海灣常客',
-                returnRate: '每年回來 3 次',
+                returnRate: '已回訪 3 次',
               },
             ].map((story, i) => (
               <motion.div
@@ -545,7 +545,7 @@ export default function HomePage() {
         </div>
         <div className="relative z-10 max-w-3xl mx-auto text-center text-white">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">你的海島假期在等你</h2>
-          <p className="text-lg text-white/80 mb-8">先以旅客的身份住進來。感覺對了，每年都會想回來。所有價格以港幣結算，支援本地支付方式。</p>
+          <p className="text-lg text-white/80 mb-8">先住進來，感受這裡。感覺對了，你會想一再回來。所有價格以港幣結算，支援本地支付方式。</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties" className="bg-white text-[#0a4c6b] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition">
               選擇我的海島假期

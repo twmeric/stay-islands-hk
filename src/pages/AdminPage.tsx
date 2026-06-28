@@ -2431,7 +2431,7 @@ function PropertiesSection() {
 export default function AdminPage() {
   const navigate = useNavigate();
   const { user, isAdmin, isChecking, adminRole } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'inquiries' | 'properties' | 'experiences' | 'customers' | 'leads' | 'payments' | 'accounts'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'properties' | 'experiences' | 'customers' | 'leads' | 'payments' | 'accounts'>('dashboard');
 
   // Guard: redirect to login if not authenticated as admin
   useEffect(() => {
@@ -2440,7 +2440,6 @@ export default function AdminPage() {
     }
   }, [isChecking, user, isAdmin, navigate]);
   const [bookings, setBookings] = useState<any[]>([]);
-  const [inquiries, setInquiries] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -2458,8 +2457,6 @@ export default function AdminPage() {
   const [paymentReference, setPaymentReference] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [bookingActionLoading, setBookingActionLoading] = useState(false);
-  const [replyText, setReplyText] = useState('');
-  const [replyId, setReplyId] = useState<number | null>(null);
   const [editingBooking, setEditingBooking] = useState(false);
   const [editBookingForm, setEditBookingForm] = useState<{ checkIn: string; checkOut: string; roomTypeId: number; guests: number; totalAmount: number } | null>(null);
   const [voucherPreview, setVoucherPreview] = useState(false);
@@ -2474,7 +2471,6 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (activeTab === 'bookings') fetchBookings();
-    else if (activeTab === 'inquiries') fetchInquiries();
     else if (activeTab === 'accounts') fetchAccounts();
     else setLoading(false);
   }, [activeTab, bookingStatusFilter, bookingPaymentFilter, bookingSearch, bookingDateFrom, bookingDateTo, bookingPage]);
@@ -2494,16 +2490,6 @@ export default function AdminPage() {
       const data = await res.json();
       setBookings(data.data || []);
       setBookingTotal(data.total || 0);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
-  }
-
-  async function fetchInquiries() {
-    setLoading(true);
-    try {
-      const res = await client.api.fetch('/api/admin/inquiries');
-      const data = await res.json();
-      setInquiries(data.data || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }
@@ -2677,7 +2663,7 @@ export default function AdminPage() {
       <html><head><title>訂單 #${selectedBooking.id}</title>
       <style>body{font-family:sans-serif;padding:40px;max-width:700px;margin:0 auto;color:#333} h1{font-size:24px} .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}</style>
       </head><body>
-      <h1>HK Islanders 訂單摘要</h1>
+      <h1>HK Maldivers 訂單摘要</h1>
       <h2>訂單 #${selectedBooking.id}</h2>
       <div class="row"><span>狀態</span><span>${selectedBooking.status}</span></div>
       <div class="row"><span>付款狀態</span><span>${selectedBooking.paymentStatus}</span></div>
@@ -2695,18 +2681,28 @@ export default function AdminPage() {
     w.document.close();
   }
 
-  async function replyInquiry(id: number) {
-    if (!replyText) return;
+  async function ensureAndCopyOrderLink() {
+    if (!selectedBooking) return;
+    let token = selectedBooking.token;
+    if (!token) {
+      try {
+        const res = await client.api.fetch(`/api/admin/bookings/${selectedBooking.id}/token`, { method: 'PATCH' });
+        if (!res.ok) throw new Error('Failed to generate token');
+        const json = await res.json();
+        token = json.data?.token;
+        setSelectedBooking({ ...selectedBooking, token });
+      } catch (err) {
+        alert('無法產生訂單連結，請稍後再試');
+        return;
+      }
+    }
+    const link = `${window.location.origin}/order/${token}`;
     try {
-      await client.api.fetch(`/api/admin/inquiries/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminReply: replyText, status: 'replied' }),
-      });
-      setReplyText('');
-      setReplyId(null);
-      fetchInquiries();
-    } catch (err) { console.error(err); }
+      await navigator.clipboard.writeText(link);
+      alert(`已複製訂單連結：${link}`);
+    } catch {
+      alert(`訂單連結：${link}`);
+    }
   }
 
   async function addAdmin() {
@@ -2789,7 +2785,6 @@ export default function AdminPage() {
   const tabs = [
     { key: 'dashboard', label: '總覽' },
     { key: 'bookings', label: '訂單管理' },
-    { key: 'inquiries', label: '旅客諮詢' },
     { key: 'leads', label: '潛在客' },
     { key: 'customers', label: '客戶管理' },
     { key: 'properties', label: '住宿管理' },
@@ -2904,6 +2899,7 @@ export default function AdminPage() {
                   <thead className="bg-gray-50 border-b">
                     <tr>
                       <th className="px-4 py-3 text-left font-medium text-gray-600">編號</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">客戶</th>
                       <th className="px-4 py-3 text-left font-medium text-gray-600">入住/退房</th>
                       <th className="px-4 py-3 text-left font-medium text-gray-600">人數</th>
                       <th className="px-4 py-3 text-left font-medium text-gray-600">金額</th>
@@ -2915,11 +2911,16 @@ export default function AdminPage() {
                   </thead>
                   <tbody className="divide-y">
                     {bookings.length === 0 ? (
-                      <tr><td colSpan={8} className="px-4 py-12 text-center text-gray-500">暫無訂單</td></tr>
+                      <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-500">暫無訂單</td></tr>
                     ) : (
                       bookings.map((b) => (
                         <tr key={b.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 font-mono">#{b.id}</td>
+                          <td className="px-4 py-3">
+                            <p className="font-medium text-[#0d1b2a]">{b.customerName || '—'}</p>
+                            <p className="text-xs text-gray-500">{b.customerEmail || ''}</p>
+                            <p className="text-xs text-gray-400">{b.customerPhone || ''}</p>
+                          </td>
                           <td className="px-4 py-3">
                             <span>{new Date(b.checkIn * 1000).toLocaleDateString('zh-HK')}</span>
                             <span className="text-gray-400 mx-1">→</span>
@@ -3054,6 +3055,10 @@ export default function AdminPage() {
                         onClick={printBookingSummary}
                         className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition"
                       >列印摘要</button>
+                      <button
+                        onClick={ensureAndCopyOrderLink}
+                        className="text-xs bg-[#0a4c6b]/10 hover:bg-[#0a4c6b]/20 text-[#0a4c6b] px-3 py-2 rounded-lg transition"
+                      >複製訂單連結</button>
                       <div className="flex items-center gap-2 ml-auto">
                         <span className="text-sm text-gray-600">供應商狀態</span>
                         <select
@@ -3340,7 +3345,7 @@ export default function AdminPage() {
                         <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center space-y-4">
                           <h4 className="font-bold text-[#0d1b2a]">電子憑證預覽</h4>
                           <div className="bg-gradient-to-r from-[#0a4c6b] to-[#2ec4b6] rounded-2xl p-6 text-white">
-                            <p className="text-white/70 text-sm">HK Islanders Voucher</p>
+                            <p className="text-white/70 text-sm">HK Maldivers Voucher</p>
                             <p className="text-3xl font-mono font-bold mt-2">{selectedBooking.voucherCode}</p>
                             <p className="text-white/90 text-sm mt-4">
                               {new Date(selectedBooking.checkIn * 1000).toLocaleDateString('zh-HK')} - {new Date(selectedBooking.checkOut * 1000).toLocaleDateString('zh-HK')}
@@ -3359,48 +3364,6 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        ) : activeTab === 'inquiries' ? (
-          <div className="space-y-4">
-            {inquiries.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 text-center text-gray-500">暫無諮詢訊息</div>
-            ) : (
-              inquiries.map((inq) => (
-                <div key={inq.id} className="bg-white rounded-2xl p-6 shadow-sm">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold text-[#0d1b2a]">{inq.subject}</h3>
-                      <p className="text-sm text-gray-500">{inq.name} · {inq.email} {inq.phone && `· ${inq.phone}`}</p>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${inq.status === 'new' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                      {inq.status === 'new' ? '新訊息' : '已回覆'}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 text-sm mb-3">{inq.message}</p>
-                  {inq.adminReply && (
-                    <div className="bg-[#f0f9f7] rounded-lg p-3 mt-3">
-                      <p className="text-xs text-gray-500 mb-1">管理員回覆：</p>
-                      <p className="text-sm text-gray-700">{inq.adminReply}</p>
-                    </div>
-                  )}
-                  {inq.status === 'new' && (
-                    <div className="mt-3">
-                      {replyId === inq.id ? (
-                        <div className="space-y-2">
-                          <textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} rows={3} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="輸入回覆..." />
-                          <div className="flex gap-2">
-                            <button onClick={() => replyInquiry(inq.id)} className="text-xs bg-[#0a4c6b] text-white px-3 py-1.5 rounded-lg hover:bg-[#083d56]">發送回覆</button>
-                            <button onClick={() => { setReplyId(null); setReplyText(''); }} className="text-xs text-gray-500 hover:text-gray-700">取消</button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button onClick={() => setReplyId(inq.id)} className="text-xs text-[#0a4c6b] hover:underline">回覆</button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))
             )}
           </div>
         ) : activeTab === 'dashboard' ? (

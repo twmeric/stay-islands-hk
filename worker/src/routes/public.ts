@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
-import type { Booking, CmsArticle, Customer, Experience, LeadType, Property, Retreat, RoomType } from '../db/schema'
+import type { Booking, CmsArticle, Customer, Experience, LeadType, Payment, Property, Retreat, RoomType } from '../db/schema'
 import { all, first, run } from '../lib/db'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
@@ -141,42 +141,6 @@ app.get('/retreats/:slug', async (c) => {
   return c.json({ data: retreat })
 })
 
-// POST /api/public/inquiries
-app.post('/inquiries', async (c) => {
-  const body = await c.req.json<{
-    name?: unknown
-    email?: unknown
-    phone?: unknown
-    subject?: unknown
-    message?: unknown
-    property_id?: unknown
-    room_type_id?: unknown
-  }>()
-
-  const name = typeof body.name === 'string' ? body.name.trim() : ''
-  const email = typeof body.email === 'string' ? body.email.trim() : ''
-  const subject = typeof body.subject === 'string' ? body.subject.trim() : ''
-  const message = typeof body.message === 'string' ? body.message.trim() : ''
-
-  if (!name || !email || !subject || !message) {
-    return c.json({ error: 'Missing required fields: name, email, subject, message' }, 400)
-  }
-
-  const propertyId = body.property_id ? Number(body.property_id) : null
-  const roomTypeId = body.room_type_id ? Number(body.room_type_id) : null
-  const phone = typeof body.phone === 'string' ? body.phone.trim() || null : null
-
-  const result = await run(
-    c.env.DB,
-    `INSERT INTO inquiries
-      (name, email, phone, subject, message, property_id, room_type_id, status, priority, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'new', 'medium', unixepoch(), unixepoch())`,
-    [name, email, phone, subject, message, propertyId, roomTypeId]
-  )
-
-  return c.json({ data: { id: result.meta.last_row_id, status: 'new' } }, 201)
-})
-
 // POST /api/public/leads
 app.post('/leads', async (c) => {
   const body = await c.req.json<{
@@ -266,6 +230,36 @@ app.get('/bookings/:id', async (c) => {
   return c.json({ data: { ...booking, property, roomType } })
 })
 
+function generateToken(length = 16): string {
+  const bytes = new Uint8Array(length)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+// GET /api/public/bookings/token/:token — guest order lookup by secret token
+app.get('/bookings/token/:token', async (c) => {
+  const token = c.req.param('token')
+  if (!token) return c.json({ error: 'Missing token' }, 400)
+
+  const booking = await first<Booking>(
+    c.env.DB,
+    'SELECT * FROM bookings WHERE token = ?',
+    [token]
+  )
+  if (!booking) return c.json({ error: 'Booking not found' }, 404)
+
+  const [customer, property, roomType, payments] = await Promise.all([
+    booking.customerId
+      ? first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE id = ?', [booking.customerId])
+      : Promise.resolve(null),
+    first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [booking.propertyId]),
+    first<RoomType>(c.env.DB, 'SELECT * FROM room_types WHERE id = ?', [booking.roomTypeId]),
+    all<Payment>(c.env.DB, 'SELECT * FROM payments WHERE booking_id = ? ORDER BY created_at DESC', [booking.id]),
+  ])
+
+  return c.json({ data: { ...booking, customer, property, roomType, payments } })
+})
+
 // POST /api/public/bookings
 app.post('/bookings', async (c) => {
   const body = await c.req.json<Record<string, unknown>>()
@@ -302,13 +296,14 @@ app.post('/bookings', async (c) => {
   }
 
   const paymentDeadline = Math.floor(Date.now() / 1000) + 48 * 60 * 60 // 48 hours
+  const token = generateToken()
 
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, supplier_status, payment_deadline, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, 'pending', ?, unixepoch(), unixepoch())`,
-    [customer?.id ?? null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons, paymentDeadline]
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, supplier_status, payment_deadline, token, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, 'pending', ?, ?, unixepoch(), unixepoch())`,
+    [customer?.id ?? null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons, paymentDeadline, token]
   )
 
   const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [
