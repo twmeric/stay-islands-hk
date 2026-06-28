@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS properties (
   amenities TEXT, -- JSON array stored as TEXT
   gallery TEXT, -- JSON array of image URLs
   facilities TEXT, -- JSON array of {icon, label}
-  activities TEXT, -- JSON array of {image, name, description}
   location_details TEXT, -- JSON object {description, mapImage, nearby}
   story TEXT, -- JSON object {title, content}
   cancellation_policy TEXT, -- JSON object {rules: [{days_before, refund_percent}]}
@@ -93,6 +92,24 @@ CREATE TABLE IF NOT EXISTS retreats (
   status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
+-- -----------------------------------------------------------------------------
+-- Property ↔ Experience / Retreat links
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS property_experiences (
+  property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+  experience_id INTEGER NOT NULL REFERENCES experiences(id) ON DELETE CASCADE,
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  PRIMARY KEY (property_id, experience_id)
+);
+
+CREATE TABLE IF NOT EXISTS property_retreats (
+  property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+  retreat_id INTEGER NOT NULL REFERENCES retreats(id) ON DELETE CASCADE,
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  PRIMARY KEY (property_id, retreat_id)
 );
 
 -- -----------------------------------------------------------------------------
@@ -335,6 +352,12 @@ CREATE INDEX IF NOT EXISTS idx_properties_created_at ON properties(created_at);
 CREATE INDEX IF NOT EXISTS idx_room_types_property_id ON room_types(property_id);
 CREATE INDEX IF NOT EXISTS idx_room_types_status ON room_types(status);
 CREATE INDEX IF NOT EXISTS idx_room_types_price ON room_types(price_per_night);
+
+-- property_experiences / property_retreats
+CREATE INDEX IF NOT EXISTS idx_property_experiences_property_id ON property_experiences(property_id);
+CREATE INDEX IF NOT EXISTS idx_property_experiences_experience_id ON property_experiences(experience_id);
+CREATE INDEX IF NOT EXISTS idx_property_retreats_property_id ON property_retreats(property_id);
+CREATE INDEX IF NOT EXISTS idx_property_retreats_retreat_id ON property_retreats(retreat_id);
 
 -- cms_articles
 CREATE INDEX IF NOT EXISTS idx_cms_articles_status ON cms_articles(status);

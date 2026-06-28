@@ -291,12 +291,100 @@ app.get('/properties/:id', requireAdmin, async (c) => {
   const property = await first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [id])
   if (!property) return c.json({ error: 'Property not found' }, 404)
 
-  const roomTypes = await all<RoomType>(
-    c.env.DB,
-    'SELECT * FROM room_types WHERE property_id = ? ORDER BY price_per_night ASC',
-    [id]
-  )
-  return c.json({ data: { ...property, roomTypes } })
+  const [roomTypes, experiences, retreats] = await Promise.all([
+    all<RoomType>(
+      c.env.DB,
+      'SELECT * FROM room_types WHERE property_id = ? ORDER BY price_per_night ASC',
+      [id]
+    ),
+    all<Experience>(
+      c.env.DB,
+      `SELECT e.* FROM experiences e
+       INNER JOIN property_experiences pe ON pe.experience_id = e.id
+       WHERE pe.property_id = ? AND e.status = ?
+       ORDER BY e.sort_order ASC, e.created_at DESC`,
+      [id, 'active']
+    ),
+    all<Retreat>(
+      c.env.DB,
+      `SELECT r.* FROM retreats r
+       INNER JOIN property_retreats pr ON pr.retreat_id = r.id
+       WHERE pr.property_id = ? AND r.status = ?
+       ORDER BY r.sort_order ASC, r.created_at DESC`,
+      [id, 'active']
+    ),
+  ])
+  return c.json({ data: { ...property, roomTypes, experiences, retreats } })
+})
+
+// PUT /api/admin/properties/:id/experiences — replace linked experiences list
+app.put('/properties/:id/experiences', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid property id' }, 400)
+
+  const property = await first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [id])
+  if (!property) return c.json({ error: 'Property not found' }, 404)
+
+  const body = await c.req.json<Record<string, unknown>>()
+  const ids = Array.isArray(body.experienceIds)
+    ? body.experienceIds.map((v) => Number(v)).filter(Number.isFinite)
+    : []
+
+  await run(c.env.DB, 'DELETE FROM property_experiences WHERE property_id = ?', [id])
+  if (ids.length > 0) {
+    const placeholders = ids.map(() => '(?, ?, unixepoch())').join(', ')
+    await run(
+      c.env.DB,
+      `INSERT INTO property_experiences (property_id, experience_id, created_at) VALUES ${placeholders}`,
+      ids.flatMap((experienceId) => [id, experienceId])
+    )
+  }
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'update_experiences',
+    targetTable: 'property_experiences',
+    targetId: id,
+    after: { experienceIds: ids },
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: { propertyId: id, experienceIds: ids } })
+})
+
+// PUT /api/admin/properties/:id/retreats — replace linked retreats list
+app.put('/properties/:id/retreats', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid property id' }, 400)
+
+  const property = await first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [id])
+  if (!property) return c.json({ error: 'Property not found' }, 404)
+
+  const body = await c.req.json<Record<string, unknown>>()
+  const ids = Array.isArray(body.retreatIds)
+    ? body.retreatIds.map((v) => Number(v)).filter(Number.isFinite)
+    : []
+
+  await run(c.env.DB, 'DELETE FROM property_retreats WHERE property_id = ?', [id])
+  if (ids.length > 0) {
+    const placeholders = ids.map(() => '(?, ?, unixepoch())').join(', ')
+    await run(
+      c.env.DB,
+      `INSERT INTO property_retreats (property_id, retreat_id, created_at) VALUES ${placeholders}`,
+      ids.flatMap((retreatId) => [id, retreatId])
+    )
+  }
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'update_retreats',
+    targetTable: 'property_retreats',
+    targetId: id,
+    after: { retreatIds: ids },
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: { propertyId: id, retreatIds: ids } })
 })
 
 app.post('/properties', requireAdmin, async (c) => {
@@ -315,8 +403,8 @@ app.post('/properties', requireAdmin, async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO properties
-      (name, name_zh, description, description_zh, location, price_per_night, max_guests, image_url, amenities, gallery, facilities, activities, location_details, story, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      (name, name_zh, description, description_zh, location, price_per_night, max_guests, image_url, amenities, gallery, facilities, location_details, story, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       name,
       nameZh,
@@ -329,7 +417,6 @@ app.post('/properties', requireAdmin, async (c) => {
       toJson(body.amenities),
       toJson(body.gallery),
       toJson(body.facilities),
-      toJson(body.activities),
       toJson(body.locationDetails),
       toJson(body.story),
       status,
@@ -406,10 +493,6 @@ app.put('/properties/:id', requireAdmin, async (c) => {
   if (body.facilities !== undefined) {
     fields.push('facilities = ?')
     values.push(toJson(body.facilities))
-  }
-  if (body.activities !== undefined) {
-    fields.push('activities = ?')
-    values.push(toJson(body.activities))
   }
   if (body.locationDetails !== undefined) {
     fields.push('location_details = ?')

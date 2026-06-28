@@ -44,6 +44,19 @@ interface Story {
   content: string;
 }
 
+interface ExperienceItem {
+  id: number;
+  name: string;
+  nameZh: string;
+  slug: string;
+  description: string | null;
+  descriptionZh: string | null;
+  duration: string | null;
+  priceNote: string | null;
+  imageUrl: string | null;
+  type: 'experience' | 'retreat';
+}
+
 interface Property {
   id: number;
   name: string;
@@ -57,10 +70,11 @@ interface Property {
   amenities: string | null;
   gallery: string | null;
   facilities: string | null;
-  activities: string | null;
   locationDetails: string | null;
   story: string | null;
   roomTypes: RoomType[];
+  experiences: ExperienceItem[];
+  retreats: ExperienceItem[];
 }
 
 function safeJsonParse<T>(value: string | null | undefined, fallback: T): T {
@@ -84,7 +98,7 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null);
-  const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
+  const [selectedActivities, setSelectedActivities] = useState<ExperienceItem[]>([]);
   const [activeImage, setActiveImage] = useState(0);
   const [roomGalleryIndex, setRoomGalleryIndex] = useState(0);
 
@@ -147,43 +161,6 @@ export default function PropertyDetailPage() {
         { icon: '💆', label: 'SPA' },
         { icon: '🧘', label: '瑜伽亭' },
         { icon: '🏖️', label: '私人甲板' },
-      ]),
-      activities: JSON.stringify([
-        {
-          image:
-            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80',
-          name: '日落巡航',
-          description:
-            '乘著傳統多尼船駛向潟湖盡頭，在香檳與夕陽中結束完美的一天。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1544551762-46a013bb70d5?w=600&q=80',
-          name: '夜釣',
-          description:
-            '跟隨當地漁民出海，在星空下學習傳統釣法，收穫可交由廚師即席烹調。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
-          name: '浮潛',
-          description:
-            '從別墅甲板直接下水，與熱帶魚群、海龜和珊瑚礁不期而遇。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
-          name: '深潛',
-          description:
-            'PADI 認證潛水中心帶你探索 North Malé 環礁的著名潛點。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=80',
-          name: '無人島野餐',
-          description:
-            '包下一座無人沙洲，享受只屬於你的燭光午餐與澄澈海水。',
-        },
       ]),
       locationDetails: JSON.stringify({
         description:
@@ -248,6 +225,8 @@ export default function PropertyDetailPage() {
           features: JSON.stringify(['私人無邊際泳池', '獨立客廳', '迎賓香檳']),
         },
       ],
+      experiences: [],
+      retreats: [],
     },
     2: {
       id: 2,
@@ -286,43 +265,6 @@ export default function PropertyDetailPage() {
         { icon: '💒', label: '婚禮場地' },
         { icon: '🛥️', label: '私人遊艇' },
         { icon: '🎬', label: '私人影院' },
-      ]),
-      activities: JSON.stringify([
-        {
-          image:
-            'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
-          name: '鯨鯊共游',
-          description:
-            '在專業嚮導陪同下，與溫柔的海洋巨人同游，感受生命的壯闊。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=600&q=80',
-          name: '海龜保育體驗',
-          description:
-            '參與島嶼保育計畫，了解海龜的生活史，並協助記錄與放生。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=80',
-          name: '沙洲燭光晚餐',
-          description:
-            '在只屬於你的沙洲上，由主廚現場烹調，侍酒師搭配美酒。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1528127269322-539801943592?w=600&q=80',
-          name: '傳統漁村探訪',
-          description:
-            '走訪 Noonu 環礁的傳統漁村，認識馬爾代夫的日常生活與手工藝。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
-          name: '環礁浮潛',
-          description:
-            '探索 Noonu 環礁豐富的珊瑚花園與熱帶魚群，適合各級泳者。',
-        },
       ]),
       locationDetails: JSON.stringify({
         description:
@@ -387,6 +329,8 @@ export default function PropertyDetailPage() {
           features: JSON.stringify(['私人無邊際泳池', '獨立客廳', '迎賓香檳']),
         },
       ],
+      experiences: [],
+      retreats: [],
     },
     3: {
       id: 3,
@@ -424,43 +368,6 @@ export default function PropertyDetailPage() {
         { icon: '🎮', label: '遊戲室' },
         { icon: '📽️', label: '海灘電影院' },
         { icon: '🚲', label: '自行車租借' },
-      ]),
-      activities: JSON.stringify([
-        {
-          image:
-            'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=600&q=80',
-          name: '跳島',
-          description:
-            '一日之內造訪多座環礁島嶼，體驗不同風格的沙灘與潟湖。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
-          name: '浮潛',
-          description:
-            '從海灘步行即可抵達珊瑚礁，與小丑魚、海龜一起游泳。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
-          name: '海豚巡遊',
-          description:
-            '在日落時分出海，觀賞成群海豚躍出水面的壯觀畫面。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1528127269322-539801943592?w=600&q=80',
-          name: '本地島嶼文化導覽',
-          description:
-            '走進居民島，品嚐傳統小吃，參觀手工藝作坊與清真寺。',
-        },
-        {
-          image:
-            'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&q=80',
-          name: '海灘電影院',
-          description:
-            '在星空下的沙灘上，躺在懶人沙發中觀賞經典電影。',
-        },
       ]),
       locationDetails: JSON.stringify({
         description:
@@ -525,6 +432,8 @@ export default function PropertyDetailPage() {
           features: JSON.stringify(['私人無邊際泳池', '獨立客廳', '迎賓香檳']),
         },
       ],
+      experiences: [],
+      retreats: [],
     },
   };
 
@@ -581,7 +490,12 @@ export default function PropertyDetailPage() {
           guests: 1,
           total_amount: totalAmount,
           currency: 'HKD',
-          addons: selectedActivities.map((a) => ({ name: a.name, description: a.description })),
+          addons: selectedActivities.map((a) => ({
+            type: a.type,
+            id: a.id,
+            name: a.name,
+            nameZh: a.nameZh,
+          })),
         }),
       });
       if (!res.ok) {
@@ -612,7 +526,10 @@ export default function PropertyDetailPage() {
 
   const gallery = safeJsonParse<string[]>(property.gallery, []);
   const facilities = safeJsonParse<Facility[]>(property.facilities, []);
-  const activities = safeJsonParse<Activity[]>(property.activities, []);
+  const availableItems: ExperienceItem[] = [
+    ...(property.experiences || []).map((e) => ({ ...e, type: 'experience' as const })),
+    ...(property.retreats || []).map((r) => ({ ...r, type: 'retreat' as const })),
+  ];
   const locationDetails = safeJsonParse<LocationDetails>(
     property.locationDetails,
     null
@@ -712,22 +629,37 @@ export default function PropertyDetailPage() {
             )}
 
             {/* Activities */}
-            {activities.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-6 font-serif">
-                  可體驗活動
-                </h2>
-                <p className="text-gray-600 mb-6">點選有興趣的活動，會一併加入你的預約諮詢。</p>
+            {availableItems.length > 0 && (
+              <div className="bg-[#f8fbfc] rounded-2xl border border-[#0a4c6b]/10 p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#0d1b2a] mb-2 font-serif">
+                      可加購的體驗與靜修
+                    </h2>
+                    <p className="text-gray-600">
+                      點選有興趣的項目，會一併加入你的預約諮詢，專員會為你安排。
+                    </p>
+                  </div>
+                  {selectedActivities.length > 0 && (
+                    <span className="inline-flex items-center justify-center px-4 py-2 bg-[#0a4c6b] text-white rounded-full text-sm font-medium">
+                      已選 {selectedActivities.length} 項
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {activities.map((a, i) => {
-                    const isSelected = selectedActivities.some((sa) => sa.name === a.name);
+                  {availableItems.map((a) => {
+                    const isSelected = selectedActivities.some(
+                      (sa) => sa.id === a.id && sa.type === a.type
+                    );
                     return (
                       <button
-                        key={i}
+                        key={`${a.type}-${a.id}`}
                         type="button"
                         onClick={() =>
                           setSelectedActivities((prev) =>
-                            isSelected ? prev.filter((sa) => sa.name !== a.name) : [...prev, a]
+                            isSelected
+                              ? prev.filter((sa) => !(sa.id === a.id && sa.type === a.type))
+                              : [...prev, a]
                           )
                         }
                         className={`text-left bg-white rounded-2xl shadow-lg border overflow-hidden transition ${
@@ -738,22 +670,25 @@ export default function PropertyDetailPage() {
                       >
                         <div className="relative aspect-[16/10] overflow-hidden">
                           <img
-                            src={a.image}
-                            alt={a.name}
+                            src={a.imageUrl || '/images/placeholder.jpg'}
+                            alt={a.nameZh || a.name}
                             className="w-full h-full object-cover"
                           />
                           {isSelected && (
-                            <div className="absolute top-3 right-3 bg-[#0a4c6b] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">
+                            <div className="absolute top-3 right-3 bg-[#0a4c6b] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-md">
                               ✓
                             </div>
                           )}
+                          <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium bg-white/90 text-[#0a4c6b]">
+                            {a.type === 'retreat' ? '靜修' : '體驗'}
+                          </span>
                         </div>
                         <div className="p-5">
                           <h3 className="font-bold text-[#0d1b2a] mb-2">
-                            {a.name}
+                            {a.nameZh || a.name}
                           </h3>
-                          <p className="text-sm text-gray-600 leading-relaxed">
-                            {a.description}
+                          <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
+                            {a.descriptionZh || a.description}
                           </p>
                         </div>
                       </button>
@@ -1136,20 +1071,25 @@ export default function PropertyDetailPage() {
                   {selectedActivities.length > 0 && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        已選加購活動
+                        已選加購項目
                       </label>
                       <div className="space-y-2">
-                        {selectedActivities.map((a, i) => (
+                        {selectedActivities.map((a) => (
                           <div
-                            key={i}
+                            key={`${a.type}-${a.id}`}
                             className="flex items-center justify-between bg-[#f0f9f7] rounded-lg px-3 py-2 text-sm"
                           >
-                            <span className="text-[#0a4c6b] font-medium">{a.name}</span>
+                            <span className="text-[#0a4c6b] font-medium">
+                              {a.nameZh || a.name}
+                              <span className="ml-2 text-xs text-gray-500">
+                                ({a.type === 'retreat' ? '靜修' : '體驗'})
+                              </span>
+                            </span>
                             <button
                               type="button"
                               onClick={() =>
                                 setSelectedActivities((prev) =>
-                                  prev.filter((sa) => sa.name !== a.name)
+                                  prev.filter((sa) => !(sa.id === a.id && sa.type === a.type))
                                 )
                               }
                               className="text-gray-400 hover:text-red-500 transition"

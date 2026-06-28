@@ -45,6 +45,7 @@ interface OrderData {
     name: string;
   } | null;
   payments?: Payment[];
+  addons?: string | null;
 }
 
 const statusMap: Record<string, string> = {
@@ -217,6 +218,35 @@ export default function OrderPage() {
               <p><span className="text-gray-500">電話：</span>{order.customer?.phone || '—'}</p>
             </div>
           </div>
+
+          {/* Add-ons */}
+          {(() => {
+            const addonList = (() => {
+              try { return JSON.parse(order.addons || '[]'); }
+              catch { return []; }
+            })();
+            if (!addonList.length) return null;
+            return (
+              <div className="p-6 md:p-8 border-b border-gray-100">
+                <h3 className="font-bold text-[#0d1b2a] mb-4">加購體驗 / 靜修</h3>
+                <div className="space-y-2">
+                  {addonList.map((a: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between bg-[#f0f9f7] rounded-lg px-4 py-3 text-sm">
+                      <div>
+                        <p className="font-medium text-[#0a4c6b]">{a.nameZh || a.name || '未命名項目'}</p>
+                        {a.description && <p className="text-gray-600 text-xs mt-0.5">{a.description}</p>}
+                      </div>
+                      {a.type && (
+                        <span className="text-xs px-2 py-1 rounded-full bg-white text-[#0a4c6b]">
+                          {a.type === 'retreat' ? '靜修' : '體驗'}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Payment summary */}
           <div className="p-6 md:p-8">

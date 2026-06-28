@@ -99,7 +99,6 @@ interface Property {
   imageUrl: string | null;
   gallery: string | null;
   facilities: string | null;
-  activities: string | null;
   locationDetails: string | null;
   story: string | null;
   status: 'active' | 'inactive' | 'draft';
@@ -168,12 +167,6 @@ interface FacilityItem {
   label: string;
 }
 
-interface ActivityItem {
-  image: string;
-  name: string;
-  description: string;
-}
-
 interface LocationDetailsShape {
   description: string;
   mapImage: string;
@@ -197,7 +190,6 @@ interface PropertyFormState {
   status: 'active' | 'inactive' | 'draft';
   gallery: string[];
   facilities: FacilityItem[];
-  activities: ActivityItem[];
   locationDetails: LocationDetailsShape;
   story: StoryShape;
 }
@@ -1223,12 +1215,15 @@ function PropertiesSection() {
     status: 'draft',
     gallery: [],
     facilities: [],
-    activities: [],
     locationDetails: { description: '', mapImage: '', nearby: [] },
     story: { title: '', content: '' },
   });
 
   const [propertyForm, setPropertyForm] = useState<PropertyFormState>(emptyPropertyForm());
+  const [allExperiences, setAllExperiences] = useState<Experience[]>([]);
+  const [allRetreats, setAllRetreats] = useState<Retreat[]>([]);
+  const [selectedExperienceIds, setSelectedExperienceIds] = useState<number[]>([]);
+  const [selectedRetreatIds, setSelectedRetreatIds] = useState<number[]>([]);
 
   const emptyRoomTypeForm = (): RoomTypeFormState => ({
     name: '',
@@ -1266,6 +1261,21 @@ function PropertiesSection() {
     }
   }
 
+  async function loadAllExperiencesAndRetreats() {
+    try {
+      const [expRes, retRes] = await Promise.all([
+        client.api.fetch('/api/admin/experiences'),
+        client.api.fetch('/api/admin/retreats'),
+      ]);
+      const expData = await expRes.json();
+      const retData = await retRes.json();
+      setAllExperiences(expData.data || []);
+      setAllRetreats(retData.data || []);
+    } catch (err: any) {
+      console.error(err);
+    }
+  }
+
   async function loadPropertyDetail(id: number) {
     setLoading(true);
     setError('');
@@ -1278,7 +1288,7 @@ function PropertiesSection() {
       const roomTypesData = await roomTypesRes.json();
       if (!propertyRes.ok) throw new Error(propertyData.error || '載入失敗');
 
-      const p: Property & { roomTypes?: RoomType[] } = propertyData.data;
+      const p: Property & { roomTypes?: RoomType[]; experiences?: Experience[]; retreats?: Retreat[] } = propertyData.data;
       setPropertyForm({
         name: p.name || '',
         nameZh: p.nameZh || '',
@@ -1291,7 +1301,6 @@ function PropertiesSection() {
         status: p.status,
         gallery: safeJsonParse<string[]>(p.gallery, []),
         facilities: safeJsonParse<FacilityItem[]>(p.facilities, []),
-        activities: safeJsonParse<ActivityItem[]>(p.activities, []),
         locationDetails: safeJsonParse<LocationDetailsShape>(p.locationDetails, {
           description: '',
           mapImage: '',
@@ -1300,6 +1309,8 @@ function PropertiesSection() {
         story: safeJsonParse<StoryShape>(p.story, { title: '', content: '' }),
       });
       setRoomTypes(roomTypesData.data || p.roomTypes || []);
+      setSelectedExperienceIds((p.experiences || []).map((e) => e.id));
+      setSelectedRetreatIds((p.retreats || []).map((r) => r.id));
     } catch (err: any) {
       setError(err.message || '載入住宿詳情時發生錯誤');
     } finally {
@@ -1317,10 +1328,14 @@ function PropertiesSection() {
       setRoomTypes([]);
       setEditingRoomTypeId(null);
       setRoomTypeForm(emptyRoomTypeForm());
+      setSelectedExperienceIds([]);
+      setSelectedRetreatIds([]);
+      loadAllExperiencesAndRetreats();
     } else if (typeof selectedPropertyId === 'number') {
       loadPropertyDetail(selectedPropertyId);
       setEditingRoomTypeId(null);
       setRoomTypeForm(emptyRoomTypeForm());
+      loadAllExperiencesAndRetreats();
     }
   }, [selectedPropertyId]);
 
@@ -1355,7 +1370,6 @@ function PropertiesSection() {
         status: propertyForm.status,
         gallery: propertyForm.gallery.filter(Boolean),
         facilities: propertyForm.facilities.filter((f) => f.label.trim()),
-        activities: propertyForm.activities.filter((a) => a.name.trim()),
         locationDetails: propertyForm.locationDetails,
         story: propertyForm.story,
       };
@@ -1365,6 +1379,7 @@ function PropertiesSection() {
       }
 
       let res: Response;
+      let savedPropertyId: number | null = null;
       if (selectedPropertyId === 'new') {
         res = await client.api.fetch('/api/admin/properties', {
           method: 'POST',
@@ -1382,6 +1397,24 @@ function PropertiesSection() {
       }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '儲存失敗');
+      savedPropertyId = data.data?.id ?? null;
+
+      // Save linked experiences & retreats
+      const propertyIdToLink = savedPropertyId ?? (typeof selectedPropertyId === 'number' ? selectedPropertyId : null);
+      if (propertyIdToLink != null) {
+        await Promise.all([
+          client.api.fetch(`/api/admin/properties/${propertyIdToLink}/experiences`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ experienceIds: selectedExperienceIds }),
+          }),
+          client.api.fetch(`/api/admin/properties/${propertyIdToLink}/retreats`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ retreatIds: selectedRetreatIds }),
+          }),
+        ]);
+      }
 
       setSuccess(selectedPropertyId === 'new' ? '住宿已新增' : '住宿已更新');
       closePropertyEditor();
@@ -1553,20 +1586,16 @@ function PropertiesSection() {
     setPropertyForm({ ...propertyForm, facilities: propertyForm.facilities.filter((_, i) => i !== index) });
   }
 
-  function addActivity() {
-    setPropertyForm({
-      ...propertyForm,
-      activities: [...propertyForm.activities, { image: '', name: '', description: '' }],
-    });
+  function toggleExperience(id: number) {
+    setSelectedExperienceIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   }
 
-  function updateActivity(index: number, field: 'image' | 'name' | 'description', value: string) {
-    const next = propertyForm.activities.map((a, i) => (i === index ? { ...a, [field]: value } : a));
-    setPropertyForm({ ...propertyForm, activities: next });
-  }
-
-  function removeActivity(index: number) {
-    setPropertyForm({ ...propertyForm, activities: propertyForm.activities.filter((_, i) => i !== index) });
+  function toggleRetreat(id: number) {
+    setSelectedRetreatIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   }
 
   function addNearby() {
@@ -1835,65 +1864,77 @@ function PropertiesSection() {
             </div>
           </div>
 
-          {/* Activities */}
+          {/* Linked Experiences & Retreats */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-[#0d1b2a]">活動（Activities）</label>
-              <button
-                onClick={addActivity}
-                className="text-xs bg-[#B8902F]/10 text-[#B8902F] px-3 py-1 rounded-lg hover:bg-[#B8902F]/20 transition"
-              >
-                + 新增活動
-              </button>
-            </div>
-            <div className="space-y-3">
-              {propertyForm.activities.length === 0 && (
-                <p className="text-sm text-gray-400">尚未設定活動</p>
-              )}
-              {propertyForm.activities.map((a, idx) => (
-                <div key={idx} className="grid grid-cols-12 gap-2 items-start border rounded-lg p-3 bg-gray-50">
-                  <div className="col-span-12 md:col-span-4">
-                    <input
-                      type="text"
-                      value={a.image}
-                      onChange={(e) => updateActivity(idx, 'image', e.target.value)}
-                      placeholder="圖片 URL"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-                    />
-                    <ImagePreview url={a.image} />
-                  </div>
-                  <div className="col-span-12 md:col-span-3">
-                    <input
-                      type="text"
-                      value={a.name}
-                      onChange={(e) => updateActivity(idx, 'name', e.target.value)}
-                      placeholder="活動名稱"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-                    />
-                  </div>
-                  <div className="col-span-12 md:col-span-4">
-                    <input
-                      type="text"
-                      value={a.description}
-                      onChange={(e) => updateActivity(idx, 'description', e.target.value)}
-                      placeholder="活動描述"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-                    />
-                  </div>
-                  <div className="col-span-12 md:col-span-1 flex md:justify-end">
-                    <button
-                      onClick={() => removeActivity(idx)}
-                      className="text-xs text-red-500 hover:text-red-700 px-2 py-2"
-                    >
-                      刪除
-                    </button>
-                  </div>
+            <label className="text-sm font-medium text-[#0d1b2a] mb-2 block">該住宿可加購的海島體驗</label>
+            <p className="text-xs text-gray-500 mb-3">勾選後，客人會在住宿頁面看到這些體驗選項並可加入預約。</p>
+
+            <div className="mb-4">
+              <p className="text-xs font-medium text-gray-600 mb-2">單日體驗</p>
+              {allExperiences.length === 0 ? (
+                <p className="text-sm text-gray-400">尚未建立任何體驗</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {allExperiences.map((e) => {
+                    const checked = selectedExperienceIds.includes(e.id);
+                    return (
+                      <label
+                        key={e.id}
+                        className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                          checked ? 'border-[#0a4c6b] bg-[#0a4c6b]/5' : 'border-gray-200 hover:border-[#2ec4b6]'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleExperience(e.id)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-[#0d1b2a]">{e.nameZh}</p>
+                          <p className="text-xs text-gray-500">{e.name} · {e.duration}</p>
+                        </div>
+                      </label>
+                    );
+                  })}
                 </div>
-              ))}
+              )}
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-gray-600 mb-2">主題靜修</p>
+              {allRetreats.length === 0 ? (
+                <p className="text-sm text-gray-400">尚未建立任何主題靜修</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {allRetreats.map((r) => {
+                    const checked = selectedRetreatIds.includes(r.id);
+                    return (
+                      <label
+                        key={r.id}
+                        className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                          checked ? 'border-[#0a4c6b] bg-[#0a4c6b]/5' : 'border-gray-200 hover:border-[#2ec4b6]'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleRetreat(r.id)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-[#0d1b2a]">{r.nameZh}</p>
+                          <p className="text-xs text-gray-500">{r.name} · {r.duration}</p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Location details */}
+          {/* Location details -->
           <div className="mb-6">
             <label className="text-sm font-medium text-[#0d1b2a] mb-2 block">位置詳情（Location Details）</label>
             <div className="space-y-3 border rounded-lg p-4 bg-gray-50">
@@ -2460,6 +2501,9 @@ export default function AdminPage() {
   const [editingBooking, setEditingBooking] = useState(false);
   const [editBookingForm, setEditBookingForm] = useState<{ checkIn: string; checkOut: string; roomTypeId: number; guests: number; totalAmount: number } | null>(null);
   const [voucherPreview, setVoucherPreview] = useState(false);
+  const [bookingLinkedExperiences, setBookingLinkedExperiences] = useState<Experience[]>([]);
+  const [bookingLinkedRetreats, setBookingLinkedRetreats] = useState<Retreat[]>([]);
+  const [bookingAddonsDraft, setBookingAddonsDraft] = useState<Array<{ type: 'experience' | 'retreat'; id: number; name: string; nameZh: string }>>([]);
   const bookingLimit = 20;
 
   // Account management state
@@ -2568,6 +2612,65 @@ export default function AdminPage() {
       if (data.data) setSelectedBooking(data.data);
     } catch (err) { console.error(err); }
   }
+
+  function parseBookingAddons(addons: any) {
+    try {
+      const arr = JSON.parse(addons || '[]');
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .filter((a: any) => a && (a.type === 'experience' || a.type === 'retreat') && a.id)
+        .map((a: any) => ({
+          type: a.type as 'experience' | 'retreat',
+          id: Number(a.id),
+          name: String(a.name || ''),
+          nameZh: String(a.nameZh || ''),
+        }));
+    } catch { return []; }
+  }
+
+  async function loadBookingLinkedItems(propertyId: number) {
+    try {
+      const res = await client.api.fetch(`/api/admin/properties/${propertyId}`);
+      const data = await res.json();
+      if (data.data) {
+        setBookingLinkedExperiences(data.data.experiences || []);
+        setBookingLinkedRetreats(data.data.retreats || []);
+      }
+    } catch (err) { console.error(err); }
+  }
+
+  function toggleBookingAddon(item: Experience | Retreat, type: 'experience' | 'retreat') {
+    setBookingAddonsDraft((prev) => {
+      const exists = prev.some((a) => a.id === item.id && a.type === type);
+      if (exists) return prev.filter((a) => !(a.id === item.id && a.type === type));
+      return [...prev, { type, id: item.id, name: item.name, nameZh: item.nameZh }];
+    });
+  }
+
+  async function saveBookingAddons(id: number) {
+    setBookingActionLoading(true);
+    try {
+      const res = await client.api.fetch(`/api/admin/bookings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addons: bookingAddonsDraft }),
+      });
+      if (!res.ok) throw new Error('更新失敗');
+      await fetchBookings();
+      await refreshSelectedBooking(id);
+    } catch (err) { console.error(err); }
+    finally { setBookingActionLoading(false); }
+  }
+
+  useEffect(() => {
+    if (selectedBooking?.propertyId) {
+      loadBookingLinkedItems(selectedBooking.propertyId);
+    } else {
+      setBookingLinkedExperiences([]);
+      setBookingLinkedRetreats([]);
+    }
+    setBookingAddonsDraft(parseBookingAddons(selectedBooking?.addons));
+  }, [selectedBooking?.id]);
 
   async function updateSupplierStatus(id: number, supplierStatus: string) {
     setBookingActionLoading(true);
@@ -3147,26 +3250,112 @@ export default function AdminPage() {
                     </div>
 
                     {/* Addons */}
-                    {(() => {
-                      const addons = (() => {
-                        try { return JSON.parse(selectedBooking.addons || '[]'); }
-                        catch { return []; }
-                      })();
-                      if (!addons.length) return null;
-                      return (
-                        <div>
-                          <h4 className="font-semibold text-[#0d1b2a] mb-2">加購活動</h4>
-                          <div className="space-y-2">
-                            {addons.map((a: any, i: number) => (
-                              <div key={i} className="bg-[#f0f9f7] rounded-lg px-3 py-2 text-sm">
-                                <p className="font-medium text-[#0a4c6b]">{a.name}</p>
-                                {a.description && <p className="text-gray-600 text-xs mt-0.5">{a.description}</p>}
-                              </div>
-                            ))}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-[#0d1b2a]">加購體驗 / 靜修</h4>
+                        {bookingAddonsDraft.length > 0 && (
+                          <span className="text-xs text-gray-500">{bookingAddonsDraft.length} 項已選</span>
+                        )}
+                      </div>
+
+                      {bookingLinkedExperiences.length === 0 && bookingLinkedRetreats.length === 0 && !(() => {
+                        try { return JSON.parse(selectedBooking.addons || '[]').length; }
+                        catch { return 0; }
+                      })() && (
+                        <p className="text-sm text-gray-400">該住宿尚未設定可加購項目</p>
+                      )}
+
+                      {bookingLinkedExperiences.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-xs font-medium text-gray-600 mb-2">單日體驗</p>
+                          <div className="grid grid-cols-1 gap-2">
+                            {bookingLinkedExperiences.map((e) => {
+                              const checked = bookingAddonsDraft.some((a) => a.type === 'experience' && a.id === e.id);
+                              return (
+                                <label
+                                  key={`exp-${e.id}`}
+                                  className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                                    checked ? 'border-[#0a4c6b] bg-[#0a4c6b]/5' : 'border-gray-200 hover:border-[#2ec4b6]'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => toggleBookingAddon(e, 'experience')}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm text-[#0d1b2a]">{e.nameZh}</p>
+                                    <p className="text-xs text-gray-500">{e.name} · {e.duration}</p>
+                                  </div>
+                                </label>
+                              );
+                            })}
                           </div>
                         </div>
-                      );
-                    })()}
+                      )}
+
+                      {bookingLinkedRetreats.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-xs font-medium text-gray-600 mb-2">主題靜修</p>
+                          <div className="grid grid-cols-1 gap-2">
+                            {bookingLinkedRetreats.map((r) => {
+                              const checked = bookingAddonsDraft.some((a) => a.type === 'retreat' && a.id === r.id);
+                              return (
+                                <label
+                                  key={`ret-${r.id}`}
+                                  className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                                    checked ? 'border-[#0a4c6b] bg-[#0a4c6b]/5' : 'border-gray-200 hover:border-[#2ec4b6]'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => toggleBookingAddon(r, 'retreat')}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm text-[#0d1b2a]">{r.nameZh}</p>
+                                    <p className="text-xs text-gray-500">{r.name} · {r.duration}</p>
+                                  </div>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {(() => {
+                        const legacyAddons = (() => {
+                          try { return JSON.parse(selectedBooking.addons || '[]').filter((a: any) => !a.type || !a.id); }
+                          catch { return []; }
+                        })();
+                        if (!legacyAddons.length) return null;
+                        return (
+                          <div className="mb-4">
+                            <p className="text-xs font-medium text-gray-600 mb-2">舊版加購紀錄（唯讀）</p>
+                            <div className="space-y-2">
+                              {legacyAddons.map((a: any, i: number) => (
+                                <div key={i} className="bg-gray-100 rounded-lg px-3 py-2 text-sm">
+                                  <p className="font-medium text-[#0a4c6b]">{a.name}</p>
+                                  {a.description && <p className="text-gray-600 text-xs mt-0.5">{a.description}</p>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {(bookingLinkedExperiences.length > 0 || bookingLinkedRetreats.length > 0) && (
+                        <button
+                          onClick={() => saveBookingAddons(selectedBooking.id)}
+                          disabled={bookingActionLoading}
+                          className="text-xs bg-[#0a4c6b] text-white px-3 py-1.5 rounded hover:bg-[#083d56] transition disabled:opacity-60"
+                        >
+                          {bookingActionLoading ? '儲存中…' : '儲存加購項目'}
+                        </button>
+                      )}
+                    </div>
 
                     {/* Admin notes */}
                     <div>

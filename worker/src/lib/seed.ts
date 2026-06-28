@@ -15,7 +15,6 @@ export interface SeedProperty {
   amenities: string
   gallery: string
   facilities: string
-  activities: string
   locationDetails: string
   story: string
   status: 'active'
@@ -113,43 +112,6 @@ const demoProperties: SeedProperty[] = [
       { icon: '🧘', label: '瑜伽亭' },
       { icon: '🏖️', label: '私人甲板' },
     ]),
-    activities: JSON.stringify([
-      {
-        image:
-          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80',
-        name: '日落巡航',
-        description:
-          '乘著傳統多尼船駛向潟湖盡頭，在香檳與夕陽中結束完美的一天。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1544551762-46a013bb70d5?w=600&q=80',
-        name: '夜釣',
-        description:
-          '跟隨當地漁民出海，在星空下學習傳統釣法，收穫可交由廚師即席烹調。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
-        name: '浮潛',
-        description:
-          '從別墅甲板直接下水，與熱帶魚群、海龜和珊瑚礁不期而遇。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
-        name: '深潛',
-        description:
-          'PADI 認證潛水中心帶你探索 North Malé 環礁的著名潛點。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=80',
-        name: '無人島野餐',
-        description:
-          '包下一座無人沙洲，享受只屬於你的燭光午餐與澄澈海水。',
-      },
-    ]),
     locationDetails: JSON.stringify({
       description:
         '御海閣位於 North Malé Atoll，距離馬累國際機場約 30 分鐘水上飛機航程，是馬爾代夫最經典的潟湖區域之一。',
@@ -206,43 +168,6 @@ const demoProperties: SeedProperty[] = [
       { icon: '🛥️', label: '私人遊艇' },
       { icon: '🎬', label: '私人影院' },
     ]),
-    activities: JSON.stringify([
-      {
-        image:
-          'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
-        name: '鯨鯊共游',
-        description:
-          '在專業嚮導陪同下，與溫柔的海洋巨人同游，感受生命的壯闊。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=600&q=80',
-        name: '海龜保育體驗',
-        description:
-          '參與島嶼保育計畫，了解海龜的生活史，並協助記錄與放生。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=80',
-        name: '沙洲燭光晚餐',
-        description:
-          '在只屬於你的沙洲上，由主廚現場烹調，侍酒師搭配美酒。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1528127269322-539801943592?w=600&q=80',
-        name: '傳統漁村探訪',
-        description:
-          '走訪 Noonu 環礁的傳統漁村，認識馬爾代夫的日常生活與手工藝。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
-        name: '環礁浮潛',
-        description:
-          '探索 Noonu 環礁豐富的珊瑚花園與熱帶魚群，適合各級泳者。',
-      },
-    ]),
     locationDetails: JSON.stringify({
       description:
         '私享島嶼坐落於 Noonu Atoll 的靜謐海域，這裡以豐富的海洋生態與原始珊瑚礁聞名，從馬累國際機場可乘內陸航班或水上飛機抵達。',
@@ -297,43 +222,6 @@ const demoProperties: SeedProperty[] = [
       { icon: '🎮', label: '遊戲室' },
       { icon: '📽️', label: '海灘電影院' },
       { icon: '🚲', label: '自行車租借' },
-    ]),
-    activities: JSON.stringify([
-      {
-        image:
-          'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=600&q=80',
-        name: '跳島',
-        description:
-          '一日之內造訪多座環礁島嶼，體驗不同風格的沙灘與潟湖。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&q=80',
-        name: '浮潛',
-        description:
-          '從海灘步行即可抵達珊瑚礁，與小丑魚、海龜一起游泳。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=600&q=80',
-        name: '海豚巡遊',
-        description:
-          '在日落時分出海，觀賞成群海豚躍出水面的壯觀畫面。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1528127269322-539801943592?w=600&q=80',
-        name: '本地島嶼文化導覽',
-        description:
-          '走進居民島，品嚐傳統小吃，參觀手工藝作坊與清真寺。',
-      },
-      {
-        image:
-          'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&q=80',
-        name: '海灘電影院',
-        description:
-          '在星空下的沙灘上，躺在懶人沙發中觀賞經典電影。',
-      },
     ]),
     locationDetails: JSON.stringify({
       description:
@@ -665,8 +553,8 @@ async function seedPropertiesAndRoomTypes(db: D1Database): Promise<void> {
     const result = await run(
       db,
       `INSERT INTO properties
-        (name, name_zh, description, description_zh, location, price_per_night, max_guests, image_url, amenities, gallery, facilities, activities, location_details, story, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (name, name_zh, description, description_zh, location, price_per_night, max_guests, image_url, amenities, gallery, facilities, location_details, story, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         property.name,
         property.nameZh,
@@ -679,7 +567,6 @@ async function seedPropertiesAndRoomTypes(db: D1Database): Promise<void> {
         property.amenities,
         property.gallery,
         property.facilities,
-        property.activities,
         property.locationDetails,
         property.story,
         property.status,

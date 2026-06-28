@@ -31,13 +31,31 @@ app.get('/properties/:id', async (c) => {
     return c.json({ error: 'Property not found' }, 404)
   }
 
-  const roomTypes = await all<RoomType>(
-    c.env.DB,
-    'SELECT * FROM room_types WHERE property_id = ? AND status = ? ORDER BY price_per_night ASC',
-    [id, 'available']
-  )
+  const [roomTypes, experiences, retreats] = await Promise.all([
+    all<RoomType>(
+      c.env.DB,
+      'SELECT * FROM room_types WHERE property_id = ? AND status = ? ORDER BY price_per_night ASC',
+      [id, 'available']
+    ),
+    all<Experience>(
+      c.env.DB,
+      `SELECT e.* FROM experiences e
+       INNER JOIN property_experiences pe ON pe.experience_id = e.id
+       WHERE pe.property_id = ? AND e.status = ?
+       ORDER BY e.sort_order ASC, e.created_at DESC`,
+      [id, 'active']
+    ),
+    all<Retreat>(
+      c.env.DB,
+      `SELECT r.* FROM retreats r
+       INNER JOIN property_retreats pr ON pr.retreat_id = r.id
+       WHERE pr.property_id = ? AND r.status = ?
+       ORDER BY r.sort_order ASC, r.created_at DESC`,
+      [id, 'active']
+    ),
+  ])
 
-  return c.json({ data: { ...property, roomTypes } })
+  return c.json({ data: { ...property, roomTypes, experiences, retreats } })
 })
 
 // GET /api/public/articles
