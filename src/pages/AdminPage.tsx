@@ -3484,12 +3484,13 @@ export default function AdminPage() {
                       <th className="px-4 py-3 text-left font-medium text-gray-600">付款</th>
                       <th className="px-4 py-3 text-left font-medium text-gray-600">狀態</th>
                       <th className="px-4 py-3 text-left font-medium text-gray-600">供應商</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-600">推薦碼</th>
                       <th className="px-4 py-3 text-left font-medium text-gray-600">操作</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {bookings.length === 0 ? (
-                      <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-500">暫無訂單</td></tr>
+                      <tr><td colSpan={10} className="px-4 py-12 text-center text-gray-500">暫無訂單</td></tr>
                     ) : (
                       bookings.map((b) => (
                         <tr key={b.id} className="hover:bg-gray-50">
@@ -3529,6 +3530,13 @@ export default function AdminPage() {
                             }`}>
                               {b.supplierStatus === 'confirmed' ? '已確認' : b.supplierStatus === 'rejected' ? '已拒絕' : '待確認'}
                             </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {b.referralCode ? (
+                              <span className="font-mono text-[#0a4c6b] text-xs">{b.referralCode}</span>
+                            ) : (
+                              <span className="text-gray-400 text-xs">—</span>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             <button
@@ -3668,6 +3676,19 @@ export default function AdminPage() {
                           <div>
                             <p className="text-gray-500">電話</p>
                             <p className="font-medium">{selectedBooking.customer.phone || '—'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Referral source */}
+                    {selectedBooking.referralCode && (
+                      <div className="bg-[#fff8e6] rounded-xl p-4 space-y-2">
+                        <h4 className="font-semibold text-[#B8902F]">轉介來源</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-500">推薦碼</p>
+                            <p className="font-mono font-medium text-[#0a4c6b]">{selectedBooking.referralCode}</p>
                           </div>
                         </div>
                       </div>
