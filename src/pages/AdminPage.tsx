@@ -3367,6 +3367,7 @@ export default function AdminPage() {
     { key: 'properties', label: '住宿管理' },
     { key: 'experiences', label: '海島體驗' },
     { key: 'payments', label: '付款記錄' },
+    { key: 'referral', label: '分享夥伴' },
     ...(adminRole === 'superadmin' ? [{ key: 'accounts', label: '帳戶管理' }] : []),
   ];
 
