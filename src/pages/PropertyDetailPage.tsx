@@ -606,126 +606,6 @@ export default function PropertyDetailPage() {
               </div>
             )}
 
-            {/* Facilities */}
-            {facilities.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-6 font-serif">
-                  設施與服務
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {facilities.map((f, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 bg-[#f0f9f7] rounded-xl p-4"
-                    >
-                      <span className="text-2xl">{f.icon}</span>
-                      <span className="text-sm font-medium text-[#0d1b2a]">
-                        {f.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Activities */}
-            {availableItems.length > 0 && (
-              <div className="bg-[#f8fbfc] rounded-2xl border border-[#0a4c6b]/10 p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-[#0d1b2a] mb-2 font-serif">
-                      可加購的體驗與靜修
-                    </h2>
-                    <p className="text-gray-600">
-                      點選有興趣的項目，會一併加入你的預約諮詢，專員會為你安排。
-                    </p>
-                  </div>
-                  {selectedActivities.length > 0 && (
-                    <span className="inline-flex items-center justify-center px-4 py-2 bg-[#0a4c6b] text-white rounded-full text-sm font-medium">
-                      已選 {selectedActivities.length} 項
-                    </span>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {availableItems.map((a) => {
-                    const isSelected = selectedActivities.some(
-                      (sa) => sa.id === a.id && sa.type === a.type
-                    );
-                    return (
-                      <button
-                        key={`${a.type}-${a.id}`}
-                        type="button"
-                        onClick={() =>
-                          setSelectedActivities((prev) =>
-                            isSelected
-                              ? prev.filter((sa) => !(sa.id === a.id && sa.type === a.type))
-                              : [...prev, a]
-                          )
-                        }
-                        className={`text-left bg-white rounded-2xl shadow-lg border overflow-hidden transition ${
-                          isSelected
-                            ? 'border-[#0a4c6b] ring-2 ring-[#0a4c6b]/20'
-                            : 'border-gray-100 hover:border-[#2ec4b6]'
-                        }`}
-                      >
-                        <div className="relative aspect-[16/10] overflow-hidden">
-                          <img
-                            src={a.imageUrl || '/images/placeholder.jpg'}
-                            alt={a.nameZh || a.name}
-                            className="w-full h-full object-cover"
-                          />
-                          {isSelected && (
-                            <div className="absolute top-3 right-3 bg-[#0a4c6b] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-md">
-                              ✓
-                            </div>
-                          )}
-                          <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium bg-white/90 text-[#0a4c6b]">
-                            {a.type === 'retreat' ? '靜修' : '體驗'}
-                          </span>
-                        </div>
-                        <div className="p-5">
-                          <h3 className="font-bold text-[#0d1b2a] mb-2">
-                            {a.nameZh || a.name}
-                          </h3>
-                          <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-                            {a.descriptionZh || a.description}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Location & Nearby */}
-            {locationDetails && (
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
-                  位置與週邊
-                </h2>
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  {locationDetails.description}
-                </p>
-                <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-md mb-6">
-                  <img
-                    src={locationDetails.mapImage}
-                    alt={`${property.nameZh} 週邊地圖`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="font-bold text-[#0d1b2a] mb-3">週邊亮點</h3>
-                <ul className="space-y-2">
-                  {locationDetails.nearby.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-gray-600">
-                      <span className="text-[#2ec4b6] mt-1">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
             {/* Room Types */}
             <div>
               <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
@@ -953,6 +833,128 @@ export default function PropertyDetailPage() {
                 )}
               </AnimatePresence>
             </div>
+
+
+            {/* Facilities */}
+            {facilities.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-6 font-serif">
+                  設施與服務
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {facilities.map((f, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 bg-[#f0f9f7] rounded-xl p-4"
+                    >
+                      <span className="text-2xl">{f.icon}</span>
+                      <span className="text-sm font-medium text-[#0d1b2a]">
+                        {f.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Activities */}
+            {availableItems.length > 0 && (
+              <div className="bg-[#f8fbfc] rounded-2xl border border-[#0a4c6b]/10 p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#0d1b2a] mb-2 font-serif">
+                      可加購的體驗與靜修
+                    </h2>
+                    <p className="text-gray-600">
+                      點選有興趣的項目，會一併加入你的預約諮詢，專員會為你安排。
+                    </p>
+                  </div>
+                  {selectedActivities.length > 0 && (
+                    <span className="inline-flex items-center justify-center px-4 py-2 bg-[#0a4c6b] text-white rounded-full text-sm font-medium">
+                      已選 {selectedActivities.length} 項
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {availableItems.map((a) => {
+                    const isSelected = selectedActivities.some(
+                      (sa) => sa.id === a.id && sa.type === a.type
+                    );
+                    return (
+                      <button
+                        key={`${a.type}-${a.id}`}
+                        type="button"
+                        onClick={() =>
+                          setSelectedActivities((prev) =>
+                            isSelected
+                              ? prev.filter((sa) => !(sa.id === a.id && sa.type === a.type))
+                              : [...prev, a]
+                          )
+                        }
+                        className={`text-left bg-white rounded-2xl shadow-lg border overflow-hidden transition ${
+                          isSelected
+                            ? 'border-[#0a4c6b] ring-2 ring-[#0a4c6b]/20'
+                            : 'border-gray-100 hover:border-[#2ec4b6]'
+                        }`}
+                      >
+                        <div className="relative aspect-[16/10] overflow-hidden">
+                          <img
+                            src={a.imageUrl || '/images/placeholder.jpg'}
+                            alt={a.nameZh || a.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {isSelected && (
+                            <div className="absolute top-3 right-3 bg-[#0a4c6b] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-md">
+                              ✓
+                            </div>
+                          )}
+                          <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium bg-white/90 text-[#0a4c6b]">
+                            {a.type === 'retreat' ? '靜修' : '體驗'}
+                          </span>
+                        </div>
+                        <div className="p-5">
+                          <h3 className="font-bold text-[#0d1b2a] mb-2">
+                            {a.nameZh || a.name}
+                          </h3>
+                          <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
+                            {a.descriptionZh || a.description}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Location & Nearby */}
+            {locationDetails && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+                <h2 className="text-2xl font-bold text-[#0d1b2a] mb-4 font-serif">
+                  位置與週邊
+                </h2>
+                <p className="text-gray-600 leading-relaxed mb-6">
+                  {locationDetails.description}
+                </p>
+                <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-md mb-6">
+                  <img
+                    src={locationDetails.mapImage}
+                    alt={`${property.nameZh} 週邊地圖`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="font-bold text-[#0d1b2a] mb-3">週邊亮點</h3>
+                <ul className="space-y-2">
+                  {locationDetails.nearby.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-gray-600">
+                      <span className="text-[#2ec4b6] mt-1">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
 
             {/* Inquiry CTA */}
             <div className="bg-gradient-to-br from-[#0a4c6b] to-[#0d1b2a] rounded-2xl p-8 sm:p-10 text-center text-white shadow-lg">
