@@ -27,9 +27,12 @@ export async function sendCloudwapiMessage(
   const to = normalizePhone(phone).replace(/\D/g, '')
   const sender = (env.CLOUDWAPI_SENDER || '85262322466').replace(/\D/g, '')
   const encodedMessage = encodeURIComponent(message)
-  let url = `https://unofficial.cloudwapi.in/send-message?api_key=${apiKey}&sender=${sender}&number=${to}&message=${encodedMessage}`
+
+  let url: string
   if (mediaUrl) {
-    url += `&type=media&media_url=${encodeURIComponent(mediaUrl)}`
+    url = `https://unofficial.cloudwapi.in/send-media?api_key=${apiKey}&sender=${sender}&number=${to}&media_type=image&caption=${encodedMessage}&url=${encodeURIComponent(mediaUrl)}`
+  } else {
+    url = `https://unofficial.cloudwapi.in/send-message?api_key=${apiKey}&sender=${sender}&number=${to}&message=${encodedMessage}`
   }
   console.log(`Sending to CloudWAPI: ${url.replace(`api_key=${apiKey}`, 'api_key=***')}`)
 
