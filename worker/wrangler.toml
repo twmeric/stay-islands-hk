@@ -28,5 +28,6 @@ BUSINESS_WHATSAPP_NUMBER = "85262322466"
 # Secrets（請使用 `wrangler secret put <NAME>` 設置，勿在此寫入值）：
 # - CLOUDWAPI_API_KEY
 # - CLOUDWAPI_SENDER
+# - SALESMARTLY_WEBHOOK_SECRET（可選，用於驗證 SaleSmartly webhook）
 # - JWT_SECRET
 # - STRIPE_SECRET_KEY（可選）

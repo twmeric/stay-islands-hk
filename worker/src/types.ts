@@ -7,6 +7,7 @@ export type Bindings = {
   JWT_SECRET: string
   CLOUDWAPI_API_KEY: string
   CLOUDWAPI_SENDER: string
+  SALESMARTLY_WEBHOOK_SECRET?: string
   BUSINESS_WHATSAPP_NUMBER: string
   FRONTEND_URL: string
   STRIPE_SECRET_KEY?: string
