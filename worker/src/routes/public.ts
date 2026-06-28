@@ -283,10 +283,20 @@ app.get('/bookings/token/:token', async (c) => {
   )
   if (!booking) return c.json({ error: 'Booking not found' }, 404)
 
-  const [customer, property, roomType, payments] = await Promise.all([
-    booking.customerId
-      ? first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE id = ?', [booking.customerId])
-      : Promise.resolve(null),
+  let customer = booking.customerId
+    ? await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE id = ?', [booking.customerId])
+    : null
+
+  // Fallback to the inquiry contact info until the booking is paid and linked to a real customer.
+  if (!customer) {
+    customer = {
+      name: booking.customerName,
+      email: booking.customerEmail || '',
+      phone: booking.customerPhone,
+    } as Customer
+  }
+
+  const [property, roomType, payments] = await Promise.all([
     first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [booking.propertyId]),
     first<RoomType>(c.env.DB, 'SELECT * FROM room_types WHERE id = ?', [booking.roomTypeId]),
     all<Payment>(c.env.DB, 'SELECT * FROM payments WHERE booking_id = ? ORDER BY created_at DESC', [booking.id]),
@@ -319,27 +329,17 @@ app.post('/bookings', async (c) => {
   if (checkIn == null) return c.json({ error: 'Missing or invalid check_in' }, 400)
   if (checkOut == null) return c.json({ error: 'Missing or invalid check_out' }, 400)
 
-  let customer = await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE email = ?', [email])
-  if (!customer) {
-    const result = await run(
-      c.env.DB,
-      'INSERT INTO customers (name, email, phone, created_at, updated_at) VALUES (?, ?, ?, unixepoch(), unixepoch())',
-      [name, email, phone]
-    )
-    customer = await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE id = ?', [
-      result.meta.last_row_id,
-    ])
-  }
-
+  // Do NOT create a customer record at the inquiry stage.
+  // A customer is only created when the booking is actually paid or a lead is converted.
   const paymentDeadline = Math.floor(Date.now() / 1000) + 48 * 60 * 60 // 48 hours
   const token = generateToken()
 
   const result = await run(
     c.env.DB,
     `INSERT INTO bookings
-      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, referral_code, supplier_status, payment_deadline, token, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, ?, 'pending', ?, ?, unixepoch(), unixepoch())`,
-    [customer?.id ?? null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons, referralCode, paymentDeadline, token]
+      (customer_id, property_id, room_type_id, check_in, check_out, guests, total_amount, currency, status, payment_status, voucher_code, addons, referral_code, customer_name, customer_email, customer_phone, supplier_status, payment_deadline, token, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, ?, ?, ?, ?, 'pending', ?, ?, unixepoch(), unixepoch())`,
+    [null, propertyId, roomTypeId, checkIn, checkOut, guests, totalAmount, currency, voucherCode, addons, referralCode, name, email, phone, paymentDeadline, token]
   )
 
   const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [

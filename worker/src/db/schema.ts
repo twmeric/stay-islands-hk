@@ -194,6 +194,9 @@ export interface Booking {
   supplierStatus: string | null
   token: string | null
   referralCode: string | null
+  customerName: string | null
+  customerEmail: string | null
+  customerPhone: string | null
   adminNotes: string | null
   cancellationReason: string | null
   refundAmount: number

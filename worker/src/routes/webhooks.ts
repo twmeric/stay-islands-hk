@@ -30,24 +30,15 @@ async function processInboundWhatsApp(env: Bindings, input: InboundWhatsAppInput
   const now = Math.floor(Date.now() / 1000)
   const incomingAt = typeof input.timestamp === 'number' ? input.timestamp : now
 
-  // 1. Ensure customer
+  // 1. Look up existing customer only. WhatsApp messages should NOT create new customer records;
+  //    a person only becomes a customer when they pay or a lead is converted.
   let customer = await first<Customer>(
     env.DB,
     'SELECT * FROM customers WHERE phone = ? OR phone = ?',
     [normalizedPhone, input.phone]
   )
 
-  if (!customer) {
-    const email = `${normalizedPhone.replace('+', '')}@whatsapp.local`
-    const result = await run(
-      env.DB,
-      'INSERT INTO customers (name, email, phone, whatsapp_consent, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
-      [input.name || '', email, normalizedPhone, 1, now, now]
-    )
-    customer = await first<Customer>(env.DB, 'SELECT * FROM customers WHERE id = ?', [
-      result.meta.last_row_id ?? 0,
-    ])
-  } else if (input.name && !customer.name) {
+  if (customer && input.name && !customer.name) {
     await run(env.DB, 'UPDATE customers SET name = ?, updated_at = ? WHERE id = ?', [
       input.name,
       now,

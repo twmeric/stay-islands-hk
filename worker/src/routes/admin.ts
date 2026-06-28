@@ -1291,6 +1291,39 @@ app.post('/leads/:id/convert', requireAdmin, async (c) => {
 // Bookings
 // ============================================================================
 
+async function ensureCustomerForBooking(
+  db: D1Database,
+  booking: Booking
+): Promise<Customer | null> {
+  if (booking.customerId) {
+    return first<Customer>(db, 'SELECT * FROM customers WHERE id = ?', [booking.customerId])
+  }
+  if (!booking.customerEmail) return null
+
+  let customer = await first<Customer>(db, 'SELECT * FROM customers WHERE email = ?', [
+    booking.customerEmail,
+  ])
+  if (!customer) {
+    const result = await run(
+      db,
+      'INSERT INTO customers (name, email, phone, created_at, updated_at) VALUES (?, ?, ?, unixepoch(), unixepoch())',
+      [booking.customerName ?? null, booking.customerEmail, booking.customerPhone ?? null]
+    )
+    customer = await first<Customer>(db, 'SELECT * FROM customers WHERE id = ?', [
+      result.meta.last_row_id ?? 0,
+    ])
+  }
+
+  if (customer && booking.customerId !== customer.id) {
+    await run(db, 'UPDATE bookings SET customer_id = ?, updated_at = unixepoch() WHERE id = ?', [
+      customer.id,
+      booking.id,
+    ])
+  }
+
+  return customer
+}
+
 const validBookingStatuses: BookingStatus[] = ['pending', 'confirmed', 'cancelled', 'completed']
 
 function parseBookingBody(body: Record<string, unknown>): {
@@ -1439,7 +1472,10 @@ app.get('/bookings', requireAdmin, async (c) => {
 
   const bookings = await all<Booking>(
     c.env.DB,
-    `SELECT b.*, c.name as customer_name, c.email as customer_email, c.phone as customer_phone
+    `SELECT b.*,
+       COALESCE(c.name, b.customer_name) as customer_name,
+       COALESCE(c.email, b.customer_email) as customer_email,
+       COALESCE(c.phone, b.customer_phone) as customer_phone
      FROM bookings b
      LEFT JOIN customers c ON c.id = b.customer_id
      ${where}
@@ -1461,10 +1497,19 @@ app.get('/bookings/:id', requireAdmin, async (c) => {
   const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
   if (!booking) return c.json({ error: 'Booking not found' }, 404)
 
-  const [customer, property, roomType, payments] = await Promise.all([
-    booking.customerId
-      ? first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE id = ?', [booking.customerId])
-      : Promise.resolve(null),
+  let customer = booking.customerId
+    ? await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE id = ?', [booking.customerId])
+    : null
+
+  if (!customer) {
+    customer = {
+      name: booking.customerName,
+      email: booking.customerEmail || '',
+      phone: booking.customerPhone,
+    } as Customer
+  }
+
+  const [property, roomType, payments] = await Promise.all([
     first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [booking.propertyId]),
     first<RoomType>(c.env.DB, 'SELECT * FROM room_types WHERE id = ?', [booking.roomTypeId]),
     all<Payment>(c.env.DB, 'SELECT * FROM payments WHERE booking_id = ? ORDER BY created_at DESC', [id]),
@@ -1641,6 +1686,20 @@ app.put('/bookings/:id', requireAdmin, async (c) => {
   await run(c.env.DB, `UPDATE bookings SET ${fields.join(', ')} WHERE id = ?`, values)
   const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
 
+  if (
+    updated &&
+    updated.paymentStatus === 'paid' &&
+    existing.paymentStatus !== 'paid'
+  ) {
+    await ensureCustomerForBooking(c.env.DB, updated)
+    await createReferralOrderAndNotify(c.env, {
+      id: updated.id,
+      token: updated.token,
+      totalAmount: updated.totalAmount,
+      referralCode: updated.referralCode,
+    })
+  }
+
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
     action: 'update',
@@ -1721,6 +1780,8 @@ app.patch('/bookings/:id/mark-paid', requireAdmin, async (c) => {
   const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
 
   if (updated && updated.paymentStatus === 'paid') {
+    // A customer is only created when money is actually received.
+    await ensureCustomerForBooking(c.env.DB, updated)
     await createReferralOrderAndNotify(c.env, {
       id: updated.id,
       token: updated.token,
