@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { client } from '../api/client';
 import { getRefCode } from '../lib/referral';
+import { normalizeHKPhone } from '../lib/phone';
 
 export default function InvestPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', vibe: '', property: '', message: '' });
@@ -17,7 +18,7 @@ export default function InvestPage() {
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          phone: form.phone,
+          phone: normalizeHKPhone(form.phone),
           lead_type: 'island_owner_talk',
           source: 'plan_page',
           referral_code: getRefCode(),
@@ -260,7 +261,10 @@ export default function InvestPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
-                    <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]" placeholder="+852" />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">+852</span>
+                      <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="flex-1 border rounded-r-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]" placeholder="98765432" />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">你理想的海島假期氛圍</label>

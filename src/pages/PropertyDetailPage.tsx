@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { client } from '../api/client';
 import { getRefCode } from '../lib/referral';
+import { normalizeHKPhone } from '../lib/phone';
 
 interface RoomType {
   id: number;
@@ -483,7 +484,7 @@ export default function PropertyDetailPage() {
         body: JSON.stringify({
           name: inquiryName,
           email: inquiryEmail,
-          phone: inquiryPhone,
+          phone: normalizeHKPhone(inquiryPhone),
           property_id: property.id,
           room_type_id: room.id,
           check_in: Math.floor(checkInDate.getTime() / 1000),
@@ -1020,13 +1021,19 @@ export default function PropertyDetailPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       電話
                     </label>
-                    <input
-                      type="tel"
-                      required
-                      value={inquiryPhone}
-                      onChange={(e) => setInquiryPhone(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                        +852
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        value={inquiryPhone}
+                        placeholder="98765432"
+                        onChange={(e) => setInquiryPhone(e.target.value)}
+                        className="flex-1 border rounded-r-lg px-3 py-2 text-sm"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">

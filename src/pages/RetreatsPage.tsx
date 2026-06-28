@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, MapPin, Users, Check, ChevronDown, ChevronUp, Heart, Leaf, Waves, Fish, Sparkles, Ship, Sunset, Anchor, Loader2, X } from 'lucide-react';
 import { client } from '../api/client';
+import { normalizeHKPhone } from '../lib/phone';
 import { getRefCode } from '../lib/referral';
 
 interface Retreat {
@@ -202,7 +203,7 @@ function InquiryForm({
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          phone: form.phone,
+          phone: normalizeHKPhone(form.phone),
           lead_type: 'experience_inquiry',
           source: 'retreats_page',
           referral_code: getRefCode(),
@@ -304,14 +305,17 @@ function InquiryForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">電話／WhatsApp</label>
-          <input
-            required
-            type="tel"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
-            placeholder="+852"
-          />
+          <div className="flex">
+            <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">+852</span>
+            <input
+              required
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className="flex-1 border rounded-r-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a4c6b]"
+              placeholder="98765432"
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">預計日期</label>

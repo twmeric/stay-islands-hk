@@ -456,3 +456,39 @@ export async function notifyReferrerOnLead(
     console.error('[referral] lead notification failed:', err)
   }
 }
+
+// ============================================================================
+// Booking inquiry notification — referrer gets momentum before payment
+// ============================================================================
+
+export function buildBookingInquiryNotificationMessage(
+  env: Bindings,
+  referrer: Referrer,
+  booking: { id: number; phone: string | null; token: string | null }
+): string {
+  const link = buildReferralLink(env, referrer.referralCode)
+  return `🎉 好消息！你推薦的朋友已經提交了一個住宿查詢，我們正在跟進中。\n\n查詢編號：#${booking.id}\n聯絡電話尾數：${maskPhoneLast4(booking.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
+}
+
+export async function notifyReferrerOnBookingInquiry(
+  env: Bindings,
+  booking: { id: number; phone: string | null; token: string | null; referralCode: string | null }
+): Promise<void> {
+  if (!booking.referralCode) return
+
+  const referrer = await first<Referrer>(
+    env.DB,
+    'SELECT * FROM referrers WHERE referral_code = ? AND status = ?',
+    [booking.referralCode, 'active']
+  )
+  if (!referrer || !referrer.phone) return
+
+  try {
+    await sendCloudwapiMessage(env, {
+      phone: referrer.phone,
+      message: buildBookingInquiryNotificationMessage(env, referrer, booking),
+    })
+  } catch (err) {
+    console.error('[referral] booking inquiry notification failed:', err)
+  }
+}

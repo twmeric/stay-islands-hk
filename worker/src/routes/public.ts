@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
 import type { Booking, CmsArticle, Customer, Experience, LeadType, Payment, Property, Retreat, RoomType } from '../db/schema'
 import { all, first, run } from '../lib/db'
-import { notifyReferrerOnLead } from './referral'
+import { notifyReferrerOnLead, notifyReferrerOnBookingInquiry } from './referral'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -345,6 +345,19 @@ app.post('/bookings', async (c) => {
   const booking = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [
     result.meta.last_row_id,
   ])
+
+  // Notify referrer as soon as a referred visitor submits a booking inquiry.
+  // This gives them early momentum before the deal actually closes.
+  if (booking && booking.referralCode) {
+    c.executionCtx.waitUntil(
+      notifyReferrerOnBookingInquiry(c.env, {
+        id: booking.id,
+        phone: phone,
+        token: booking.token,
+        referralCode: booking.referralCode,
+      })
+    )
+  }
 
   return c.json({ data: booking }, 201)
 })

@@ -3533,9 +3533,16 @@ export default function AdminPage() {
                           </td>
                           <td className="px-4 py-3">
                             {b.referralCode ? (
-                              <span className="font-mono text-[#0a4c6b] text-xs">{b.referralCode}</span>
+                              <div className="flex flex-col gap-1">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#B8902F]/10 text-[#B8902F] w-fit">
+                                  轉介
+                                </span>
+                                <span className="font-mono text-[#0a4c6b] text-xs">{b.referralCode}</span>
+                              </div>
                             ) : (
-                              <span className="text-gray-400 text-xs">—</span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 w-fit">
+                                直接
+                              </span>
                             )}
                           </td>
                           <td className="px-4 py-3">
