@@ -114,7 +114,7 @@ async function processInboundWhatsApp(env: Bindings, input: InboundWhatsAppInput
   }
 
   // 5. Referral auto-reply (always sent via CloudWAPI)
-  const referral = await handleReferralWhatsAppMessage(env, normalizedPhone, message)
+  const referral = await handleReferralWhatsAppMessage(env, normalizedPhone, message, input.name)
   let replied = false
 
   if (referral.handled && referral.message) {

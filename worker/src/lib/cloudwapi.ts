@@ -19,29 +19,28 @@ export async function sendCloudwapiMessage(
   env: Bindings,
   { phone, message }: { phone: string; message: string }
 ): Promise<unknown> {
-  const to = normalizePhone(phone)
-  const url = 'https://api.cloudwapi.com/v1/messages'
-  const body = {
-    to,
-    body: message,
-    sender: env.CLOUDWAPI_SENDER,
+  const apiKey = env.CLOUDWAPI_API_KEY
+  if (!apiKey) {
+    throw new Error('CLOUDWAPI_API_KEY not configured')
   }
 
-  console.log(`Would send to CloudWAPI: ${url}`, body)
+  const to = normalizePhone(phone).replace(/\D/g, '')
+  const sender = (env.CLOUDWAPI_SENDER || '85262322466').replace(/\D/g, '')
+  const encodedMessage = encodeURIComponent(message)
+
+  const url = `https://unofficial.cloudwapi.in/send-message?api_key=${apiKey}&sender=${sender}&number=${to}&message=${encodedMessage}`
+  console.log(`Sending to CloudWAPI: ${url.replace(`api_key=${apiKey}`, 'api_key=***')}`)
 
   const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${env.CLOUDWAPI_API_KEY}`,
-    },
-    body: JSON.stringify(body),
+    method: 'GET',
+    headers: { Accept: 'application/json' },
   })
 
-  if (!resp.ok) {
-    const text = await resp.text().catch(() => 'Unknown error')
-    throw new Error(`CloudWAPI request failed: ${resp.status} ${text}`)
+  const result = (await resp.json().catch(() => ({}))) as Record<string, unknown>
+
+  if (result.status !== true && result.status !== 'success') {
+    throw new Error(`CloudWAPI request failed: ${resp.status} ${JSON.stringify(result)}`)
   }
 
-  return resp.json().catch(() => ({}))
+  return result
 }

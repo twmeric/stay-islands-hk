@@ -351,31 +351,60 @@ adminApp.put('/referral-settings', requireAdmin, async (c) => {
 export async function handleReferralWhatsAppMessage(
   env: Bindings,
   phone: string,
-  message: string
+  message: string,
+  name?: string
 ): Promise<{ handled: boolean; message?: string }> {
   if (!message.includes('HKMaldivers')) {
     return { handled: false }
   }
 
-  const match = message.match(REFERRAL_CODE_REGEX)
-  if (!match) {
-    return {
-      handled: true,
-      message: '感謝你的查詢！HK Maldivers 分享夥伴計劃為邀請制，請聯繫我們了解詳情。',
-    }
+  const normalizedPhone = normalizePhone(phone)
+  const now = Math.floor(Date.now() / 1000)
+
+  // 1. If the message includes an existing referral code, look it up first.
+  const codeMatch = message.match(REFERRAL_CODE_REGEX)
+  let referrer: Referrer | null = null
+
+  if (codeMatch) {
+    referrer = await first<Referrer>(
+      env.DB,
+      'SELECT * FROM referrers WHERE referral_code = ? AND status = ?',
+      [codeMatch[0].toUpperCase(), 'active']
+    )
   }
 
-  const code = match[0].toUpperCase()
-  const referrer = await first<Referrer>(
-    env.DB,
-    'SELECT * FROM referrers WHERE referral_code = ? AND status = ?',
-    [code, 'active']
-  )
+  // 2. Otherwise, look up by phone number.
+  if (!referrer) {
+    referrer = await first<Referrer>(
+      env.DB,
+      'SELECT * FROM referrers WHERE phone = ? AND status = ?',
+      [normalizedPhone, 'active']
+    )
+  }
+
+  // 3. If still not found, auto-create a new referrer for this phone.
+  //    This replaces the manual "add new partner" step.
+  if (!referrer) {
+    const code = await ensureUniqueCode(env.DB)
+    const token = await ensureUniqueToken(env.DB)
+
+    const result = await run(
+      env.DB,
+      `INSERT INTO referrers
+        (name, phone, referral_code, token, status, total_referrals, total_commission, paid_commission, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name || '', normalizedPhone, code, token, 'active', 0, 0, 0, now, now]
+    )
+
+    referrer = await first<Referrer>(env.DB, 'SELECT * FROM referrers WHERE id = ?', [
+      result.meta.last_row_id ?? 0,
+    ])
+  }
 
   if (!referrer) {
     return {
       handled: true,
-      message: '感謝你的查詢！此推薦碼不存在或尚未啟用，請聯繫我們了解詳情。',
+      message: '系統暫時無法建立分享夥伴資料，請稍後再試。',
     }
   }
 
