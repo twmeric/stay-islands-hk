@@ -245,7 +245,7 @@ export default function ExperiencesPage() {
       {/* Hero — Desktop */}
       <div className="relative hidden md:flex md:min-h-[600px] md:h-[75vh] items-end justify-center overflow-hidden pb-16">
         <img
-          src="https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=1920&q=80"
+          src="/images/experiences-hero.jpg"
           alt="Maldives ocean activities"
           className="absolute inset-0 w-full h-full object-cover object-[35%_center]"
         />
@@ -262,7 +262,7 @@ export default function ExperiencesPage() {
       <section className="md:hidden min-h-screen flex flex-col bg-[#0d1b2a]">
         <div className="relative h-[55vh] w-full">
           <img
-            src="https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?w=1920&q=80"
+            src="/images/experiences-hero.jpg"
             alt="Maldives ocean activities"
             className="w-full h-full object-cover object-[50%_35%]"
           />
