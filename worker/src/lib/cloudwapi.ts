@@ -17,7 +17,7 @@ export function normalizePhone(phone: string): string {
 
 export async function sendCloudwapiMessage(
   env: Bindings,
-  { phone, message }: { phone: string; message: string }
+  { phone, message, mediaUrl }: { phone: string; message: string; mediaUrl?: string }
 ): Promise<unknown> {
   const apiKey = env.CLOUDWAPI_API_KEY
   if (!apiKey) {
@@ -27,8 +27,10 @@ export async function sendCloudwapiMessage(
   const to = normalizePhone(phone).replace(/\D/g, '')
   const sender = (env.CLOUDWAPI_SENDER || '85262322466').replace(/\D/g, '')
   const encodedMessage = encodeURIComponent(message)
-
-  const url = `https://unofficial.cloudwapi.in/send-message?api_key=${apiKey}&sender=${sender}&number=${to}&message=${encodedMessage}`
+  let url = `https://unofficial.cloudwapi.in/send-message?api_key=${apiKey}&sender=${sender}&number=${to}&message=${encodedMessage}`
+  if (mediaUrl) {
+    url += `&type=media&media_url=${encodeURIComponent(mediaUrl)}`
+  }
   console.log(`Sending to CloudWAPI: ${url.replace(`api_key=${apiKey}`, 'api_key=***')}`)
 
   const resp = await fetch(url, {

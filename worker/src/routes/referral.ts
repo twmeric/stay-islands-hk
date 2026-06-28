@@ -7,6 +7,7 @@ import {
   buildDashboardLink,
   buildQrCodeUrl,
   buildReferralLink,
+  buildReferralPromoMessage,
   buildWhatsAppDeeplink,
   buildWelcomeMessage,
   calculateCommission,
@@ -360,7 +361,7 @@ export async function handleReferralWhatsAppMessage(
   phone: string,
   message: string,
   name?: string
-): Promise<{ handled: boolean; message?: string }> {
+): Promise<{ handled: boolean; message?: string; mediaUrl?: string; followUpMessage?: string }> {
   if (!message.includes('HKMaldivers')) {
     return { handled: false }
   }
@@ -418,6 +419,8 @@ export async function handleReferralWhatsAppMessage(
   return {
     handled: true,
     message: buildWelcomeMessage(env, referrer),
+    mediaUrl: 'https://uploadfile.jkdcoding.com/wapict.jpg',
+    followUpMessage: buildReferralPromoMessage(env, referrer),
   }
 }
 

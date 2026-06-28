@@ -49,9 +49,13 @@ export function buildQrCodeUrl(deeplink: string): string {
 }
 
 export function buildWelcomeMessage(env: Bindings, referrer: Referrer): string {
-  const link = buildReferralLink(env, referrer.referralCode)
   const dashboard = buildDashboardLink(env, referrer.token)
-  return `歡迎成為 HK Maldivers 分享夥伴！\n\n你的專屬連結：\n${link}\n\n朋友透過此連結預約並付款後，你即可獲得回饋。\n\n隨時查看業績：\n${dashboard}`
+  return `歡迎成為 HK Maldivers 分享夥伴！\n\n隨時查看轉介結果：\n${dashboard}\n\n只需朋友透過你的專屬連結預約並付款後，你即可獲得回饋。`
+}
+
+export function buildReferralPromoMessage(env: Bindings, referrer: Referrer): string {
+  const link = buildReferralLink(env, referrer.referralCode)
+  return `🏝️ 厭倦咗香港嘅煩囂？一個按鍵就可以計劃你嘅馬爾代夫夢幻假期！\n\n👉 用我嘅專屬連結預約，不但有專人跟進，仲有額外驚喜安排：\n${link}\n\n📲 快啲入去睇吓靚靚海島住宿同度假套餐，靚檔期先到先得！`
 }
 
 export function buildCommissionNotificationMessage(

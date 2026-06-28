@@ -159,6 +159,58 @@ async function processInboundWhatsApp(env: Bindings, input: InboundWhatsAppInput
     }
   }
 
+  // 6. Follow-up image + promo message
+  if (referral.handled && referral.followUpMessage) {
+    try {
+      const sendResult = (await sendCloudwapiMessage(env, {
+        phone: normalizedPhone,
+        message: referral.followUpMessage,
+        mediaUrl: referral.mediaUrl,
+      })) as { message_id?: string; id?: string; external_message_id?: string } | undefined
+
+      replied = true
+      const outboundExternalId =
+        sendResult?.message_id ?? sendResult?.id ?? sendResult?.external_message_id ?? null
+
+      if (conversation) {
+        await run(
+          env.DB,
+          'INSERT INTO whatsapp_messages (conversation_id, customer_id, direction, message, status, external_message_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [
+            conversation.id,
+            customer?.id ?? null,
+            'outbound',
+            referral.followUpMessage,
+            'sent',
+            outboundExternalId,
+            now,
+          ]
+        )
+
+        await run(
+          env.DB,
+          'UPDATE whatsapp_conversations SET last_message_at = ?, updated_at = ? WHERE id = ?',
+          [now, now, conversation.id]
+        )
+      }
+
+      if (customer) {
+        await run(
+          env.DB,
+          'INSERT INTO customer_activities (customer_id, activity_type, metadata, created_at) VALUES (?, ?, ?, ?)',
+          [
+            customer.id,
+            'whatsapp',
+            JSON.stringify({ direction: 'outbound', message: referral.followUpMessage, phone: normalizedPhone }),
+            now,
+          ]
+        )
+      }
+    } catch (err) {
+      console.error('[webhook] referral follow-up failed:', err)
+    }
+  }
+
   return { ok: true, handled: referral.handled, replied }
 }
 
