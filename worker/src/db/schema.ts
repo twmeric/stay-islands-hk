@@ -102,6 +102,7 @@ export interface Experience {
   duration: string | null
   groupSize: string | null
   includes: string | null // JSON array of strings
+  price: number | null
   priceNote: string | null
   imageUrl: string | null
   iconName: string | null
@@ -111,7 +112,7 @@ export interface Experience {
   updatedAt: number
 }
 
-export interface Retreat {
+export interface Package {
   id: number
   name: string
   nameZh: string
@@ -121,12 +122,36 @@ export interface Retreat {
   duration: string | null
   location: string | null
   audience: string | null
+  inclusions: string | null // JSON array of strings
   itinerary: string | null // JSON array of {day, title, desc}
-  priceNote: string | null
+  pricingOptions: string | null // JSON array of {type: 'shared'|'single', label, price, currency}
+  terms: string | null
   imageUrl: string | null
-  iconName: string | null
+  gallery: string | null // JSON array of URLs
   sortOrder: number
-  status: 'active' | 'inactive'
+  status: string
+  createdAt: number
+  updatedAt: number
+}
+
+export interface PackageBooking {
+  id: number
+  packageId: number
+  customerName: string | null
+  customerEmail: string | null
+  customerPhone: string | null
+  checkIn: number | null
+  occupancy: string | null
+  guests: number
+  totalAmount: number
+  currency: string
+  status: string
+  paymentStatus: string
+  referralCode: string | null
+  token: string | null
+  paymentDeadline: number | null
+  paidAt: number | null
+  adminNotes: string | null
   createdAt: number
   updatedAt: number
 }
@@ -238,7 +263,8 @@ export interface Referrer {
 
 export interface ReferralOrder {
   id: number
-  bookingId: number
+  bookingId: number | null
+  packageBookingId: number | null
   referrerId: number
   orderAmount: number
   commissionAmount: number

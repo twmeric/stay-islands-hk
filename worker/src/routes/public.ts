@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
-import type { Booking, CmsArticle, Customer, Experience, LeadType, Payment, Property, Retreat, RoomType } from '../db/schema'
+import type { Booking, CmsArticle, Customer, Experience, LeadType, Package, PackageBooking, Payment, Property, RoomType } from '../db/schema'
 import { all, first, run } from '../lib/db'
-import { notifyReferrerOnLead, notifyReferrerOnBookingInquiry } from './referral'
+import { notifyReferrerOnLead, notifyReferrerOnBookingInquiry, notifyReferrerOnPackageBooking } from './referral'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -32,7 +32,7 @@ app.get('/properties/:id', async (c) => {
     return c.json({ error: 'Property not found' }, 404)
   }
 
-  const [roomTypes, experiences, retreats] = await Promise.all([
+  const [roomTypes, experiences] = await Promise.all([
     all<RoomType>(
       c.env.DB,
       'SELECT * FROM room_types WHERE property_id = ? AND status = ? ORDER BY price_per_night ASC',
@@ -46,17 +46,9 @@ app.get('/properties/:id', async (c) => {
        ORDER BY e.sort_order ASC, e.created_at DESC`,
       [id, 'active']
     ),
-    all<Retreat>(
-      c.env.DB,
-      `SELECT r.* FROM retreats r
-       INNER JOIN property_retreats pr ON pr.retreat_id = r.id
-       WHERE pr.property_id = ? AND r.status = ?
-       ORDER BY r.sort_order ASC, r.created_at DESC`,
-      [id, 'active']
-    ),
   ])
 
-  return c.json({ data: { ...property, roomTypes, experiences, retreats } })
+  return c.json({ data: { ...property, roomTypes, experiences } })
 })
 
 // GET /api/public/articles
@@ -133,31 +125,31 @@ app.get('/experiences/:slug', async (c) => {
   return c.json({ data: experience })
 })
 
-// GET /api/public/retreats
-app.get('/retreats', async (c) => {
+// GET /api/public/packages
+app.get('/packages', async (c) => {
   const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 200)
   const offset = Math.max(parseInt(c.req.query('offset') || '0', 10), 0)
 
-  const retreats = await all<Retreat>(
+  const packages = await all<Package>(
     c.env.DB,
-    'SELECT * FROM retreats WHERE status = ? ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?',
+    'SELECT * FROM packages WHERE status = ? ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?',
     ['active', limit, offset]
   )
-  return c.json({ data: retreats })
+  return c.json({ data: packages })
 })
 
-// GET /api/public/retreats/:slug
-app.get('/retreats/:slug', async (c) => {
+// GET /api/public/packages/:slug
+app.get('/packages/:slug', async (c) => {
   const slug = c.req.param('slug')
-  const retreat = await first<Retreat>(
+  const pkg = await first<Package>(
     c.env.DB,
-    'SELECT * FROM retreats WHERE slug = ? AND status = ?',
+    'SELECT * FROM packages WHERE slug = ? AND status = ?',
     [slug, 'active']
   )
-  if (!retreat) {
-    return c.json({ error: 'Retreat not found' }, 404)
+  if (!pkg) {
+    return c.json({ error: 'Package not found' }, 404)
   }
-  return c.json({ data: retreat })
+  return c.json({ data: pkg })
 })
 
 // POST /api/public/leads
@@ -374,6 +366,120 @@ app.patch('/bookings/:id/cancel', async (c) => {
 
   const updated = await first<Booking>(c.env.DB, 'SELECT * FROM bookings WHERE id = ?', [id])
   return c.json({ data: updated })
+})
+
+// ---------------------------------------------------------------------------
+// Package bookings
+// ---------------------------------------------------------------------------
+
+type PricingOption = {
+  type: 'shared' | 'single'
+  label: string
+  price: number
+  currency: string
+}
+
+function parsePricingOptions(value: string | null): PricingOption[] {
+  if (!value) return []
+  try {
+    const parsed = JSON.parse(value) as unknown
+    return Array.isArray(parsed) ? (parsed as PricingOption[]) : []
+  } catch {
+    return []
+  }
+}
+
+// POST /api/public/package-bookings
+app.post('/package-bookings', async (c) => {
+  const body = await c.req.json<Record<string, unknown>>()
+
+  const packageId = Number(body.package_id)
+  const name = typeof body.name === 'string' ? body.name.trim() : ''
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+  const phone = typeof body.phone === 'string' ? body.phone.trim() : ''
+  const occupancy = typeof body.occupancy === 'string' ? body.occupancy : ''
+  const guests = Number(body.guests) || 1
+  const referralCode = typeof body.referral_code === 'string' ? body.referral_code.trim().toUpperCase() || null : null
+  const checkIn = toUnixEpoch(body.check_in)
+
+  if (!Number.isFinite(packageId)) return c.json({ error: 'Missing or invalid package_id' }, 400)
+  if (!name) return c.json({ error: 'Missing required field: name' }, 400)
+  if (!email) return c.json({ error: 'Missing required field: email' }, 400)
+  if (!phone) return c.json({ error: 'Missing required field: phone' }, 400)
+  if (!['shared', 'single'].includes(occupancy)) return c.json({ error: 'Invalid occupancy' }, 400)
+  if (checkIn == null) return c.json({ error: 'Missing or invalid check_in' }, 400)
+
+  const pkg = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ? AND status = ?', [
+    packageId,
+    'active',
+  ])
+  if (!pkg) return c.json({ error: 'Package not found' }, 404)
+
+  const pricingOptions = parsePricingOptions(pkg.pricingOptions)
+  const selectedOption = pricingOptions.find((o) => o.type === occupancy)
+  if (!selectedOption) {
+    return c.json({ error: 'No pricing option found for selected occupancy' }, 400)
+  }
+
+  const totalAmount = Number(selectedOption.price) || 0
+  const currency = typeof selectedOption.currency === 'string' ? selectedOption.currency.toUpperCase() : 'USD'
+  const paymentDeadline = Math.floor(Date.now() / 1000) + 48 * 60 * 60 // 48 hours
+  const token = generateToken()
+
+  const result = await run(
+    c.env.DB,
+    `INSERT INTO package_bookings
+      (package_id, customer_name, customer_email, customer_phone, check_in, occupancy, guests, total_amount, currency, status, payment_status, referral_code, token, payment_deadline, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid', ?, ?, ?, unixepoch(), unixepoch())`,
+    [packageId, name, email, phone, checkIn, occupancy, guests, totalAmount, currency, referralCode, token, paymentDeadline]
+  )
+
+  const booking = await first<PackageBooking>(c.env.DB, 'SELECT * FROM package_bookings WHERE id = ?', [
+    result.meta.last_row_id,
+  ])
+
+  // Notify referrer immediately when a package booking inquiry comes in.
+  if (booking && booking.referralCode) {
+    c.executionCtx.waitUntil(
+      notifyReferrerOnPackageBooking(c.env, {
+        packageName: pkg.name,
+        phone: booking.customerPhone,
+        referralCode: booking.referralCode,
+      })
+    )
+  }
+
+  return c.json({ data: booking }, 201)
+})
+
+// GET /api/public/package-bookings/token/:token
+app.get('/package-bookings/token/:token', async (c) => {
+  const token = c.req.param('token')
+  if (!token) return c.json({ error: 'Missing token' }, 400)
+
+  const booking = await first<PackageBooking>(
+    c.env.DB,
+    'SELECT * FROM package_bookings WHERE token = ?',
+    [token]
+  )
+  if (!booking) return c.json({ error: 'Package booking not found' }, 404)
+
+  const pkg = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ?', [booking.packageId])
+
+  let customer = booking.customerEmail
+    ? await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE email = ?', [booking.customerEmail])
+    : null
+
+  // Fallback to the inquiry contact info until the booking is paid and linked to a real customer.
+  if (!customer) {
+    customer = {
+      name: booking.customerName,
+      email: booking.customerEmail || '',
+      phone: booking.customerPhone,
+    } as Customer
+  }
+
+  return c.json({ data: { ...booking, package: pkg, customer } })
 })
 
 export default app

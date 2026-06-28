@@ -21,6 +21,7 @@ export default function Layout() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
             <Link to="/properties" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">海島住宿</Link>
+            <Link to="/packages" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">度假套餐</Link>
             <Link to="/guide" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">旅遊指南</Link>
             <Link to="/experiences" className="text-gray-700 hover:text-[#0a4c6b] transition text-sm font-medium">海島體驗</Link>
             <Link to="/plan" className="text-black hover:text-[#0a4c6b] transition text-sm font-medium">假期諮詢</Link>
@@ -39,6 +40,7 @@ export default function Layout() {
         {mobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-lg px-4 py-4 space-y-3">
             <Link to="/properties" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">海島住宿</Link>
+            <Link to="/packages" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">度假套餐</Link>
             <Link to="/guide" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">旅遊指南</Link>
             <Link to="/experiences" onClick={() => setMobileMenu(false)} className="block text-gray-700 py-2">海島體驗</Link>
             <Link to="/plan" onClick={() => setMobileMenu(false)} className="block text-black py-2">假期諮詢</Link>
@@ -64,6 +66,7 @@ export default function Layout() {
               <h4 className="font-medium mb-3">快速連結</h4>
               <div className="space-y-2 text-sm text-gray-400">
                 <Link to="/properties" className="block hover:text-white transition">海島住宿</Link>
+                <Link to="/packages" className="block hover:text-white transition">度假套餐</Link>
                 <Link to="/plan" className="block hover:text-white transition">假期諮詢</Link>
                 <Link to="/guide" className="block hover:text-white transition">旅遊指南</Link>
                 <Link to="/experiences" className="block hover:text-white transition">海島體驗</Link>

@@ -57,23 +57,6 @@ export interface SeedExperience {
   status: 'active' | 'inactive'
 }
 
-export interface SeedRetreat {
-  name: string
-  nameZh: string
-  slug: string
-  description: string | null
-  descriptionZh: string | null
-  duration: string
-  location: string
-  audience: string
-  itinerary: string
-  priceNote: string
-  imageUrl: string
-  iconName: string
-  sortOrder: number
-  status: 'active' | 'inactive'
-}
-
 const demoProperties: SeedProperty[] = [
   {
     name: 'Stay Mikado',
@@ -355,110 +338,6 @@ const demoExperiences: SeedExperience[] = [
   },
 ]
 
-const demoRetreats: SeedRetreat[] = [
-  {
-    name: 'Yoga & Adventure Retreat',
-    nameZh: '瑜伽與冒險靜修',
-    slug: 'yoga-adventure',
-    description:
-      'Begin each day with sunrise yoga and meditation, spend afternoons snorkeling or exploring uninhabited islands, and unwind under the stars.',
-    descriptionZh:
-      '每日晨間瑜伽、冥想，下午安排浮潛、無人島探險，晚上享受星空下的放鬆。',
-    duration: '8 天 7 晚',
-    location: 'North Malé Atoll',
-    audience: '瑜伽練習者、想要身心平衡的旅客',
-    itinerary: JSON.stringify([
-      { day: 'Day 1', title: '抵達', desc: '迎賓晚餐、日落冥想' },
-      { day: 'Day 2-6', title: '瑜伽與冒險', desc: '晨間瑜伽、活動體驗、自由時間' },
-      { day: 'Day 7', title: '文化與告別', desc: '文化導覽、告別晚宴' },
-      { day: 'Day 8', title: '離島', desc: '帶著平靜的心啟程' },
-    ]),
-    priceNote: '按人數與房型報價',
-    imageUrl:
-      'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80',
-    iconName: 'Leaf',
-    sortOrder: 1,
-    status: 'active',
-  },
-  {
-    name: 'Surf Retreat',
-    nameZh: '衝浪靜修',
-    slug: 'surf',
-    description:
-      'Led by experienced surf coaches, this retreat takes you to the best breaks in the Maldives for learning, practice, and pure wave joy.',
-    descriptionZh:
-      '由經驗豐富的衝浪教練帶領，前往馬爾代夫最佳浪點，學習、練習、享受海浪。',
-    duration: '8 天 7 晚',
-    location: 'South Malé / Central Atolls',
-    audience: '初學者到中級衝浪者',
-    itinerary: JSON.stringify([
-      { day: 'Day 1', title: '適應日', desc: '抵達、浪況介紹、歡迎晚餐' },
-      { day: 'Day 2-4', title: '浪點探索', desc: '每日兩次衝浪、教練指導' },
-      { day: 'Day 5-6', title: '影片分析', desc: '動作檢討、自由衝浪' },
-      { day: 'Day 7', title: '告別派對', desc: '最後一浪、海灘派對' },
-      { day: 'Day 8', title: '離島', desc: '帶著新技巧回家' },
-    ]),
-    priceNote: '按人數與房型報價',
-    imageUrl:
-      'https://images.unsplash.com/photo-1502680390469-be436bb09401?w=800&q=80',
-    iconName: 'Waves',
-    sortOrder: 2,
-    status: 'active',
-  },
-  {
-    name: 'Couple Getaway',
-    nameZh: '浪漫雙人靜修',
-    slug: 'couple',
-    description:
-      'Private sandbank dinners, couples spa, sunset cruises, and uninhabited island picnics — create memories made just for two.',
-    descriptionZh:
-      '私人沙洲晚餐、雙人 SPA、日落巡航、無人島野餐，為兩人創造專屬回憶。',
-    duration: '8 天 7 晚',
-    location: 'North Malé Atoll',
-    audience: '情侶、蜜月、週年紀念',
-    itinerary: JSON.stringify([
-      { day: 'Day 1', title: '浪漫抵達', desc: '房型浪漫布置、迎賓香檳' },
-      { day: 'Day 2', title: '沙洲燭光晚餐', desc: '私人沙洲、專屬廚師' },
-      { day: 'Day 3', title: '浮潛共游', desc: '與海龜和熱帶魚共游' },
-      { day: 'Day 4', title: '雙人 SPA', desc: '海邊療程、放鬆身心' },
-      { day: 'Day 5', title: '日落巡航', desc: '私人遊艇、海豚相伴' },
-      { day: 'Day 6-7', title: '自由時光', desc: '無人島野餐、星空電影' },
-      { day: 'Day 8', title: '離島', desc: '帶著回憶啟程' },
-    ]),
-    priceNote: '按人數與房型報價',
-    imageUrl:
-      'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80',
-    iconName: 'Heart',
-    sortOrder: 3,
-    status: 'active',
-  },
-  {
-    name: 'Fishing Package',
-    nameZh: '釣魚套餐',
-    slug: 'fishing',
-    description:
-      'From traditional night fishing to professional big-game fishing, local fishermen guide you to the best spots for an authentic Maldivian ocean experience.',
-    descriptionZh:
-      '從傳統夜釣到專業海釣，由當地漁夫帶領前往最佳釣點，體驗馬爾代夫的海洋文化。',
-    duration: '10 天 9 晚',
-    location: '多個環礁',
-    audience: '釣魚愛好者、團體',
-    itinerary: JSON.stringify([
-      { day: 'Day 1-2', title: '夜釣體驗', desc: '傳統釣法、船上晚餐' },
-      { day: 'Day 3-5', title: '礁釣', desc: '環礁釣點、多樣魚種' },
-      { day: 'Day 6-8', title: '深海釣', desc: '大魚挑戰、專業裝備' },
-      { day: 'Day 9', title: '魚獲烹飪', desc: '主廚料理、本地島嶼探訪' },
-      { day: 'Day 10', title: '離島', desc: '滿載回憶與故事' },
-    ]),
-    priceNote: '按人數與房型報價',
-    imageUrl:
-      'https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80',
-    iconName: 'Fish',
-    sortOrder: 4,
-    status: 'active',
-  },
-]
-
 function lagoonVilla(
   basePrice: number,
   overrides: Partial<Omit<SeedRoomType, 'propertyId' | 'name' | 'nameZh' | 'description' | 'descriptionZh' | 'pricePerNight' | 'maxGuests' | 'inventory' | 'imageUrl' | 'amenities' | 'status'>> = {}
@@ -642,43 +521,8 @@ async function seedExperiences(db: D1Database): Promise<void> {
   }
 }
 
-async function seedRetreats(db: D1Database): Promise<void> {
-  const check = await db
-    .prepare('SELECT COUNT(*) as count FROM retreats')
-    .first<{ count: number }>()
-  if (check && check.count > 0) {
-    return
-  }
-
-  for (const retreat of demoRetreats) {
-    await run(
-      db,
-      `INSERT OR IGNORE INTO retreats
-        (name, name_zh, slug, description, description_zh, duration, location, audience, itinerary, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
-      [
-        retreat.name,
-        retreat.nameZh,
-        retreat.slug,
-        retreat.description,
-        retreat.descriptionZh,
-        retreat.duration,
-        retreat.location,
-        retreat.audience,
-        retreat.itinerary,
-        retreat.priceNote,
-        retreat.imageUrl,
-        retreat.iconName,
-        retreat.sortOrder,
-        retreat.status,
-      ]
-    )
-  }
-}
-
 export async function seedDatabase(db: D1Database): Promise<void> {
   await seedAdmin(db)
   await seedPropertiesAndRoomTypes(db)
   await seedExperiences(db)
-  await seedRetreats(db)
 }

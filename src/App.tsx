@@ -6,7 +6,9 @@ import HomePage from './pages/HomePage';
 import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailPage from './pages/PropertyDetailPage';
 import ExperiencesPage from './pages/ExperiencesPage';
-import RetreatsPage from './pages/RetreatsPage';
+import PackagesPage from './pages/PackagesPage';
+import PackageDetailPage from './pages/PackageDetailPage';
+import PackageOrderPage from './pages/PackageOrderPage';
 import TripPlannerPage from './pages/TripPlannerPage';
 import GuidePage from './pages/GuidePage';
 import PlanPage from './pages/PlanPage';
@@ -69,7 +71,9 @@ export default function App() {
           <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/properties/:id" element={<PropertyDetailPage />} />
           <Route path="/experiences" element={<ExperiencesPage />} />
-          <Route path="/retreats" element={<RetreatsPage />} />
+          <Route path="/packages" element={<PackagesPage />} />
+          <Route path="/packages/:slug" element={<PackageDetailPage />} />
+          <Route path="/package-order/:token" element={<PackageOrderPage />} />
           <Route path="/guide" element={<GuidePage />} />
           <Route path="/plan" element={<PlanPage />} />
           <Route path="/invest" element={<Navigate to="/plan" replace />} />

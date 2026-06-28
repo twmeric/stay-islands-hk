@@ -99,11 +99,14 @@ publicApp.get('/dashboard/:token', async (c) => {
     "SELECT COUNT(*) as count FROM referral_orders WHERE referrer_id = ?",
     [referrer.id]
   )
-  const recentOrders = await all<ReferralOrder & { booking_token: string | null }>(
+  const recentOrders = await all<
+    ReferralOrder & { booking_token: string | null; package_booking_token: string | null }
+  >(
     c.env.DB,
-    `SELECT ro.*, b.token as booking_token
+    `SELECT ro.*, b.token as booking_token, pb.token as package_booking_token
      FROM referral_orders ro
      LEFT JOIN bookings b ON b.id = ro.booking_id
+     LEFT JOIN package_bookings pb ON pb.id = ro.package_booking_id
      WHERE ro.referrer_id = ?
      ORDER BY ro.created_at DESC
      LIMIT 20`,
@@ -121,7 +124,8 @@ publicApp.get('/dashboard/:token', async (c) => {
       paidCommission: paid?.total ?? 0,
       recentOrders: recentOrders.map((o) => ({
         bookingId: o.bookingId,
-        bookingToken: o.booking_token,
+        packageBookingId: o.packageBookingId,
+        orderToken: o.booking_token || o.package_booking_token,
         orderAmount: o.orderAmount,
         commissionAmount: o.commissionAmount,
         status: o.status,
@@ -256,12 +260,15 @@ adminApp.get('/referral-orders', requireAdmin, async (c) => {
     params.push(status)
   }
 
-  const orders = await all<ReferralOrder & { referrer_name: string; booking_token: string | null }>(
+  const orders = await all<
+    ReferralOrder & { referrer_name: string; booking_token: string | null; package_booking_token: string | null }
+  >(
     c.env.DB,
-    `SELECT ro.*, r.name as referrer_name, b.token as booking_token
+    `SELECT ro.*, r.name as referrer_name, b.token as booking_token, pb.token as package_booking_token
      FROM referral_orders ro
      LEFT JOIN referrers r ON r.id = ro.referrer_id
      LEFT JOIN bookings b ON b.id = ro.booking_id
+     LEFT JOIN package_bookings pb ON pb.id = ro.package_booking_id
      ${where}
      ORDER BY ro.created_at DESC
      LIMIT ? OFFSET ?`,
@@ -490,5 +497,41 @@ export async function notifyReferrerOnBookingInquiry(
     })
   } catch (err) {
     console.error('[referral] booking inquiry notification failed:', err)
+  }
+}
+
+// ============================================================================
+// Package booking inquiry notification
+// ============================================================================
+
+export function buildPackageBookingNotificationMessage(
+  env: Bindings,
+  referrer: Referrer,
+  booking: { packageName: string; phone: string | null }
+): string {
+  const link = buildReferralLink(env, referrer.referralCode)
+  return `🎉 好消息！你推薦的朋友已經提交了一個度假套餐查詢，我們正在跟進中。\n\n套餐：${booking.packageName}\n聯絡電話尾數：${maskPhoneLast4(booking.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
+}
+
+export async function notifyReferrerOnPackageBooking(
+  env: Bindings,
+  booking: { packageName: string; phone: string | null; referralCode: string | null }
+): Promise<void> {
+  if (!booking.referralCode) return
+
+  const referrer = await first<Referrer>(
+    env.DB,
+    'SELECT * FROM referrers WHERE referral_code = ? AND status = ?',
+    [booking.referralCode, 'active']
+  )
+  if (!referrer || !referrer.phone) return
+
+  try {
+    await sendCloudwapiMessage(env, {
+      phone: referrer.phone,
+      message: buildPackageBookingNotificationMessage(env, referrer, booking),
+    })
+  } catch (err) {
+    console.error('[referral] package booking notification failed:', err)
   }
 }

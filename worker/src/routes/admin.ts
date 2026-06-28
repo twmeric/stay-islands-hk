@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import bcryptjs from 'bcryptjs'
 import type { Bindings, Variables } from '../types'
 import { all, first, run } from '../lib/db'
-import { createReferralOrderAndNotify } from '../lib/referral'
+import { createReferralOrderAndNotify, createReferralOrderForPackageBookingAndNotify } from '../lib/referral'
 import {
   requireAdmin,
   requireRole,
@@ -25,11 +25,12 @@ import type {
   Lead,
   LeadStatus,
   LeadType,
+  Package,
+  PackageBooking,
   Payment,
   PaymentGateway,
   Property,
   PropertyStatus,
-  Retreat,
   RoomType,
   RoomTypeStatus,
   TransactionStatus,
@@ -292,7 +293,7 @@ app.get('/properties/:id', requireAdmin, async (c) => {
   const property = await first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [id])
   if (!property) return c.json({ error: 'Property not found' }, 404)
 
-  const [roomTypes, experiences, retreats] = await Promise.all([
+  const [roomTypes, experiences] = await Promise.all([
     all<RoomType>(
       c.env.DB,
       'SELECT * FROM room_types WHERE property_id = ? ORDER BY price_per_night ASC',
@@ -306,16 +307,8 @@ app.get('/properties/:id', requireAdmin, async (c) => {
        ORDER BY e.sort_order ASC, e.created_at DESC`,
       [id, 'active']
     ),
-    all<Retreat>(
-      c.env.DB,
-      `SELECT r.* FROM retreats r
-       INNER JOIN property_retreats pr ON pr.retreat_id = r.id
-       WHERE pr.property_id = ? AND r.status = ?
-       ORDER BY r.sort_order ASC, r.created_at DESC`,
-      [id, 'active']
-    ),
   ])
-  return c.json({ data: { ...property, roomTypes, experiences, retreats } })
+  return c.json({ data: { ...property, roomTypes, experiences } })
 })
 
 // PUT /api/admin/properties/:id/experiences — replace linked experiences list
@@ -351,41 +344,6 @@ app.put('/properties/:id/experiences', requireAdmin, async (c) => {
   })
 
   return c.json({ data: { propertyId: id, experienceIds: ids } })
-})
-
-// PUT /api/admin/properties/:id/retreats — replace linked retreats list
-app.put('/properties/:id/retreats', requireAdmin, async (c) => {
-  const id = Number(c.req.param('id'))
-  if (!Number.isFinite(id)) return c.json({ error: 'Invalid property id' }, 400)
-
-  const property = await first<Property>(c.env.DB, 'SELECT * FROM properties WHERE id = ?', [id])
-  if (!property) return c.json({ error: 'Property not found' }, 404)
-
-  const body = await c.req.json<Record<string, unknown>>()
-  const ids = Array.isArray(body.retreatIds)
-    ? body.retreatIds.map((v) => Number(v)).filter(Number.isFinite)
-    : []
-
-  await run(c.env.DB, 'DELETE FROM property_retreats WHERE property_id = ?', [id])
-  if (ids.length > 0) {
-    const placeholders = ids.map(() => '(?, ?, unixepoch())').join(', ')
-    await run(
-      c.env.DB,
-      `INSERT INTO property_retreats (property_id, retreat_id, created_at) VALUES ${placeholders}`,
-      ids.flatMap((retreatId) => [id, retreatId])
-    )
-  }
-
-  await logAudit(c.env.DB, {
-    adminId: c.get('adminId') ?? null,
-    action: 'update_retreats',
-    targetTable: 'property_retreats',
-    targetId: id,
-    after: { retreatIds: ids },
-    ip: c.req.header('CF-Connecting-IP') ?? null,
-  })
-
-  return c.json({ data: { propertyId: id, retreatIds: ids } })
 })
 
 app.post('/properties', requireAdmin, async (c) => {
@@ -806,8 +764,8 @@ app.post('/experiences', requireAdmin, async (c) => {
   const result = await run(
     c.env.DB,
     `INSERT INTO experiences
-      (name, name_zh, slug, description, description_zh, duration, group_size, includes, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+      (name, name_zh, slug, description, description_zh, duration, group_size, includes, price, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       name,
       nameZh,
@@ -817,6 +775,7 @@ app.post('/experiences', requireAdmin, async (c) => {
       typeof body.duration === 'string' ? body.duration.trim() || null : null,
       typeof body.groupSize === 'string' ? body.groupSize.trim() || null : null,
       toJson(body.includes),
+      body.price !== undefined && body.price !== null ? Number(body.price) : null,
       typeof body.priceNote === 'string' ? body.priceNote.trim() || null : null,
       typeof body.imageUrl === 'string' ? body.imageUrl.trim() || null : null,
       typeof body.iconName === 'string' ? body.iconName.trim() || null : null,
@@ -857,6 +816,7 @@ app.put('/experiences/:id', requireAdmin, async (c) => {
     duration: 'duration',
     groupSize: 'group_size',
     includes: 'includes',
+    price: 'price',
     priceNote: 'price_note',
     imageUrl: 'image_url',
     iconName: 'icon_name',
@@ -874,6 +834,8 @@ app.put('/experiences/:id', requireAdmin, async (c) => {
         values.push(toJson(body[key]))
       } else if (key === 'sortOrder') {
         values.push(Number(body[key]) || 0)
+      } else if (key === 'price') {
+        values.push(body[key] !== null ? Number(body[key]) : null)
       } else if (key === 'status') {
         const s = String(body[key])
         if (!validExperienceStatuses.includes(s)) {
@@ -928,43 +890,49 @@ app.delete('/experiences/:id', requireAdmin, async (c) => {
 })
 
 // ============================================================================
-// Retreats
+// Packages
 // ============================================================================
 
-const validRetreatStatuses = ['active', 'inactive']
+const validPackageStatuses = ['active', 'inactive']
 
-app.get('/retreats', requireAdmin, async (c) => {
+app.get('/packages', requireAdmin, async (c) => {
+  const search = c.req.query('search')?.trim()
   const status = c.req.query('status')
   const limit = Math.min(parseIntParam(c.req.query('limit'), 100), 200)
   const offset = Math.max(parseIntParam(c.req.query('offset'), 0), 0)
 
   let where = 'WHERE 1=1'
   const params: unknown[] = []
-  if (status && validRetreatStatuses.includes(status)) {
+
+  if (search) {
+    where += ' AND (name LIKE ? OR name_zh LIKE ? OR slug LIKE ?)'
+    const like = `%${search}%`
+    params.push(like, like, like)
+  }
+  if (status && validPackageStatuses.includes(status)) {
     where += ' AND status = ?'
     params.push(status)
   }
 
-  const retreats = await all<Retreat>(
+  const packages = await all<Package>(
     c.env.DB,
-    `SELECT * FROM retreats ${where} ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?`,
+    `SELECT * FROM packages ${where} ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?`,
     [...params, limit, offset]
   )
-
-  const countRow = await first<{ count: number }>(c.env.DB, `SELECT COUNT(*) as count FROM retreats ${where}`, params)
-  return c.json({ data: retreats, total: countRow?.count ?? 0 })
+  const countRow = await first<{ count: number }>(c.env.DB, `SELECT COUNT(*) as count FROM packages ${where}`, params)
+  return c.json({ data: packages, total: countRow?.count ?? 0 })
 })
 
-app.get('/retreats/:id', requireAdmin, async (c) => {
+app.get('/packages/:id', requireAdmin, async (c) => {
   const id = Number(c.req.param('id'))
-  if (!Number.isFinite(id)) return c.json({ error: 'Invalid retreat id' }, 400)
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid package id' }, 400)
 
-  const retreat = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [id])
-  if (!retreat) return c.json({ error: 'Retreat not found' }, 404)
-  return c.json({ data: retreat })
+  const pkg = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ?', [id])
+  if (!pkg) return c.json({ error: 'Package not found' }, 404)
+  return c.json({ data: pkg })
 })
 
-app.post('/retreats', requireAdmin, async (c) => {
+app.post('/packages', requireAdmin, async (c) => {
   const body = await c.req.json<Record<string, unknown>>()
   const name = typeof body.name === 'string' ? body.name.trim() : ''
   const nameZh = typeof body.nameZh === 'string' ? body.nameZh.trim() : ''
@@ -973,13 +941,13 @@ app.post('/retreats', requireAdmin, async (c) => {
     return c.json({ error: 'Missing required fields: name, nameZh, slug' }, 400)
   }
 
-  const status = validRetreatStatuses.includes(String(body.status)) ? String(body.status) : 'active'
+  const status = validPackageStatuses.includes(String(body.status)) ? String(body.status) : 'active'
 
   const result = await run(
     c.env.DB,
-    `INSERT INTO retreats
-      (name, name_zh, slug, description, description_zh, duration, location, audience, itinerary, price_note, image_url, icon_name, sort_order, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+    `INSERT INTO packages
+      (name, name_zh, slug, description, description_zh, duration, location, audience, inclusions, itinerary, pricing_options, terms, image_url, gallery, sort_order, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
     [
       name,
       nameZh,
@@ -989,34 +957,36 @@ app.post('/retreats', requireAdmin, async (c) => {
       typeof body.duration === 'string' ? body.duration.trim() || null : null,
       typeof body.location === 'string' ? body.location.trim() || null : null,
       typeof body.audience === 'string' ? body.audience.trim() || null : null,
+      toJson(body.inclusions),
       toJson(body.itinerary),
-      typeof body.priceNote === 'string' ? body.priceNote.trim() || null : null,
+      toJson(body.pricingOptions),
+      typeof body.terms === 'string' ? body.terms.trim() || null : null,
       typeof body.imageUrl === 'string' ? body.imageUrl.trim() || null : null,
-      typeof body.iconName === 'string' ? body.iconName.trim() || null : null,
+      toJson(body.gallery),
       Number(body.sortOrder) || 0,
       status,
     ]
   )
 
-  const retreat = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [result.meta.last_row_id])
+  const pkg = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ?', [result.meta.last_row_id])
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
     action: 'create',
-    targetTable: 'retreats',
+    targetTable: 'packages',
     targetId: result.meta.last_row_id,
-    after: retreat as unknown as Record<string, unknown>,
+    after: pkg as unknown as Record<string, unknown>,
     ip: c.req.header('CF-Connecting-IP') ?? null,
   })
 
-  return c.json({ data: retreat }, 201)
+  return c.json({ data: pkg }, 201)
 })
 
-app.put('/retreats/:id', requireAdmin, async (c) => {
+app.put('/packages/:id', requireAdmin, async (c) => {
   const id = Number(c.req.param('id'))
-  if (!Number.isFinite(id)) return c.json({ error: 'Invalid retreat id' }, 400)
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid package id' }, 400)
 
-  const existing = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [id])
-  if (!existing) return c.json({ error: 'Retreat not found' }, 404)
+  const existing = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Package not found' }, 404)
 
   const body = await c.req.json<Record<string, unknown>>()
   const fieldMap: Record<string, string> = {
@@ -1028,10 +998,12 @@ app.put('/retreats/:id', requireAdmin, async (c) => {
     duration: 'duration',
     location: 'location',
     audience: 'audience',
+    inclusions: 'inclusions',
     itinerary: 'itinerary',
-    priceNote: 'price_note',
+    pricingOptions: 'pricing_options',
+    terms: 'terms',
     imageUrl: 'image_url',
-    iconName: 'icon_name',
+    gallery: 'gallery',
     sortOrder: 'sort_order',
     status: 'status',
   }
@@ -1042,13 +1014,13 @@ app.put('/retreats/:id', requireAdmin, async (c) => {
   for (const [key, dbKey] of Object.entries(fieldMap)) {
     if (body[key] !== undefined) {
       fields.push(`${dbKey} = ?`)
-      if (['itinerary'].includes(key)) {
+      if (['inclusions', 'itinerary', 'pricingOptions', 'gallery'].includes(key)) {
         values.push(toJson(body[key]))
       } else if (key === 'sortOrder') {
         values.push(Number(body[key]) || 0)
       } else if (key === 'status') {
         const s = String(body[key])
-        if (!validRetreatStatuses.includes(s)) {
+        if (!validPackageStatuses.includes(s)) {
           return c.json({ error: 'Invalid status' }, 400)
         }
         values.push(s)
@@ -1063,13 +1035,13 @@ app.put('/retreats/:id', requireAdmin, async (c) => {
   fields.push('updated_at = unixepoch()')
   values.push(id)
 
-  await run(c.env.DB, `UPDATE retreats SET ${fields.join(', ')} WHERE id = ?`, values)
-  const updated = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [id])
+  await run(c.env.DB, `UPDATE packages SET ${fields.join(', ')} WHERE id = ?`, values)
+  const updated = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ?', [id])
 
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
     action: 'update',
-    targetTable: 'retreats',
+    targetTable: 'packages',
     targetId: id,
     before: existing as unknown as Record<string, unknown>,
     after: updated as unknown as Record<string, unknown>,
@@ -1079,18 +1051,210 @@ app.put('/retreats/:id', requireAdmin, async (c) => {
   return c.json({ data: updated })
 })
 
-app.delete('/retreats/:id', requireAdmin, async (c) => {
+app.delete('/packages/:id', requireAdmin, async (c) => {
   const id = Number(c.req.param('id'))
-  if (!Number.isFinite(id)) return c.json({ error: 'Invalid retreat id' }, 400)
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid package id' }, 400)
 
-  const existing = await first<Retreat>(c.env.DB, 'SELECT * FROM retreats WHERE id = ?', [id])
-  if (!existing) return c.json({ error: 'Retreat not found' }, 404)
+  const existing = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Package not found' }, 404)
 
-  await run(c.env.DB, 'DELETE FROM retreats WHERE id = ?', [id])
+  await run(c.env.DB, 'DELETE FROM packages WHERE id = ?', [id])
   await logAudit(c.env.DB, {
     adminId: c.get('adminId') ?? null,
     action: 'delete',
-    targetTable: 'retreats',
+    targetTable: 'packages',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: { ok: true } })
+})
+
+// ============================================================================
+// Package Bookings
+// ============================================================================
+
+async function ensureCustomerForPackageBooking(
+  db: D1Database,
+  booking: PackageBooking
+): Promise<Customer | null> {
+  if (!booking.customerEmail) return null
+
+  let customer = await first<Customer>(db, 'SELECT * FROM customers WHERE email = ?', [
+    booking.customerEmail,
+  ])
+  if (!customer) {
+    const result = await run(
+      db,
+      'INSERT INTO customers (name, email, phone, created_at, updated_at) VALUES (?, ?, ?, unixepoch(), unixepoch())',
+      [booking.customerName ?? null, booking.customerEmail, booking.customerPhone ?? null]
+    )
+    customer = await first<Customer>(db, 'SELECT * FROM customers WHERE id = ?', [
+      result.meta.last_row_id ?? 0,
+    ])
+  }
+
+  return customer
+}
+
+const validPackageBookingStatuses = ['pending', 'confirmed', 'cancelled', 'completed']
+
+app.get('/package-bookings', requireAdmin, async (c) => {
+  const status = c.req.query('status')
+  const packageId = c.req.query('package_id')
+  const search = c.req.query('search')?.trim()
+  const limit = Math.min(parseIntParam(c.req.query('limit'), 20), 100)
+  const offset = Math.max(parseIntParam(c.req.query('offset'), 0), 0)
+
+  const params: unknown[] = []
+  let where = 'WHERE 1=1'
+
+  if (status) {
+    where += ' AND pb.status = ?'
+    params.push(status)
+  }
+  if (packageId) {
+    where += ' AND pb.package_id = ?'
+    params.push(Number(packageId))
+  }
+  if (search) {
+    where += ` AND (
+      pb.id = ?
+      OR pb.customer_name LIKE ?
+      OR pb.customer_email LIKE ?
+      OR pb.customer_phone LIKE ?
+    )`
+    const like = `%${search}%`
+    params.push(Number(search) || 0, like, like, like)
+  }
+
+  const bookings = await all<PackageBooking & { package_name: string }>(
+    c.env.DB,
+    `SELECT pb.*, p.name as package_name
+     FROM package_bookings pb
+     LEFT JOIN packages p ON p.id = pb.package_id
+     ${where}
+     ORDER BY pb.created_at DESC LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
+  )
+  const countRow = await first<{ count: number }>(
+    c.env.DB,
+    `SELECT COUNT(*) as count FROM package_bookings pb ${where}`,
+    params
+  )
+  return c.json({ data: bookings, total: countRow?.count ?? 0 })
+})
+
+app.get('/package-bookings/:id', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid package booking id' }, 400)
+
+  const booking = await first<PackageBooking>(c.env.DB, 'SELECT * FROM package_bookings WHERE id = ?', [id])
+  if (!booking) return c.json({ error: 'Package booking not found' }, 404)
+
+  const pkg = await first<Package>(c.env.DB, 'SELECT * FROM packages WHERE id = ?', [booking.packageId])
+
+  let customer = booking.customerEmail
+    ? await first<Customer>(c.env.DB, 'SELECT * FROM customers WHERE email = ?', [booking.customerEmail])
+    : null
+
+  if (!customer) {
+    customer = {
+      name: booking.customerName,
+      email: booking.customerEmail || '',
+      phone: booking.customerPhone,
+    } as Customer
+  }
+
+  return c.json({ data: { ...booking, package: pkg, customer } })
+})
+
+app.patch('/package-bookings/:id/status', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid package booking id' }, 400)
+
+  const body = await c.req.json<{ status?: unknown }>()
+  const status = typeof body.status === 'string' ? body.status : ''
+  if (!validPackageBookingStatuses.includes(status)) {
+    return c.json({ error: 'Invalid status' }, 400)
+  }
+
+  const existing = await first<PackageBooking>(c.env.DB, 'SELECT * FROM package_bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Package booking not found' }, 404)
+
+  await run(c.env.DB, 'UPDATE package_bookings SET status = ?, updated_at = unixepoch() WHERE id = ?', [
+    status,
+    id,
+  ])
+  const updated = await first<PackageBooking>(c.env.DB, 'SELECT * FROM package_bookings WHERE id = ?', [id])
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'update_status',
+    targetTable: 'package_bookings',
+    targetId: id,
+    before: { status: existing.status },
+    after: { status: updated?.status },
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+// PATCH /api/admin/package-bookings/:id/mark-paid - mark package booking as paid manually
+app.patch('/package-bookings/:id/mark-paid', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid package booking id' }, 400)
+
+  const existing = await first<PackageBooking>(c.env.DB, 'SELECT * FROM package_bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Package booking not found' }, 404)
+
+  const now = Math.floor(Date.now() / 1000)
+
+  await run(
+    c.env.DB,
+    `UPDATE package_bookings SET payment_status = 'paid', paid_at = ?, updated_at = unixepoch() WHERE id = ?`,
+    [now, id]
+  )
+
+  const updated = await first<PackageBooking>(c.env.DB, 'SELECT * FROM package_bookings WHERE id = ?', [id])
+
+  if (updated && updated.paymentStatus === 'paid') {
+    await ensureCustomerForPackageBooking(c.env.DB, updated)
+    await createReferralOrderForPackageBookingAndNotify(c.env, {
+      id: updated.id,
+      token: updated.token,
+      totalAmount: updated.totalAmount,
+      referralCode: updated.referralCode,
+    })
+  }
+
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'mark_paid',
+    targetTable: 'package_bookings',
+    targetId: id,
+    before: existing as unknown as Record<string, unknown>,
+    after: updated as unknown as Record<string, unknown>,
+    ip: c.req.header('CF-Connecting-IP') ?? null,
+  })
+
+  return c.json({ data: updated })
+})
+
+app.delete('/package-bookings/:id', requireAdmin, async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!Number.isFinite(id)) return c.json({ error: 'Invalid package booking id' }, 400)
+
+  const existing = await first<PackageBooking>(c.env.DB, 'SELECT * FROM package_bookings WHERE id = ?', [id])
+  if (!existing) return c.json({ error: 'Package booking not found' }, 404)
+
+  await run(c.env.DB, 'DELETE FROM package_bookings WHERE id = ?', [id])
+  await logAudit(c.env.DB, {
+    adminId: c.get('adminId') ?? null,
+    action: 'delete',
+    targetTable: 'package_bookings',
     targetId: id,
     before: existing as unknown as Record<string, unknown>,
     ip: c.req.header('CF-Connecting-IP') ?? null,

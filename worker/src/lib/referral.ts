@@ -146,3 +146,60 @@ export async function createReferralOrderAndNotify(
     console.error('[referral] commission notification failed:', err)
   }
 }
+
+export async function createReferralOrderForPackageBookingAndNotify(
+  env: Bindings,
+  packageBooking: {
+    id: number
+    token: string | null
+    totalAmount: number
+    referralCode: string | null
+  }
+): Promise<void> {
+  if (!packageBooking.referralCode) return
+
+  const referrer = await first<Referrer>(
+    env.DB,
+    'SELECT * FROM referrers WHERE referral_code = ? AND status = ?',
+    [packageBooking.referralCode, 'active']
+  )
+  if (!referrer) return
+
+  const existing = await first<{ count: number }>(
+    env.DB,
+    'SELECT COUNT(*) as count FROM referral_orders WHERE package_booking_id = ?',
+    [packageBooking.id]
+  )
+  if (existing && existing.count > 0) return
+
+  const rules = await getReferralSettings(env.DB)
+  const commission = calculateCommission(packageBooking.totalAmount, rules)
+
+  await run(
+    env.DB,
+    `INSERT INTO referral_orders
+      (package_booking_id, referrer_id, order_amount, commission_amount, currency, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())`,
+    [packageBooking.id, referrer.id, packageBooking.totalAmount, commission, rules.currency, 'pending']
+  )
+
+  await run(
+    env.DB,
+    `UPDATE referrers SET
+      total_referrals = total_referrals + 1,
+      total_commission = total_commission + ?,
+      updated_at = unixepoch()
+      WHERE id = ?`,
+    [commission, referrer.id]
+  )
+
+  const { sendCloudwapiMessage } = await import('./cloudwapi')
+  try {
+    await sendCloudwapiMessage(env, {
+      phone: referrer.phone || '',
+      message: buildCommissionNotificationMessage(env, referrer, packageBooking.token, packageBooking.totalAmount, commission),
+    })
+  } catch (err) {
+    console.error('[referral] package booking commission notification failed:', err)
+  }
+}

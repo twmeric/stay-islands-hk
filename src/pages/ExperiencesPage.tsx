@@ -11,6 +11,7 @@ interface Experience {
   groupSize: string;
   includes: string[];
   description: string;
+  price?: number | null;
   priceNote: string;
   image: string;
   icon: React.ReactNode;
@@ -27,6 +28,7 @@ interface ApiExperience {
   duration: string;
   groupSize: string;
   includes: string;
+  price: number | null;
   priceNote: string;
   imageUrl: string;
   iconName: string | null;
@@ -170,6 +172,7 @@ function mapApiExperience(item: ApiExperience): Experience {
     groupSize: item.groupSize,
     includes: safeJsonParse<string[]>(item.includes, []),
     description: item.description,
+    price: item.price,
     priceNote: item.priceNote,
     image: item.imageUrl,
     icon: getIconByName(item.iconName),
@@ -359,7 +362,7 @@ export default function ExperiencesPage() {
                       <span>{exp.nameZh || exp.name}</span>
                     </div>
                     <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-[#0a4c6b]">
-                      {exp.priceNote}
+                      {exp.price != null ? `HK$${exp.price.toLocaleString()}` : exp.priceNote}
                     </div>
                   </div>
                   <div className="p-6">

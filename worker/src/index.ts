@@ -19,24 +19,20 @@ app.onError(errorHandler)
 
 // Auto-seed demo data if any core content table is empty.
 // seedDatabase() internally skips tables that already have rows, so this
-// ensures new tables (e.g. experiences, retreats) are backfilled on existing DBs.
+// ensures new tables are backfilled on existing DBs.
 app.use('*', async (c, next) => {
   try {
-    const [properties, experiences, retreats] = await Promise.all([
+    const [properties, experiences] = await Promise.all([
       c.env.DB
         .prepare('SELECT COUNT(*) as count FROM properties')
         .first<{ count: number }>(),
       c.env.DB
         .prepare('SELECT COUNT(*) as count FROM experiences')
         .first<{ count: number }>(),
-      c.env.DB
-        .prepare('SELECT COUNT(*) as count FROM retreats')
-        .first<{ count: number }>(),
     ])
     const needsSeed =
       (properties && properties.count === 0) ||
-      (experiences && experiences.count === 0) ||
-      (retreats && retreats.count === 0)
+      (experiences && experiences.count === 0)
     if (needsSeed) {
       await seedDatabase(c.env.DB)
     }

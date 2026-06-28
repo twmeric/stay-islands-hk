@@ -6,6 +6,7 @@ import DashboardSection from '../components/admin/DashboardSection';
 import CustomersSection from '../components/admin/CustomersSection';
 import LeadsSection from '../components/admin/LeadsSection';
 import PaymentsSection from '../components/admin/PaymentsSection';
+import PackagesSection from '../components/admin/PackagesSection';
 import {
   Anchor,
   Compass,
@@ -58,6 +59,7 @@ interface Experience {
   duration: string | null;
   groupSize: string | null;
   includes: string | null;
+  price: number | null;
   priceNote: string | null;
   imageUrl: string | null;
   iconName: string | null;
@@ -138,6 +140,7 @@ interface ExperienceFormState {
   duration: string;
   groupSize: string;
   includesText: string;
+  price: string;
   priceNote: string;
   imageUrl: string;
   iconName: string;
@@ -298,6 +301,7 @@ function ExperiencesSection() {
     duration: '',
     groupSize: '',
     includesText: '',
+    price: '',
     priceNote: '',
     imageUrl: '',
     iconName: 'Compass',
@@ -346,6 +350,7 @@ function ExperiencesSection() {
       duration: item.duration || '',
       groupSize: item.groupSize || '',
       includesText: arrayToLines(safeJsonParse<string[]>(item.includes, [])),
+      price: item.price != null ? String(item.price) : '',
       priceNote: item.priceNote || '',
       imageUrl: item.imageUrl || '',
       iconName: item.iconName || 'Compass',
@@ -378,6 +383,7 @@ function ExperiencesSection() {
         duration: form.duration.trim() || null,
         groupSize: form.groupSize.trim() || null,
         includes: linesToArray(form.includesText),
+        price: form.price === '' ? null : Number(form.price),
         priceNote: form.priceNote.trim() || null,
         imageUrl: form.imageUrl.trim() || null,
         iconName: form.iconName.trim() || null,
@@ -509,6 +515,16 @@ function ExperiencesSection() {
               />
             </div>
             <div>
+              <label className="block text-xs text-gray-500 mb-1">價格（HKD）</label>
+              <input
+                type="number"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                placeholder="例如：1280"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
+              />
+            </div>
+            <div>
               <label className="block text-xs text-gray-500 mb-1">價格備註</label>
               <input
                 type="text"
@@ -621,6 +637,7 @@ function ExperiencesSection() {
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">中文名稱</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">時長</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-600">價格</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">狀態</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">排序</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">操作</th>
@@ -629,7 +646,7 @@ function ExperiencesSection() {
             <tbody className="divide-y">
               {experiences.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
                     暫無體驗
                   </td>
                 </tr>
@@ -645,504 +662,15 @@ function ExperiencesSection() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{item.duration || '-'}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {item.price != null ? `HK$${item.price.toLocaleString()}` : '-'}
+                    </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass(item.status)}`}>
                         {item.status === 'active' ? '上架' : '下架'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{item.sortOrder}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => startEdit(item)}
-                          className="text-xs text-[#0a4c6b] hover:underline"
-                        >
-                          編輯
-                        </button>
-                        {deleteConfirmId === item.id ? (
-                          <>
-                            <button
-                              onClick={() => confirmDelete(item.id)}
-                              className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                            >
-                              確認
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirmId(null)}
-                              className="text-xs text-gray-500 hover:text-gray-700"
-                            >
-                              取消
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            onClick={() => setDeleteConfirmId(item.id)}
-                            className="text-xs text-red-500 hover:text-red-700"
-                          >
-                            刪除
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// Retreats Section
-// ============================================================================
-
-function RetreatsSection() {
-  const [retreats, setRetreats] = useState<Retreat[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-
-  const emptyForm = (): RetreatFormState => ({
-    name: '',
-    nameZh: '',
-    slug: '',
-    description: '',
-    descriptionZh: '',
-    duration: '',
-    location: '',
-    audience: '',
-    itinerary: [],
-    priceNote: '',
-    imageUrl: '',
-    iconName: 'Compass',
-    sortOrder: '0',
-    status: 'active',
-  });
-
-  const [form, setForm] = useState<RetreatFormState>(emptyForm());
-
-  async function load() {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await client.api.fetch('/api/admin/retreats');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '載入失敗');
-      setRetreats(data.data || []);
-    } catch (err: any) {
-      setError(err.message || '載入靜修時發生錯誤');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  function openNew() {
-    setEditingId(null);
-    setForm(emptyForm());
-    setIsFormOpen(true);
-    setError('');
-    setSuccess('');
-    setDeleteConfirmId(null);
-  }
-
-  function startEdit(item: Retreat) {
-    setEditingId(item.id);
-    setForm({
-      name: item.name || '',
-      nameZh: item.nameZh || '',
-      slug: item.slug || '',
-      description: item.description || '',
-      descriptionZh: item.descriptionZh || '',
-      duration: item.duration || '',
-      location: item.location || '',
-      audience: item.audience || '',
-      itinerary: safeJsonParse<{ day: string; title: string; desc: string }[]>(item.itinerary, []),
-      priceNote: item.priceNote || '',
-      imageUrl: item.imageUrl || '',
-      iconName: item.iconName || 'Compass',
-      sortOrder: String(item.sortOrder ?? 0),
-      status: item.status,
-    });
-    setIsFormOpen(true);
-    setError('');
-    setSuccess('');
-    setDeleteConfirmId(null);
-  }
-
-  function closeForm() {
-    setIsFormOpen(false);
-    setEditingId(null);
-    setForm(emptyForm());
-  }
-
-  function addItinerary() {
-    setForm({
-      ...form,
-      itinerary: [...form.itinerary, { day: '', title: '', desc: '' }],
-    });
-  }
-
-  function updateItinerary(index: number, field: 'day' | 'title' | 'desc', value: string) {
-    const next = form.itinerary.map((it, i) => (i === index ? { ...it, [field]: value } : it));
-    setForm({ ...form, itinerary: next });
-  }
-
-  function removeItinerary(index: number) {
-    setForm({ ...form, itinerary: form.itinerary.filter((_, i) => i !== index) });
-  }
-
-  async function save() {
-    setLoading(true);
-    setError('');
-    setSuccess('');
-    try {
-      const body = {
-        name: form.name.trim(),
-        nameZh: form.nameZh.trim(),
-        slug: form.slug.trim(),
-        description: form.description.trim() || null,
-        descriptionZh: form.descriptionZh.trim() || null,
-        duration: form.duration.trim() || null,
-        location: form.location.trim() || null,
-        audience: form.audience.trim() || null,
-        itinerary: form.itinerary.filter((it) => it.day || it.title || it.desc),
-        priceNote: form.priceNote.trim() || null,
-        imageUrl: form.imageUrl.trim() || null,
-        iconName: form.iconName.trim() || null,
-        sortOrder: Number(form.sortOrder) || 0,
-        status: form.status,
-      };
-
-      if (!body.name || !body.nameZh || !body.slug) {
-        throw new Error('請填寫名稱、中文名稱與 slug');
-      }
-
-      let res: Response;
-      if (editingId) {
-        res = await client.api.fetch(`/api/admin/retreats/${editingId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-      } else {
-        res = await client.api.fetch('/api/admin/retreats', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-      }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '儲存失敗');
-
-      setSuccess(editingId ? '靜修已更新' : '靜修已新增');
-      closeForm();
-      await load();
-    } catch (err: any) {
-      setError(err.message || '儲存時發生錯誤');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function confirmDelete(id: number) {
-    setLoading(true);
-    setError('');
-    setSuccess('');
-    try {
-      const res = await client.api.fetch(`/api/admin/retreats/${id}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '刪除失敗');
-      setSuccess('靜修已刪除');
-      await load();
-    } catch (err: any) {
-      setError(err.message || '刪除時發生錯誤');
-    } finally {
-      setLoading(false);
-      setDeleteConfirmId(null);
-    }
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold text-lg text-[#0d1b2a]">主題靜修管理</h3>
-        <button
-          onClick={openNew}
-          className="bg-[#0a4c6b] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#083d56] transition"
-        >
-          新增靜修
-        </button>
-      </div>
-
-      {error && (
-        <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-lg">{error}</p>
-      )}
-      {success && (
-        <p className="text-sm text-green-600 bg-green-50 px-4 py-3 rounded-lg">{success}</p>
-      )}
-
-      {isFormOpen && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h4 className="font-semibold text-[#0d1b2a] mb-4">
-            {editingId ? '編輯靜修' : '新增靜修'}
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">英文名稱</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">中文名稱</label>
-              <input
-                type="text"
-                value={form.nameZh}
-                onChange={(e) => setForm({ ...form, nameZh: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Slug</label>
-              <input
-                type="text"
-                value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">時長</label>
-              <input
-                type="text"
-                value={form.duration}
-                onChange={(e) => setForm({ ...form, duration: e.target.value })}
-                placeholder="例如：5 天 4 夜"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">地點</label>
-              <input
-                type="text"
-                value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">適合對象</label>
-              <input
-                type="text"
-                value={form.audience}
-                onChange={(e) => setForm({ ...form, audience: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">價格備註</label>
-              <input
-                type="text"
-                value={form.priceNote}
-                onChange={(e) => setForm({ ...form, priceNote: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">圖片網址</label>
-              <input
-                type="text"
-                value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-              <ImagePreview url={form.imageUrl} />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">圖示</label>
-              <div className="flex items-center gap-2">
-                <select
-                  value={form.iconName}
-                  onChange={(e) => setForm({ ...form, iconName: e.target.value })}
-                  className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-                >
-                  {ICON_NAMES.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-                <div className="text-[#0a4c6b]">
-                  <IconPreview name={form.iconName} />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">排序</label>
-              <input
-                type="number"
-                value={form.sortOrder}
-                onChange={(e) => setForm({ ...form, sortOrder: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">狀態</label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value as 'active' | 'inactive' })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              >
-                <option value="active">上架</option>
-                <option value="inactive">下架</option>
-              </select>
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-xs text-gray-500 mb-1">英文描述</label>
-              <textarea
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                rows={3}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-xs text-gray-500 mb-1">中文描述</label>
-              <textarea
-                value={form.descriptionZh}
-                onChange={(e) => setForm({ ...form, descriptionZh: e.target.value })}
-                rows={3}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs text-gray-500">行程表（day / title / desc）</label>
-              <button
-                onClick={addItinerary}
-                className="text-xs bg-[#B8902F]/10 text-[#B8902F] px-3 py-1 rounded-lg hover:bg-[#B8902F]/20 transition"
-              >
-                + 新增行程
-              </button>
-            </div>
-            <div className="space-y-3">
-              {form.itinerary.length === 0 && (
-                <p className="text-sm text-gray-400">尚未設定行程</p>
-              )}
-              {form.itinerary.map((it, idx) => (
-                <div key={idx} className="grid grid-cols-12 gap-3 items-start border rounded-lg p-3 bg-gray-50">
-                  <div className="col-span-2">
-                    <input
-                      type="text"
-                      value={it.day}
-                      onChange={(e) => updateItinerary(idx, 'day', e.target.value)}
-                      placeholder="Day"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <input
-                      type="text"
-                      value={it.title}
-                      onChange={(e) => updateItinerary(idx, 'title', e.target.value)}
-                      placeholder="標題"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-                    />
-                  </div>
-                  <div className="col-span-5">
-                    <textarea
-                      value={it.desc}
-                      onChange={(e) => updateItinerary(idx, 'desc', e.target.value)}
-                      placeholder="描述"
-                      rows={2}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0a4c6b]/20 focus:border-[#0a4c6b] outline-none"
-                    />
-                  </div>
-                  <div className="col-span-1 flex justify-end">
-                    <button
-                      onClick={() => removeItinerary(idx)}
-                      className="text-xs text-red-500 hover:text-red-700 px-2 py-2"
-                    >
-                      刪除
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={save}
-              disabled={loading}
-              className="bg-[#0a4c6b] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#083d56] transition disabled:opacity-60"
-            >
-              {loading ? '儲存中…' : editingId ? '更新靜修' : '新增靜修'}
-            </button>
-            <button
-              onClick={closeForm}
-              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2"
-            >
-              取消
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">中文名稱</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">時長</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">地點</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">狀態</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {retreats.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-gray-500">
-                    暫無靜修
-                  </td>
-                </tr>
-              ) : (
-                retreats.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-[#0d1b2a]">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#0a4c6b]">
-                          <IconPreview name={item.iconName} />
-                        </span>
-                        {item.nameZh}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{item.duration || '-'}</td>
-                    <td className="px-4 py-3 text-gray-600">{item.location || '-'}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass(item.status)}`}>
-                        {item.status === 'active' ? '上架' : '下架'}
-                      </span>
-                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button
@@ -2946,7 +2474,7 @@ function ReferralSection() {
 export default function AdminPage() {
   const navigate = useNavigate();
   const { user, isAdmin, isChecking, adminRole } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'properties' | 'experiences' | 'customers' | 'leads' | 'payments' | 'referral' | 'accounts'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'properties' | 'experiences' | 'packages' | 'customers' | 'leads' | 'payments' | 'referral' | 'accounts'>('dashboard');
 
   // Guard: redirect to login if not authenticated as admin
   useEffect(() => {
@@ -3366,6 +2894,7 @@ export default function AdminPage() {
     { key: 'customers', label: '客戶管理' },
     { key: 'properties', label: '住宿管理' },
     { key: 'experiences', label: '海島體驗' },
+    { key: 'packages', label: '度假套餐' },
     { key: 'payments', label: '付款記錄' },
     { key: 'referral', label: '分享夥伴' },
     ...(adminRole === 'superadmin' ? [{ key: 'accounts', label: '帳戶管理' }] : []),
@@ -4171,10 +3700,9 @@ export default function AdminPage() {
             </div>
           </div>
         ) : activeTab === 'experiences' ? (
-          <div className="space-y-12">
-            <ExperiencesSection />
-            <RetreatsSection />
-          </div>
+          <ExperiencesSection />
+        ) : activeTab === 'packages' ? (
+          <PackagesSection />
         ) : (
           <PropertiesSection />
         )}

@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS experiences (
   duration TEXT,
   group_size TEXT,
   includes TEXT, -- JSON array of strings
+  price INTEGER,
   price_note TEXT,
   image_url TEXT,
   icon_name TEXT,
@@ -74,28 +75,52 @@ CREATE TABLE IF NOT EXISTS experiences (
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
 
-CREATE TABLE IF NOT EXISTS retreats (
+CREATE TABLE IF NOT EXISTS packages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  name_zh TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
+  name TEXT,
+  name_zh TEXT,
+  slug TEXT UNIQUE,
   description TEXT,
   description_zh TEXT,
   duration TEXT,
   location TEXT,
   audience TEXT,
+  inclusions TEXT, -- JSON array of strings
   itinerary TEXT, -- JSON array of {day, title, desc}
-  price_note TEXT,
+  pricing_options TEXT, -- JSON array of {type: 'shared'|'single', label, price, currency}
+  terms TEXT,
   image_url TEXT,
-  icon_name TEXT,
+  gallery TEXT, -- JSON array of URLs
   sort_order INTEGER DEFAULT 0,
-  status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+  status TEXT DEFAULT 'active',
+  created_at INTEGER,
+  updated_at INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS package_bookings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  package_id INTEGER NOT NULL REFERENCES packages(id) ON DELETE CASCADE,
+  customer_name TEXT,
+  customer_email TEXT,
+  customer_phone TEXT,
+  check_in INTEGER,
+  occupancy TEXT,
+  guests INTEGER DEFAULT 1,
+  total_amount INTEGER,
+  currency TEXT DEFAULT 'USD',
+  status TEXT DEFAULT 'pending',
+  payment_status TEXT DEFAULT 'unpaid',
+  referral_code TEXT,
+  token TEXT UNIQUE,
+  payment_deadline INTEGER,
+  paid_at INTEGER,
+  admin_notes TEXT,
+  created_at INTEGER,
+  updated_at INTEGER
 );
 
 -- -----------------------------------------------------------------------------
--- Property ↔ Experience / Retreat links
+-- Property ↔ Experience links
 -- -----------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS property_experiences (
@@ -103,13 +128,6 @@ CREATE TABLE IF NOT EXISTS property_experiences (
   experience_id INTEGER NOT NULL REFERENCES experiences(id) ON DELETE CASCADE,
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   PRIMARY KEY (property_id, experience_id)
-);
-
-CREATE TABLE IF NOT EXISTS property_retreats (
-  property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
-  retreat_id INTEGER NOT NULL REFERENCES retreats(id) ON DELETE CASCADE,
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  PRIMARY KEY (property_id, retreat_id)
 );
 
 -- -----------------------------------------------------------------------------
@@ -353,11 +371,19 @@ CREATE INDEX IF NOT EXISTS idx_room_types_property_id ON room_types(property_id)
 CREATE INDEX IF NOT EXISTS idx_room_types_status ON room_types(status);
 CREATE INDEX IF NOT EXISTS idx_room_types_price ON room_types(price_per_night);
 
--- property_experiences / property_retreats
+-- property_experiences
 CREATE INDEX IF NOT EXISTS idx_property_experiences_property_id ON property_experiences(property_id);
 CREATE INDEX IF NOT EXISTS idx_property_experiences_experience_id ON property_experiences(experience_id);
-CREATE INDEX IF NOT EXISTS idx_property_retreats_property_id ON property_retreats(property_id);
-CREATE INDEX IF NOT EXISTS idx_property_retreats_retreat_id ON property_retreats(retreat_id);
+
+-- packages / package_bookings
+CREATE INDEX IF NOT EXISTS idx_packages_status ON packages(status);
+CREATE INDEX IF NOT EXISTS idx_packages_slug ON packages(slug);
+CREATE INDEX IF NOT EXISTS idx_packages_sort_order ON packages(sort_order);
+CREATE INDEX IF NOT EXISTS idx_package_bookings_package_id ON package_bookings(package_id);
+CREATE INDEX IF NOT EXISTS idx_package_bookings_status ON package_bookings(status);
+CREATE INDEX IF NOT EXISTS idx_package_bookings_payment_status ON package_bookings(payment_status);
+CREATE INDEX IF NOT EXISTS idx_package_bookings_referral_code ON package_bookings(referral_code);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_package_bookings_token ON package_bookings(token) WHERE token IS NOT NULL;
 
 -- cms_articles
 CREATE INDEX IF NOT EXISTS idx_cms_articles_status ON cms_articles(status);
