@@ -418,13 +418,20 @@ export async function handleReferralWhatsAppMessage(
 // Lead notification — keep referrers motivated before the deal closes
 // ============================================================================
 
+function maskPhoneLast4(phone: string | null | undefined): string {
+  if (!phone) return '—'
+  const digits = phone.replace(/\D/g, '')
+  if (digits.length === 0) return '—'
+  return digits.slice(-4)
+}
+
 export function buildLeadNotificationMessage(
   env: Bindings,
   referrer: Referrer,
   lead: { name: string | null; email: string; phone: string | null }
 ): string {
   const link = buildReferralLink(env, referrer.referralCode)
-  return `🎉 好消息！你推薦的朋友已經留下聯絡資料，我們正在跟進中。\n\n姓名：${lead.name || '—'}\n電郵：${lead.email}\n電話：${lead.phone || '—'}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
+  return `🎉 好消息！你推薦的朋友已經留下聯絡資料，我們正在跟進中。\n\n聯絡電話尾數：${maskPhoneLast4(lead.phone)}\n\n繼續分享你的專屬連結，讓更多人認識 HK Maldivers！\n${link}`
 }
 
 export async function notifyReferrerOnLead(
